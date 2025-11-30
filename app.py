@@ -86,6 +86,9 @@ if "history" not in st.session_state:
 if "last_result" not in st.session_state:
     st.session_state.last_result = None
 
+if "last_result_tab" not in st.session_state:
+    st.session_state.last_result_tab = None
+
 # =========================
 # COMMON FUNCTIONS
 # =========================
@@ -209,6 +212,55 @@ def run_calculation(
     return result
 
 
+def render_summary_block(res: dict):
+    """Render the summary UI block under the calculation section."""
+    st.markdown('<div class="box">', unsafe_allow_html=True)
+    st.write("## 📊 Calculation Summary")
+
+    st.write(f"**Property Type:** {res['property_type']}")
+    st.write(f"**Category:** {res['category']}")
+    st.write(
+        f"**Land Area:** {res['land_area_yards']} sq. yards "
+        f"({res['land_area_m']:.2f} sq. meters)"
+    )
+    st.write(f"**Your Land Value:** ₹{math.ceil(res['land_value_user']):,}")
+    st.write(f"**Construction Value:** ₹{math.ceil(res['construction_value']):,}")
+    st.write(f"**Parking Cost:** ₹{math.ceil(res['parking_cost']):,}")
+    st.write(
+        f"**Auto Consideration (circle + construction):** "
+        f"₹{math.ceil(res['auto_consideration']):,}"
+    )
+
+    if res["custom_consideration"] > 0:
+        st.write(
+            f"**Custom Consideration Entered:** ₹{math.ceil(res['custom_consideration']):,}"
+        )
+
+    st.write(
+        f"**Final Consideration Used ({res['cons_source']}):** "
+        f"₹{math.ceil(res['final_consideration']):,}"
+    )
+
+    st.write("---")
+    st.write("### Govt. Duty Calculation")
+    st.write(
+        f"**Stamp Duty ({res['stamp_rate']*100:.3f}%):** ₹{math.ceil(res['stamp_duty']):,}"
+    )
+    st.write(f"**Mutation Fees:** ₹{math.ceil(res['mutation']):,}")
+    st.write(f"**E-Fees (1% + mutation):** ₹{math.ceil(res['e_fees']):,}")
+    st.write(f"**TDS:** ₹{math.ceil(res['tds']):,}")
+    st.success(
+        f"**Total Payable Govt. Duty: ₹{math.ceil(res['total_payable']):,}**"
+    )
+
+    # Save to history button
+    if st.button("💾 Save This Summary to History"):
+        st.session_state.history.append(res)
+        st.success("Summary saved to History tab.")
+
+    st.markdown("</div>", unsafe_allow_html=True)
+
+
 # =========================
 # HEADER WITH LOGO + BRAND
 # =========================
@@ -235,8 +287,8 @@ st.write("---")
 # TABS LAYOUT
 # =========================
 
-tab_home, tab_res, tab_com, tab_summary, tab_history, tab_about = st.tabs(
-    ["🏠 Home", "📄 Residential", "🏬 Commercial", "📊 Summary", "📚 History", "ℹ️ About"]
+tab_home, tab_res, tab_com, tab_history, tab_about = st.tabs(
+    ["🏠 Home", "📄 Residential", "🏬 Commercial", "📚 History", "ℹ️ About"]
 )
 
 # -------------------------
@@ -254,8 +306,9 @@ with tab_home:
         </p>
         <ul>
             <li>Use the <b>Residential</b> or <b>Commercial</b> tab to calculate.</li>
-            <li>Review your latest calculation in the <b>Summary</b> tab.</li>
-            <li>See all calculations of this session in the <b>History</b> tab.</li>
+            <li>After calculation, summary appears below the button.</li>
+            <li>Click <b>"Save This Summary to History"</b> to store it for later.</li>
+            <li>See all saved calculations in the <b>History</b> tab.</li>
         </ul>
         </div>
         """,
@@ -343,9 +396,15 @@ with tab_res:
             r_custom_cons,
         )
         st.session_state.last_result = result
-        st.session_state.history.append(result)
+        st.session_state.last_result_tab = "Residential"
+        st.success("Residential property calculation completed.")
 
-        st.success("Residential property calculation completed. Check the Summary tab.")
+    # Show summary under calculation if last_result belongs to Residential
+    if (
+        st.session_state.last_result is not None
+        and st.session_state.last_result_tab == "Residential"
+    ):
+        render_summary_block(st.session_state.last_result)
 
     st.markdown("</div>", unsafe_allow_html=True)
 
@@ -430,56 +489,15 @@ with tab_com:
             c_custom_cons,
         )
         st.session_state.last_result = result
-        st.session_state.history.append(result)
+        st.session_state.last_result_tab = "Commercial"
+        st.success("Commercial property calculation completed.")
 
-        st.success("Commercial property calculation completed. Check the Summary tab.")
-
-    st.markdown("</div>", unsafe_allow_html=True)
-
-# -------------------------
-# SUMMARY TAB
-# -------------------------
-with tab_summary:
-    st.markdown('<div class="box">', unsafe_allow_html=True)
-    st.subheader("Latest Calculation Summary")
-
-    res = st.session_state.last_result
-    if not res:
-        st.info("No calculation yet. Please use the Residential or Commercial tab first.")
-    else:
-        st.write(f"**Property Type:** {res['property_type']}")
-        st.write(f"**Category:** {res['category']}")
-        st.write(
-            f"**Land Area:** {res['land_area_yards']} sq. yards "
-            f"({res['land_area_m']:.2f} sq. meters)"
-        )
-        st.write(f"**Your Land Value:** ₹{math.ceil(res['land_value_user']):,}")
-        st.write(f"**Construction Value:** ₹{math.ceil(res['construction_value']):,}")
-        st.write(f"**Parking Cost:** ₹{math.ceil(res['parking_cost']):,}")
-        st.write(
-            f"**Auto Consideration (circle + construction):** "
-            f"₹{math.ceil(res['auto_consideration']):,}"
-        )
-        if res["custom_consideration"] > 0:
-            st.write(
-                f"**Custom Consideration Entered:** ₹{math.ceil(res['custom_consideration']):,}"
-            )
-        st.write(
-            f"**Final Consideration Used ({res['cons_source']}):** "
-            f"₹{math.ceil(res['final_consideration']):,}"
-        )
-
-        st.write("---")
-        st.write("### Govt. Duty Calculation")
-        st.write(
-            f"**Stamp Duty ({res['stamp_rate']*100:.3f}%):** ₹{math.ceil(res['stamp_duty']):,}"
-        )
-        st.write(f"**Mutation Fees:** ₹{math.ceil(res['mutation']):,}")
-        st.write(f"**E-Fees (1% + mutation):** ₹{math.ceil(res['e_fees']):,}")
-        st.write(f"**TDS:** ₹{math.ceil(res['tds']):,}")
-        st.success(
-            f"**Total Payable Govt. Duty: ₹{math.ceil(res['total_payable']):,}**"
-        )
+    # Show summary under calculation if last_result belongs to Commercial
+    if (
+        st.session_state.last_result is not None
+        and st.session_state.last_result_tab == "Commercial"
+    ):
+        render_summary_block(st.session_state.last_result)
 
     st.markdown("</div>", unsafe_allow_html=True)
 
@@ -488,12 +506,11 @@ with tab_summary:
 # -------------------------
 with tab_history:
     st.markdown('<div class="box">', unsafe_allow_html=True)
-    st.subheader("Session History")
+    st.subheader("Saved Summaries (History)")
 
     if not st.session_state.history:
-        st.info("No history yet. Perform some calculations first.")
+        st.info("No saved summaries yet. Use Residential or Commercial tab, calculate and click 'Save This Summary to History'.")
     else:
-        # Create a simple table view
         rows = []
         for h in st.session_state.history:
             rows.append(
@@ -556,12 +573,9 @@ with tab_about:
 
     # WhatsApp share button
     wa_text = (
-        "Check this Delhi Property Price Calculator by Aggarwal Documents & Legal "
-        "Consultants: "
+        "Check this Delhi Property Price Calculator by Aggarwal Documents & Legal Consultants: "
     )
-    wa_url = (
-        "https://wa.me/?text=" + (wa_text + APP_URL).replace(" ", "%20")
-    )
+    wa_url = "https://wa.me/?text=" + (wa_text + APP_URL).replace(" ", "%20")
     st.markdown(
         f"""
         <a href="{wa_url}" target="_blank">

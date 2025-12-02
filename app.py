@@ -1,6 +1,7 @@
 import streamlit as st
 import math
 from datetime import datetime
+from urllib.parse import quote
 
 # =========================
 # CONFIG & CONSTANTS
@@ -212,7 +213,7 @@ def run_calculation(
     return result
 
 
-def render_summary_block(res: dict):
+def render_summary_block(res: dict, save_key: str):
     """Render the summary UI block under the calculation section."""
     st.markdown('<div class="box">', unsafe_allow_html=True)
     st.write("## 📊 Calculation Summary")
@@ -254,7 +255,7 @@ def render_summary_block(res: dict):
     )
 
     # Save to history button
-    if st.button("💾 Save This Summary to History"):
+    if st.button("💾 Save This Summary to History", key=save_key):
         st.session_state.history.append(res)
         st.success("Summary saved to History tab.")
 
@@ -265,7 +266,6 @@ def render_summary_block(res: dict):
 # DDA / CGHS CONSTANTS & HELPERS
 # =========================
 
-# Table 1.3 – minimum built-up rates up to four storeys (Rs/sqm)
 AREA_CATEGORY_RATES = {
     "residential": {
         "upto_30": 50400,
@@ -281,7 +281,6 @@ AREA_CATEGORY_RATES = {
     },
 }
 
-# Uniform rates when building has MORE than four storeys
 UNIFORM_RATES_MORE_THAN_4 = {
     "residential": 87840,
     "commercial": 100800,
@@ -289,7 +288,6 @@ UNIFORM_RATES_MORE_THAN_4 = {
 
 
 def determine_area_category(plinth_area_sqm: float) -> str:
-    """Return the plinth-area category key."""
     if plinth_area_sqm <= 30:
         return "upto_30"
     elif plinth_area_sqm <= 50:
@@ -303,10 +301,6 @@ def determine_area_category(plinth_area_sqm: float) -> str:
 def dda_minimum_value(plinth_area_sqm: float,
                       building_more_than_4_storeys: bool,
                       usage: str) -> tuple[float, float]:
-    """
-    Returns (rate_per_sqm, minimum_value).
-    usage: 'residential' or 'commercial'
-    """
     usage = usage.lower()
     if usage not in AREA_CATEGORY_RATES:
         raise ValueError("Usage must be 'residential' or 'commercial'.")
@@ -319,12 +313,6 @@ def dda_minimum_value(plinth_area_sqm: float,
 
     value = plinth_area_sqm * rate
     return rate, value
-
-
-def dda_e_fees_and_tds(consideration: float, usage: str):
-    """Reuse same gov logic as main calculator."""
-    stamp_rate = get_stampduty_rate("male", consideration)  # owner type handled elsewhere
-    # we won't use this stamp_rate here, just keeping pattern similar
 
 
 # =========================
@@ -373,9 +361,7 @@ with tab_home:
         <ul>
             <li>Use the <b>Residential</b> or <b>Commercial</b> tab to calculate.</li>
             <li>The <b>DDA/CGHS Flats</b> tab uses built-up rates based on plinth area and storeys.</li>
-            <li>After calculation, summary appears below the button.</li>
-            <li>Click <b>"Save This Summary to History"</b> to store it for later.</li>
-            <li>See all saved calculations in the <b>History</b> tab.</li>
+            <li>After calculation, summary appears below the button and can be saved to History.</li>
         </ul>
         </div>
         """,
@@ -466,12 +452,11 @@ with tab_res:
         st.session_state.last_result_tab = "Residential"
         st.success("Residential property calculation completed.")
 
-    # Show summary under calculation if last_result belongs to Residential
     if (
         st.session_state.last_result is not None
         and st.session_state.last_result_tab == "Residential"
     ):
-        render_summary_block(st.session_state.last_result)
+        render_summary_block(st.session_state.last_result, save_key="save_res")
 
     st.markdown("</div>", unsafe_allow_html=True)
 
@@ -559,12 +544,11 @@ with tab_com:
         st.session_state.last_result_tab = "Commercial"
         st.success("Commercial property calculation completed.")
 
-    # Show summary under calculation if last_result belongs to Commercial
     if (
         st.session_state.last_result is not None
         and st.session_state.last_result_tab == "Commercial"
     ):
-        render_summary_block(st.session_state.last_result)
+        render_summary_block(st.session_state.last_result, save_key="save_com")
 
     st.markdown("</div>", unsafe_allow_html=True)
 
@@ -616,21 +600,21 @@ with tab_dda:
 
     if st.button("Calculate DDA / CGHS Value", key="dda_calc_btn"):
         usage_key = dda_usage_pretty.lower()
-        more_than_4_flag = dda_more_than_4.lower() == "yes"
+        more_than_4_flag = dda_more_than_4.lower() == "Yes".lower()
 
         plinth_area_sqm = convert_sq_yards_to_sq_meters(dda_area_yards)
         rate_per_sqm, govt_value = dda_minimum_value(
             plinth_area_sqm, more_than_4_flag, usage_key
         )
 
-        # Govt value duties
         duty_rate_govt = get_stampduty_rate(dda_owner, govt_value)
         stamp_govt = govt_value * duty_rate_govt
-        # mutation rules same as main calculator
+
         if usage_key == "residential":
             mutation_govt = 1136 if govt_value > 5_000_000 else 1124
         else:
             mutation_govt = 1124
+
         e_fees_govt = govt_value * 0.01 + mutation_govt
         tds_govt = govt_value * 0.01 if govt_value > 5_000_000 else 0.0
         total_govt = stamp_govt + e_fees_govt + tds_govt
@@ -665,6 +649,39 @@ with tab_dda:
             f"**Total Govt Liability on Govt Value: ₹{math.ceil(total_govt):,}**"
         )
 
+        # Save govt summary to history
+        dda_result_govt = {
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "property_type": f"DDA/CGHS - {dda_usage_pretty}",
+            "category": "DDA Govt",
+            "land_area_yards": dda_area_yards,
+            "land_area_m": plinth_area_sqm,
+            "auto_consideration": govt_value,
+            "custom_consideration": 0,
+            "final_consideration": govt_value,
+            "cons_source": "DDA Govt Value",
+            "stamp_rate": duty_rate_govt,
+            "stamp_duty": stamp_govt,
+            "mutation": mutation_govt,
+            "e_fees": e_fees_govt,
+            "tds": tds_govt,
+            "total_payable": total_govt,
+            "land_value_user": govt_value,
+            "construction_value": 0,
+            "parking_cost": 0,
+            "include_const": "no",
+            "parking": "no",
+            "total_storey": 0,
+            "user_storey": 0,
+            "constructed_area": 0,
+            "year_built": 0,
+            "owner": dda_owner,
+        }
+
+        if st.button("💾 Save Govt Value Summary to History", key="save_dda_govt"):
+            st.session_state.history.append(dda_result_govt)
+            st.success("DDA/CGHS Govt value summary saved to History tab.")
+
         # Custom consideration block
         if dda_calc_custom and dda_custom_cons > 0:
             duty_rate_custom = get_stampduty_rate(dda_owner, dda_custom_cons)
@@ -694,6 +711,38 @@ with tab_dda:
                 f"**Total Govt Liability on Custom Consideration: ₹{math.ceil(total_custom):,}**"
             )
 
+            dda_result_custom = {
+                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "property_type": f"DDA/CGHS - {dda_usage_pretty}",
+                "category": "DDA Custom",
+                "land_area_yards": dda_area_yards,
+                "land_area_m": plinth_area_sqm,
+                "auto_consideration": dda_custom_cons,
+                "custom_consideration": dda_custom_cons,
+                "final_consideration": dda_custom_cons,
+                "cons_source": "DDA Custom Consideration",
+                "stamp_rate": duty_rate_custom,
+                "stamp_duty": stamp_custom,
+                "mutation": mutation_custom,
+                "e_fees": e_fees_custom,
+                "tds": tds_custom,
+                "total_payable": total_custom,
+                "land_value_user": dda_custom_cons,
+                "construction_value": 0,
+                "parking_cost": 0,
+                "include_const": "no",
+                "parking": "no",
+                "total_storey": 0,
+                "user_storey": 0,
+                "constructed_area": 0,
+                "year_built": 0,
+                "owner": dda_owner,
+            }
+
+            if st.button("💾 Save Custom Consideration Summary to History", key="save_dda_custom"):
+                st.session_state.history.append(dda_result_custom)
+                st.success("DDA/CGHS custom consideration summary saved to History tab.")
+
         st.markdown("</div>", unsafe_allow_html=True)
 
     st.markdown("</div>", unsafe_allow_html=True)
@@ -707,7 +756,7 @@ with tab_history:
 
     if not st.session_state.history:
         st.info(
-            "No saved summaries yet. Use Residential or Commercial tab, calculate and click 'Save This Summary to History'."
+            "No saved summaries yet. Use Residential, Commercial or DDA/CGHS tabs, calculate and click 'Save...' button."
         )
     else:
         rows = []
@@ -754,27 +803,16 @@ with tab_about:
     st.write("---")
     st.write("### 🔗 Share this App")
 
-    st.write("You can share this calculator with others:")
+    st.write("**App Link (copy & share):**")
+    st.code(APP_URL, language="text")
 
-    # Copy Link button (JS)
-    st.markdown(
-        f"""
-        <button onclick="navigator.clipboard.writeText('{APP_URL}'); 
-                         alert('App link copied to clipboard!');"
-                style="padding:8px 16px; border-radius:8px; border:none;
-                       background-color:#00c853; color:white; margin-right:10px;
-                       cursor:pointer;">
-            📋 Copy App Link
-        </button>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    # WhatsApp share button
     wa_text = (
         "Check this Delhi Property Price Calculator by Aggarwal Documents & Legal Consultants: "
     )
-    wa_url = "https://wa.me/?text=" + (wa_text + APP_URL).replace(" ", "%20")
+    encoded_message = quote(wa_text + APP_URL, safe="")
+    wa_url = f"https://wa.me/?text={encoded_message}"
+
+    st.write("Or share directly on WhatsApp:")
     st.markdown(
         f"""
         <a href="{wa_url}" target="_blank">

@@ -262,6 +262,72 @@ def render_summary_block(res: dict):
 
 
 # =========================
+# DDA / CGHS CONSTANTS & HELPERS
+# =========================
+
+# Table 1.3 – minimum built-up rates up to four storeys (Rs/sqm)
+AREA_CATEGORY_RATES = {
+    "residential": {
+        "upto_30": 50400,
+        "30_50": 54480,
+        "50_100": 66240,
+        "above_100": 76200,
+    },
+    "commercial": {
+        "upto_30": 57840,
+        "30_50": 62520,
+        "50_100": 75960,
+        "above_100": 87360,
+    },
+}
+
+# Uniform rates when building has MORE than four storeys
+UNIFORM_RATES_MORE_THAN_4 = {
+    "residential": 87840,
+    "commercial": 100800,
+}
+
+
+def determine_area_category(plinth_area_sqm: float) -> str:
+    """Return the plinth-area category key."""
+    if plinth_area_sqm <= 30:
+        return "upto_30"
+    elif plinth_area_sqm <= 50:
+        return "30_50"
+    elif plinth_area_sqm <= 100:
+        return "50_100"
+    else:
+        return "above_100"
+
+
+def dda_minimum_value(plinth_area_sqm: float,
+                      building_more_than_4_storeys: bool,
+                      usage: str) -> tuple[float, float]:
+    """
+    Returns (rate_per_sqm, minimum_value).
+    usage: 'residential' or 'commercial'
+    """
+    usage = usage.lower()
+    if usage not in AREA_CATEGORY_RATES:
+        raise ValueError("Usage must be 'residential' or 'commercial'.")
+
+    if building_more_than_4_storeys:
+        rate = UNIFORM_RATES_MORE_THAN_4[usage]
+    else:
+        category = determine_area_category(plinth_area_sqm)
+        rate = AREA_CATEGORY_RATES[usage][category]
+
+    value = plinth_area_sqm * rate
+    return rate, value
+
+
+def dda_e_fees_and_tds(consideration: float, usage: str):
+    """Reuse same gov logic as main calculator."""
+    stamp_rate = get_stampduty_rate("male", consideration)  # owner type handled elsewhere
+    # we won't use this stamp_rate here, just keeping pattern similar
+
+
+# =========================
 # HEADER WITH LOGO + BRAND
 # =========================
 
@@ -287,8 +353,8 @@ st.write("---")
 # TABS LAYOUT
 # =========================
 
-tab_home, tab_res, tab_com, tab_history, tab_about = st.tabs(
-    ["🏠 Home", "📄 Residential", "🏬 Commercial", "📚 History", "ℹ️ About"]
+tab_home, tab_res, tab_com, tab_dda, tab_history, tab_about = st.tabs(
+    ["🏠 Home", "📄 Residential", "🏬 Commercial", "🏢 DDA/CGHS Flats", "📚 History", "ℹ️ About"]
 )
 
 # -------------------------
@@ -306,6 +372,7 @@ with tab_home:
         </p>
         <ul>
             <li>Use the <b>Residential</b> or <b>Commercial</b> tab to calculate.</li>
+            <li>The <b>DDA/CGHS Flats</b> tab uses built-up rates based on plinth area and storeys.</li>
             <li>After calculation, summary appears below the button.</li>
             <li>Click <b>"Save This Summary to History"</b> to store it for later.</li>
             <li>See all saved calculations in the <b>History</b> tab.</li>
@@ -502,6 +569,136 @@ with tab_com:
     st.markdown("</div>", unsafe_allow_html=True)
 
 # -------------------------
+# DDA / CGHS TAB
+# -------------------------
+with tab_dda:
+    st.markdown('<div class="box">', unsafe_allow_html=True)
+    st.subheader("DDA / CGHS Built-Up Flat Calculator")
+
+    col1, col2 = st.columns(2)
+    with col1:
+        dda_area_yards = st.number_input(
+            "Plinth Area (Sq. Yards)",
+            min_value=1.0,
+            value=50.0,
+            step=1.0,
+            key="dda_area_yards",
+        )
+        dda_usage_pretty = st.radio(
+            "Usage Type",
+            ["Residential", "Commercial"],
+            horizontal=True,
+            key="dda_usage",
+        )
+        dda_more_than_4 = st.radio(
+            "Building has more than 4 storeys?",
+            ["No", "Yes"],
+            horizontal=True,
+            key="dda_more_than_4",
+        )
+    with col2:
+        dda_owner = st.selectbox(
+            "Buyer Type (for Stamp Duty)",
+            ["male", "female", "joint"],
+            key="dda_owner",
+        )
+        dda_calc_custom = st.checkbox(
+            "Also calculate on your own consideration value", value=False
+        )
+        dda_custom_cons = 0.0
+        if dda_calc_custom:
+            dda_custom_cons = st.number_input(
+                "Enter your own consideration value (₹)",
+                min_value=0.0,
+                step=10000.0,
+                key="dda_custom_cons",
+            )
+
+    if st.button("Calculate DDA / CGHS Value", key="dda_calc_btn"):
+        usage_key = dda_usage_pretty.lower()
+        more_than_4_flag = dda_more_than_4.lower() == "yes"
+
+        plinth_area_sqm = convert_sq_yards_to_sq_meters(dda_area_yards)
+        rate_per_sqm, govt_value = dda_minimum_value(
+            plinth_area_sqm, more_than_4_flag, usage_key
+        )
+
+        # Govt value duties
+        duty_rate_govt = get_stampduty_rate(dda_owner, govt_value)
+        stamp_govt = govt_value * duty_rate_govt
+        # mutation rules same as main calculator
+        if usage_key == "residential":
+            mutation_govt = 1136 if govt_value > 5_000_000 else 1124
+        else:
+            mutation_govt = 1124
+        e_fees_govt = govt_value * 0.01 + mutation_govt
+        tds_govt = govt_value * 0.01 if govt_value > 5_000_000 else 0.0
+        total_govt = stamp_govt + e_fees_govt + tds_govt
+
+        st.markdown('<div class="box">', unsafe_allow_html=True)
+        st.write("## 🔹 Government (Circle) Value – DDA/CGHS")
+
+        st.write(f"**Usage Type:** {dda_usage_pretty}")
+        st.write(
+            f"**Plinth Area:** {dda_area_yards:.2f} sq. yards "
+            f"({plinth_area_sqm:.2f} sq. meters)"
+        )
+        st.write(f"**Rate Applied:** ₹{rate_per_sqm:,.2f} per sq. meter")
+        if more_than_4_flag:
+            st.write("**Storey Rule:** Uniform rate applied (building has more than 4 storeys)")
+        else:
+            st.write("**Storey Rule:** Up to 4 storeys (area category-based rate)")
+
+        st.success(f"**Minimum Govt. Value (Built-up): ₹{govt_value:,.2f}**")
+
+        st.write("---")
+        st.write("### Govt. Duty on Govt. Value")
+        st.write(f"**Stamp Duty Rate:** {duty_rate_govt*100:.2f}%")
+        st.write(f"**Stamp Duty Amount:** ₹{math.ceil(stamp_govt):,}")
+        st.write(f"**Mutation Fees:** ₹{mutation_govt:,}")
+        st.write(f"**E-Fees (1% + mutation):** ₹{math.ceil(e_fees_govt):,}")
+        if tds_govt > 0:
+            st.write(f"**TDS (1% > ₹50L):** ₹{math.ceil(tds_govt):,}")
+        else:
+            st.write("**TDS (1% > ₹50L):** Not applicable")
+        st.success(
+            f"**Total Govt Liability on Govt Value: ₹{math.ceil(total_govt):,}**"
+        )
+
+        # Custom consideration block
+        if dda_calc_custom and dda_custom_cons > 0:
+            duty_rate_custom = get_stampduty_rate(dda_owner, dda_custom_cons)
+            stamp_custom = dda_custom_cons * duty_rate_custom
+            if usage_key == "residential":
+                mutation_custom = 1136 if dda_custom_cons > 5_000_000 else 1124
+            else:
+                mutation_custom = 1124
+            e_fees_custom = dda_custom_cons * 0.01 + mutation_custom
+            tds_custom = (
+                dda_custom_cons * 0.01 if dda_custom_cons > 5_000_000 else 0.0
+            )
+            total_custom = stamp_custom + e_fees_custom + tds_custom
+
+            st.write("---")
+            st.write("## 🔹 Custom Consideration Calculation")
+            st.write(f"**Consideration Value:** ₹{dda_custom_cons:,.2f}")
+            st.write(f"**Stamp Duty Rate:** {duty_rate_custom*100:.2f}%")
+            st.write(f"**Stamp Duty Amount:** ₹{math.ceil(stamp_custom):,}")
+            st.write(f"**Mutation Fees:** ₹{mutation_custom:,}")
+            st.write(f"**E-Fees (1% + mutation):** ₹{math.ceil(e_fees_custom):,}")
+            if tds_custom > 0:
+                st.write(f"**TDS (1% > ₹50L):** ₹{math.ceil(tds_custom):,}")
+            else:
+                st.write("**TDS (1% > ₹50L):** Not applicable")
+            st.success(
+                f"**Total Govt Liability on Custom Consideration: ₹{math.ceil(total_custom):,}**"
+            )
+
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    st.markdown("</div>", unsafe_allow_html=True)
+
+# -------------------------
 # HISTORY TAB
 # -------------------------
 with tab_history:
@@ -509,7 +706,9 @@ with tab_history:
     st.subheader("Saved Summaries (History)")
 
     if not st.session_state.history:
-        st.info("No saved summaries yet. Use Residential or Commercial tab, calculate and click 'Save This Summary to History'.")
+        st.info(
+            "No saved summaries yet. Use Residential or Commercial tab, calculate and click 'Save This Summary to History'."
+        )
     else:
         rows = []
         for h in st.session_state.history:

@@ -1,13 +1,25 @@
 import streamlit as st
 import math
 from datetime import datetime
+import sqlite3
+import hashlib
+import pandas as pd
+import random
 from urllib.parse import quote
 
-# =========================
-# CONFIG & CONSTANTS
-# =========================
+from database import (
+    get_connection,
+    init_db,
+    create_otp,
+    verify_otp,
+)
+from email_otp import send_otp_email
+
+# ---------------- CONFIG ----------------
 
 APP_URL = "https://delhi-property-calculator-lkdbpzkcuch6l8cgpehdsi.streamlit.app"
+
+stampdutyrates = {"male": 0.06, "female": 0.04, "joint": 0.05}
 
 # Residential data
 circlerates_res = {
@@ -29,13 +41,29 @@ construction_rates_com = {
     "E": 10800, "F": 9480, "G": 8040, "H": 3960
 }
 
-stampdutyrates = {"male": 0.06, "female": 0.04, "joint": 0.05}
+# DDA / CGHS rates
+AREA_CATEGORY_RATES = {
+    "residential": {
+        "upto_30": 50400,
+        "30_50": 54480,
+        "50_100": 66240,
+        "above_100": 76200,
+    },
+    "commercial": {
+        "upto_30": 57840,
+        "30_50": 62520,
+        "50_100": 75960,
+        "above_100": 87360,
+    },
+}
+UNIFORM_RATES_MORE_THAN_4 = {
+    "residential": 87840,
+    "commercial": 100800,
+}
+
+# ---------------- STREAMLIT BASE CONFIG ----------------
 
 st.set_page_config(page_title="Delhi Property Price Calculator", layout="wide")
-
-# =========================
-# STYLING
-# =========================
 
 st.markdown(
     """
@@ -77,26 +105,69 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# =========================
-# SESSION STATE INIT
-# =========================
+# ---------------- DB INIT ----------------
 
-if "history" not in st.session_state:
-    st.session_state.history = []  # list of dicts
+init_db()
+conn = get_connection()
 
-if "last_result" not in st.session_state:
-    st.session_state.last_result = None
+# ---------------- AUTH HELPERS ----------------
 
-if "last_result_tab" not in st.session_state:
-    st.session_state.last_result_tab = None
+def hash_password(pw: str) -> str:
+    return hashlib.sha256(pw.encode()).hexdigest()
 
-# =========================
-# COMMON FUNCTIONS
-# =========================
 
+def get_user_by_email(email: str):
+    c = conn.cursor()
+    c.execute("SELECT id, email, password_hash, is_verified FROM users WHERE email = ?;", (email.lower(),))
+    return c.fetchone()
+
+
+def create_user(email: str, password_hash: str):
+    c = conn.cursor()
+    c.execute(
+        "INSERT INTO users (email, password_hash, is_verified, created_at) VALUES (?, ?, ?, ?);",
+        (email.lower(), password_hash, 1, datetime.utcnow().isoformat()),
+    )
+    conn.commit()
+    c.execute("SELECT id, email, password_hash, is_verified FROM users WHERE email = ?;", (email.lower(),))
+    return c.fetchone()
+
+
+def ensure_session_state():
+    if "user_id" not in st.session_state:
+        st.session_state.user_id = None
+    if "user_email" not in st.session_state:
+        st.session_state.user_email = None
+    if "pending_signup_email" not in st.session_state:
+        st.session_state.pending_signup_email = None
+    if "otp_sent" not in st.session_state:
+        st.session_state.otp_sent = False
+    if "last_result" not in st.session_state:
+        st.session_state.last_result = None
+    if "last_result_tab" not in st.session_state:
+        st.session_state.last_result_tab = None
+
+
+ensure_session_state()
+
+# ---------------- COLONIES FROM DB ----------------
+
+@st.cache_data
+def load_colonies_from_db():
+    df = pd.read_sql_query(
+        "SELECT colony_name, category FROM colonies ORDER BY colony_name;",
+        conn
+    )
+    names = df["colony_name"].tolist()
+    mapping = dict(zip(df["colony_name"], df["category"]))
+    return names, mapping
+
+
+COLONY_NAMES, COLONY_MAP = load_colonies_from_db()
+
+# ---------------- COMMON CALC HELPERS ----------------
 
 def convert_sq_yards_to_sq_meters(sq_yards: float) -> float:
-    """Convert sq. yards to sq. meters with 2 decimals."""
     return round(sq_yards * 0.8361, 2)
 
 
@@ -131,8 +202,8 @@ def run_calculation(
     constructed_area: float,
     year_built: int,
     custom_cons: float,
+    colony_name: str | None = None,
 ):
-    # choose correct data
     if property_type == "Residential":
         circlerates = circlerates_res
         construction_rates = construction_rates_res
@@ -162,7 +233,6 @@ def run_calculation(
     total_construction = construction_value + parking_cost
     auto_consideration = land_value_user + total_construction
 
-    # final consideration
     if custom_cons > 0:
         final_consideration = float(custom_cons)
         cons_source = "Custom consideration used"
@@ -173,7 +243,6 @@ def run_calculation(
     stamp_rate = get_stampduty_rate(owner, final_consideration)
     stamp_duty = final_consideration * stamp_rate
 
-    # mutation logic
     if property_type == "Residential":
         mutation = 1136 if final_consideration > 5_000_000 else 1124
     else:
@@ -186,6 +255,7 @@ def run_calculation(
     result = {
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "property_type": property_type,
+        "colony_name": colony_name,
         "land_area_yards": land_area_yards,
         "land_area_m": land_area_m,
         "category": category,
@@ -213,11 +283,73 @@ def run_calculation(
     return result
 
 
+def determine_area_category(plinth_area_sqm: float) -> str:
+    if plinth_area_sqm <= 30:
+        return "upto_30"
+    elif plinth_area_sqm <= 50:
+        return "30_50"
+    elif plinth_area_sqm <= 100:
+        return "50_100"
+    else:
+        return "above_100"
+
+
+def dda_minimum_value(plinth_area_sqm: float,
+                      building_more_than_4_storeys: bool,
+                      usage: str) -> tuple[float, float]:
+    usage = usage.lower()
+    if usage not in AREA_CATEGORY_RATES:
+        raise ValueError("Usage must be 'residential' or 'commercial'.")
+
+    if building_more_than_4_storeys:
+        rate = UNIFORM_RATES_MORE_THAN_4[usage]
+    else:
+        category = determine_area_category(plinth_area_sqm)
+        rate = AREA_CATEGORY_RATES[usage][category]
+
+    value = plinth_area_sqm * rate
+    return rate, value
+
+
+# ---------------- SAVE HISTORY ----------------
+
+def save_history_to_db(res: dict):
+    if st.session_state.user_id is None:
+        st.error("Please login to save history.")
+        return
+    c = conn.cursor()
+    c.execute(
+        """
+        INSERT INTO history (
+            user_id, created_at, colony_name,
+            property_type, category,
+            consideration, stamp_duty, e_fees, tds, total_govt_duty
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+        """,
+        (
+            st.session_state.user_id,
+            res["timestamp"],
+            res["colony_name"],
+            res["property_type"],
+            res["category"],
+            res["final_consideration"],
+            res["stamp_duty"],
+            res["e_fees"],
+            res["tds"],
+            res["total_payable"],
+        ),
+    )
+    conn.commit()
+    st.success("Summary saved to History.")
+
+
 def render_summary_block(res: dict, save_key: str):
-    """Render the summary UI block under the calculation section."""
     st.markdown('<div class="box">', unsafe_allow_html=True)
     st.write("## 📊 Calculation Summary")
 
+    if res["colony_name"]:
+        st.write(f"**Colony:** {res['colony_name']}")
     st.write(f"**Property Type:** {res['property_type']}")
     st.write(f"**Category:** {res['category']}")
     st.write(
@@ -254,70 +386,97 @@ def render_summary_block(res: dict, save_key: str):
         f"**Total Payable Govt. Duty: ₹{math.ceil(res['total_payable']):,}**"
     )
 
-    # Save to history button
     if st.button("💾 Save This Summary to History", key=save_key):
-        st.session_state.history.append(res)
-        st.success("Summary saved to History tab.")
+        if st.session_state.user_id is None:
+            st.error("Please login to save history.")
+        else:
+            save_history_to_db(res)
 
     st.markdown("</div>", unsafe_allow_html=True)
 
 
-# =========================
-# DDA / CGHS CONSTANTS & HELPERS
-# =========================
+# ---------------- AUTH UI (SIGNUP / LOGIN) ----------------
 
-AREA_CATEGORY_RATES = {
-    "residential": {
-        "upto_30": 50400,
-        "30_50": 54480,
-        "50_100": 66240,
-        "above_100": 76200,
-    },
-    "commercial": {
-        "upto_30": 57840,
-        "30_50": 62520,
-        "50_100": 75960,
-        "above_100": 87360,
-    },
-}
+def auth_sidebar():
+    with st.sidebar:
+        st.markdown("### 🔐 Account")
 
-UNIFORM_RATES_MORE_THAN_4 = {
-    "residential": 87840,
-    "commercial": 100800,
-}
+        if st.session_state.user_id is None:
+            tab_login, tab_signup = st.tabs(["Login", "Sign Up"])
+
+            with tab_login:
+                email = st.text_input("Email", key="login_email")
+                password = st.text_input("Password", type="password", key="login_pw")
+                if st.button("Login", key="login_btn"):
+                    row = get_user_by_email(email)
+                    if not row:
+                        st.error("No account found with this email.")
+                    else:
+                        user_id, u_email, pw_hash, is_verified = row
+                        if pw_hash != hash_password(password):
+                            st.error("Incorrect password.")
+                        elif not is_verified:
+                            st.error("Account not verified. Please sign up again.")
+                        else:
+                            st.session_state.user_id = user_id
+                            st.session_state.user_email = u_email
+                            st.success(f"Logged in as {u_email}")
+
+            with tab_signup:
+                signup_email = st.text_input("Email for Signup", key="signup_email")
+                if st.button("Send OTP", key="send_otp_btn"):
+                    if not signup_email:
+                        st.error("Please enter an email.")
+                    else:
+                        existing = get_user_by_email(signup_email)
+                        if existing:
+                            st.error("This email is already registered. Please login.")
+                        else:
+                            otp = f"{random.randint(100000, 999999)}"
+                            try:
+                                send_otp_email(signup_email, otp)
+                                create_otp(signup_email, otp)
+                                st.session_state.pending_signup_email = signup_email
+                                st.session_state.otp_sent = True
+                                st.success("OTP sent to your email.")
+                            except Exception as e:
+                                st.error("Failed to send OTP. Check email settings.")
+                                st.text(str(e))
+
+                if st.session_state.otp_sent and st.session_state.pending_signup_email:
+                    st.write(f"OTP sent to: {st.session_state.pending_signup_email}")
+                    otp_input = st.text_input("Enter OTP", key="otp_input")
+                    new_password = st.text_input(
+                        "Set Password", type="password", key="signup_pw"
+                    )
+                    if st.button("Verify OTP & Create Account", key="verify_otp_btn"):
+                        if not otp_input or not new_password:
+                            st.error("Please enter both OTP and password.")
+                        else:
+                            ok = verify_otp(
+                                st.session_state.pending_signup_email, otp_input
+                            )
+                            if not ok:
+                                st.error("Invalid or expired OTP.")
+                            else:
+                                pw_hash = hash_password(new_password)
+                                user = create_user(
+                                    st.session_state.pending_signup_email, pw_hash
+                                )
+                                st.session_state.user_id = user[0]
+                                st.session_state.user_email = user[1]
+                                st.session_state.otp_sent = False
+                                st.session_state.pending_signup_email = None
+                                st.success("Account created and logged in!")
+        else:
+            st.success(f"Logged in as: {st.session_state.user_email}")
+            if st.button("Logout"):
+                st.session_state.user_id = None
+                st.session_state.user_email = None
+                st.experimental_rerun()
 
 
-def determine_area_category(plinth_area_sqm: float) -> str:
-    if plinth_area_sqm <= 30:
-        return "upto_30"
-    elif plinth_area_sqm <= 50:
-        return "30_50"
-    elif plinth_area_sqm <= 100:
-        return "50_100"
-    else:
-        return "above_100"
-
-
-def dda_minimum_value(plinth_area_sqm: float,
-                      building_more_than_4_storeys: bool,
-                      usage: str) -> tuple[float, float]:
-    usage = usage.lower()
-    if usage not in AREA_CATEGORY_RATES:
-        raise ValueError("Usage must be 'residential' or 'commercial'.")
-
-    if building_more_than_4_storeys:
-        rate = UNIFORM_RATES_MORE_THAN_4[usage]
-    else:
-        category = determine_area_category(plinth_area_sqm)
-        rate = AREA_CATEGORY_RATES[usage][category]
-
-    value = plinth_area_sqm * rate
-    return rate, value
-
-
-# =========================
-# HEADER WITH LOGO + BRAND
-# =========================
+# ---------------- HEADER ----------------
 
 header_col1, header_col2 = st.columns([1, 6])
 with header_col1:
@@ -337,46 +496,51 @@ with header_col2:
 
 st.write("---")
 
-# =========================
-# TABS LAYOUT
-# =========================
+# Sidebar auth (Option B: calculators open even if not logged in)
+auth_sidebar()
+
+# ---------------- TABS ----------------
 
 tab_home, tab_res, tab_com, tab_dda, tab_history, tab_about = st.tabs(
     ["🏠 Home", "📄 Residential", "🏬 Commercial", "🏢 DDA/CGHS Flats", "📚 History", "ℹ️ About"]
 )
 
-# -------------------------
-# HOME TAB
-# -------------------------
+# -------- HOME TAB --------
+
 with tab_home:
     st.markdown(
         """
         <div class="box">
         <h3>Welcome to the Delhi Property Price Calculator</h3>
         <p>
-        This tool helps you quickly estimate the value of Residential and Commercial
-        properties in Delhi based on circle rates, construction, parking, stamp duty,
-        e-fees and TDS.
+        This tool helps you estimate Delhi property values and government
+        duty amounts quickly.
         </p>
         <ul>
-            <li>Use the <b>Residential</b> or <b>Commercial</b> tab to calculate.</li>
-            <li>The <b>DDA/CGHS Flats</b> tab uses built-up rates based on plinth area and storeys.</li>
-            <li>After calculation, summary appears below the button and can be saved to History.</li>
+            <li>Use <b>Residential</b> / <b>Commercial</b> tabs for circle rate based calculations.</li>
+            <li>Use <b>DDA/CGHS</b> tab for DDA & CGHS flat calculations.</li>
+            <li>Saving summaries & history requires login, but calculators are free to use.</li>
         </ul>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-# -------------------------
-# RESIDENTIAL TAB
-# -------------------------
+# -------- RESIDENTIAL TAB --------
+
 with tab_res:
     st.markdown('<div class="box">', unsafe_allow_html=True)
     st.subheader("Residential Property Calculation")
 
     col1, col2 = st.columns(2)
     with col1:
+        r_colony_choice = None
+        if COLONY_NAMES:
+            r_colony_choice = st.selectbox(
+                "Colony (type to search, optional)",
+                ["(Not using colony)"] + COLONY_NAMES,
+                key="r_colony",
+            )
         r_land_area_yards = st.number_input(
             "Land Area (Sq. Yards)",
             value=50.0,
@@ -384,15 +548,24 @@ with tab_res:
             step=1.0,
             key="r_land_area",
         )
-        r_category = st.selectbox(
-            "Property Category (A–H)", list(circlerates_res.keys()), key="r_category"
-        )
+
+        if r_colony_choice and r_colony_choice != "(Not using colony)":
+            r_category = COLONY_MAP.get(r_colony_choice, "G")
+            st.info(f"Detected Category: **{r_category}**")
+        else:
+            r_category = st.selectbox(
+                "Property Category (A–H)",
+                list(circlerates_res.keys()),
+                key="r_category",
+            )
+
         r_total_storey = st.number_input(
             "Total Storeys", value=1, min_value=1, step=1, key="r_total_storey"
         )
         r_user_storey = st.number_input(
             "Storeys Buying", value=1, min_value=1, step=1, key="r_user_storey"
         )
+
     with col2:
         r_owner = st.selectbox(
             "Ownership Type", ["male", "female", "joint"], key="r_owner"
@@ -435,7 +608,7 @@ with tab_res:
     )
 
     if st.button("Calculate Residential", key="calc_res"):
-        result = run_calculation(
+        res = run_calculation(
             "Residential",
             r_land_area_yards,
             r_category,
@@ -447,28 +620,35 @@ with tab_res:
             r_constructed_area,
             r_year_built,
             r_custom_cons,
+            colony_name=None if not r_colony_choice or r_colony_choice == "(Not using colony)" else r_colony_choice,
         )
-        st.session_state.last_result = result
+        st.session_state.last_result = res
         st.session_state.last_result_tab = "Residential"
         st.success("Residential property calculation completed.")
 
     if (
-        st.session_state.last_result is not None
+        st.session_state.last_result
         and st.session_state.last_result_tab == "Residential"
     ):
         render_summary_block(st.session_state.last_result, save_key="save_res")
 
     st.markdown("</div>", unsafe_allow_html=True)
 
-# -------------------------
-# COMMERCIAL TAB
-# -------------------------
+# -------- COMMERCIAL TAB --------
+
 with tab_com:
     st.markdown('<div class="box">', unsafe_allow_html=True)
     st.subheader("Commercial Property Calculation")
 
     col1, col2 = st.columns(2)
     with col1:
+        c_colony_choice = None
+        if COLONY_NAMES:
+            c_colony_choice = st.selectbox(
+                "Colony (type to search, optional)",
+                ["(Not using colony)"] + COLONY_NAMES,
+                key="c_colony",
+            )
         c_land_area_yards = st.number_input(
             "Land Area (Sq. Yards)",
             value=50.0,
@@ -476,15 +656,24 @@ with tab_com:
             step=1.0,
             key="c_land_area",
         )
-        c_category = st.selectbox(
-            "Property Category (A–H)", list(circlerates_com.keys()), key="c_category"
-        )
+
+        if c_colony_choice and c_colony_choice != "(Not using colony)":
+            c_category = COLONY_MAP.get(c_colony_choice, "G")
+            st.info(f"Detected Category: **{c_category}**")
+        else:
+            c_category = st.selectbox(
+                "Property Category (A–H)",
+                list(circlerates_com.keys()),
+                key="c_category",
+            )
+
         c_total_storey = st.number_input(
             "Total Storeys", value=1, min_value=1, step=1, key="c_total_storey"
         )
         c_user_storey = st.number_input(
             "Storeys Buying", value=1, min_value=1, step=1, key="c_user_storey"
         )
+
     with col2:
         c_owner = st.selectbox(
             "Ownership Type", ["male", "female", "joint"], key="c_owner"
@@ -527,7 +716,7 @@ with tab_com:
     )
 
     if st.button("Calculate Commercial", key="calc_com"):
-        result = run_calculation(
+        res = run_calculation(
             "Commercial",
             c_land_area_yards,
             c_category,
@@ -539,22 +728,22 @@ with tab_com:
             c_constructed_area,
             c_year_built,
             c_custom_cons,
+            colony_name=None if not c_colony_choice or c_colony_choice == "(Not using colony)" else c_colony_choice,
         )
-        st.session_state.last_result = result
+        st.session_state.last_result = res
         st.session_state.last_result_tab = "Commercial"
         st.success("Commercial property calculation completed.")
 
     if (
-        st.session_state.last_result is not None
+        st.session_state.last_result
         and st.session_state.last_result_tab == "Commercial"
     ):
         render_summary_block(st.session_state.last_result, save_key="save_com")
 
     st.markdown("</div>", unsafe_allow_html=True)
 
-# -------------------------
-# DDA / CGHS TAB
-# -------------------------
+# -------- DDA / CGHS TAB --------
+
 with tab_dda:
     st.markdown('<div class="box">', unsafe_allow_html=True)
     st.subheader("DDA / CGHS Built-Up Flat Calculator")
@@ -629,7 +818,7 @@ with tab_dda:
         )
         st.write(f"**Rate Applied:** ₹{rate_per_sqm:,.2f} per sq. meter")
         if more_than_4_flag:
-            st.write("**Storey Rule:** Uniform rate applied (building has more than 4 storeys)")
+            st.write("**Storey Rule:** Uniform rate (more than 4 storeys)")
         else:
             st.write("**Storey Rule:** Up to 4 storeys (area category-based rate)")
 
@@ -649,151 +838,64 @@ with tab_dda:
             f"**Total Govt Liability on Govt Value: ₹{math.ceil(total_govt):,}**"
         )
 
-        # Save govt summary to history
-        dda_result_govt = {
-            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "property_type": f"DDA/CGHS - {dda_usage_pretty}",
-            "category": "DDA Govt",
-            "land_area_yards": dda_area_yards,
-            "land_area_m": plinth_area_sqm,
-            "auto_consideration": govt_value,
-            "custom_consideration": 0,
-            "final_consideration": govt_value,
-            "cons_source": "DDA Govt Value",
-            "stamp_rate": duty_rate_govt,
-            "stamp_duty": stamp_govt,
-            "mutation": mutation_govt,
-            "e_fees": e_fees_govt,
-            "tds": tds_govt,
-            "total_payable": total_govt,
-            "land_value_user": govt_value,
-            "construction_value": 0,
-            "parking_cost": 0,
-            "include_const": "no",
-            "parking": "no",
-            "total_storey": 0,
-            "user_storey": 0,
-            "constructed_area": 0,
-            "year_built": 0,
-            "owner": dda_owner,
-        }
-
-        if st.button("💾 Save Govt Value Summary to History", key="save_dda_govt"):
-            st.session_state.history.append(dda_result_govt)
-            st.success("DDA/CGHS Govt value summary saved to History tab.")
-
-        # Custom consideration block
-        if dda_calc_custom and dda_custom_cons > 0:
-            duty_rate_custom = get_stampduty_rate(dda_owner, dda_custom_cons)
-            stamp_custom = dda_custom_cons * duty_rate_custom
-            if usage_key == "residential":
-                mutation_custom = 1136 if dda_custom_cons > 5_000_000 else 1124
-            else:
-                mutation_custom = 1124
-            e_fees_custom = dda_custom_cons * 0.01 + mutation_custom
-            tds_custom = (
-                dda_custom_cons * 0.01 if dda_custom_cons > 5_000_000 else 0.0
-            )
-            total_custom = stamp_custom + e_fees_custom + tds_custom
-
-            st.write("---")
-            st.write("## 🔹 Custom Consideration Calculation")
-            st.write(f"**Consideration Value:** ₹{dda_custom_cons:,.2f}")
-            st.write(f"**Stamp Duty Rate:** {duty_rate_custom*100:.2f}%")
-            st.write(f"**Stamp Duty Amount:** ₹{math.ceil(stamp_custom):,}")
-            st.write(f"**Mutation Fees:** ₹{mutation_custom:,}")
-            st.write(f"**E-Fees (1% + mutation):** ₹{math.ceil(e_fees_custom):,}")
-            if tds_custom > 0:
-                st.write(f"**TDS (1% > ₹50L):** ₹{math.ceil(tds_custom):,}")
-            else:
-                st.write("**TDS (1% > ₹50L):** Not applicable")
-            st.success(
-                f"**Total Govt Liability on Custom Consideration: ₹{math.ceil(total_custom):,}**"
-            )
-
-            dda_result_custom = {
-                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                "property_type": f"DDA/CGHS - {dda_usage_pretty}",
-                "category": "DDA Custom",
-                "land_area_yards": dda_area_yards,
-                "land_area_m": plinth_area_sqm,
-                "auto_consideration": dda_custom_cons,
-                "custom_consideration": dda_custom_cons,
-                "final_consideration": dda_custom_cons,
-                "cons_source": "DDA Custom Consideration",
-                "stamp_rate": duty_rate_custom,
-                "stamp_duty": stamp_custom,
-                "mutation": mutation_custom,
-                "e_fees": e_fees_custom,
-                "tds": tds_custom,
-                "total_payable": total_custom,
-                "land_value_user": dda_custom_cons,
-                "construction_value": 0,
-                "parking_cost": 0,
-                "include_const": "no",
-                "parking": "no",
-                "total_storey": 0,
-                "user_storey": 0,
-                "constructed_area": 0,
-                "year_built": 0,
-                "owner": dda_owner,
-            }
-
-            if st.button("💾 Save Custom Consideration Summary to History", key="save_dda_custom"):
-                st.session_state.history.append(dda_result_custom)
-                st.success("DDA/CGHS custom consideration summary saved to History tab.")
-
         st.markdown("</div>", unsafe_allow_html=True)
 
     st.markdown("</div>", unsafe_allow_html=True)
 
-# -------------------------
-# HISTORY TAB
-# -------------------------
+# -------- HISTORY TAB --------
+
 with tab_history:
     st.markdown('<div class="box">', unsafe_allow_html=True)
     st.subheader("Saved Summaries (History)")
 
-    if not st.session_state.history:
-        st.info(
-            "No saved summaries yet. Use Residential, Commercial or DDA/CGHS tabs, calculate and click 'Save...' button."
-        )
+    if st.session_state.user_id is None:
+        st.error("Please login to view your history.")
     else:
-        rows = []
-        for h in st.session_state.history:
-            rows.append(
-                {
-                    "Time": h["timestamp"],
-                    "Type": h["property_type"],
-                    "Category": h["category"],
-                    "Consideration Used (₹)": math.ceil(h["final_consideration"]),
-                    "Stamp Duty (₹)": math.ceil(h["stamp_duty"]),
-                    "E-Fees (₹)": math.ceil(h["e_fees"]),
-                    "TDS (₹)": math.ceil(h["tds"]),
-                    "Total Govt Duty (₹)": math.ceil(h["total_payable"]),
-                }
+        c = conn.cursor()
+        c.execute(
+            """
+            SELECT created_at, colony_name, property_type, category,
+                   consideration, stamp_duty, e_fees, tds, total_govt_duty
+            FROM history
+            WHERE user_id = ?
+            ORDER BY created_at DESC
+            """,
+            (st.session_state.user_id,),
+        )
+        rows = c.fetchall()
+        if not rows:
+            st.info("No saved entries yet.")
+        else:
+            df = pd.DataFrame(
+                rows,
+                columns=[
+                    "Time", "Colony", "Type", "Category",
+                    "Consideration (₹)", "Stamp Duty (₹)",
+                    "E-Fees (₹)", "TDS (₹)", "Total Govt Duty (₹)",
+                ],
             )
-        st.dataframe(rows, use_container_width=True)
-        if st.button("Clear History"):
-            st.session_state.history = []
-            st.success("History cleared for this session.")
+            st.dataframe(df, use_container_width=True)
+
+            if st.button("Clear My History"):
+                c.execute("DELETE FROM history WHERE user_id = ?;", (st.session_state.user_id,))
+                conn.commit()
+                st.success("Your history has been cleared.")
+                st.experimental_rerun()
 
     st.markdown("</div>", unsafe_allow_html=True)
 
-# -------------------------
-# ABOUT / BRANDING / SHARE
-# -------------------------
+# -------- ABOUT TAB --------
+
 with tab_about:
     st.markdown('<div class="box">', unsafe_allow_html=True)
     st.subheader("About Aggarwal Documents & Legal Consultants")
 
     st.write(
         """
-        This calculator is designed to help estimate Delhi property values and government
-        duty amounts in a quick and easy way.
+        This calculator helps estimate Delhi property values and government
+        duties.
 
         **Aggarwal Documents & Legal Consultants**  
-        Providing assistance in:
         - Property Documentation  
         - Sale Deeds & Agreements  
         - Registration & Legal Consultancy  
@@ -827,9 +929,8 @@ with tab_about:
 
     st.markdown("</div>", unsafe_allow_html=True)
 
-# -------------------------
-# FOOTER
-# -------------------------
+# -------- FOOTER --------
+
 st.markdown(
     '<div class="footer">Created by <b>Rishav Singh</b> · Aggarwal Documents &amp; Legal Consultants</div>',
     unsafe_allow_html=True,

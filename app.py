@@ -1,6 +1,5 @@
 import math
 import hashlib
-import random
 from datetime import datetime
 from urllib.parse import quote
 
@@ -1068,4 +1067,4 @@ with tab_about:
 st.markdown(
     '<div class="footer">Created by <b>Rishav Singh</b> · Aggarwal Documents &amp; Legal Consultants</div>',
     unsafe_allow_html=True,
-)
+            )

@@ -1,10 +1,11 @@
-import streamlit as st
 import math
-from datetime import datetime
 import hashlib
-import pandas as pd
 import random
+from datetime import datetime
 from urllib.parse import quote
+
+import pandas as pd
+import streamlit as st
 
 from database import (
     get_connection,
@@ -14,33 +15,59 @@ from database import (
 )
 from email_otp import send_otp_email
 
-# ---------------- CONFIG ----------------
+# -------------------------------------------------
+# BASIC CONFIG
+# -------------------------------------------------
 
 APP_URL = "https://delhi-property-calculator-lkdbpzkcuch6l8cgpehdsi.streamlit.app"
 
 stampdutyrates = {"male": 0.06, "female": 0.04, "joint": 0.05}
 
-# Residential data
+# Residential circle & construction rates
 circlerates_res = {
-    "A": 774000, "B": 245520, "C": 159840, "D": 127680,
-    "E": 70080, "F": 56640, "G": 46200, "H": 23280
+    "A": 774000,
+    "B": 245520,
+    "C": 159840,
+    "D": 127680,
+    "E": 70080,
+    "F": 56640,
+    "G": 46200,
+    "H": 23280,
 }
 construction_rates_res = {
-    "A": 21960, "B": 17400, "C": 13920, "D": 11160,
-    "E": 9360, "F": 8220, "G": 6960, "H": 3480
+    "A": 21960,
+    "B": 17400,
+    "C": 13920,
+    "D": 11160,
+    "E": 9360,
+    "F": 8220,
+    "G": 6960,
+    "H": 3480,
 }
 
-# Commercial data
+# Commercial circle & construction rates
 circlerates_com = {
-    "A": 774000 * 3, "B": 245520 * 3, "C": 159840 * 3, "D": 127680 * 3,
-    "E": 70080 * 3, "F": 56640 * 3, "G": 46200 * 3, "H": 23280 * 3
+    "A": 774000 * 3,
+    "B": 245520 * 3,
+    "C": 159840 * 3,
+    "D": 127680 * 3,
+    "E": 70080 * 3,
+    "F": 56640 * 3,
+    "G": 46200 * 3,
+    "H": 23280 * 3,
 }
 construction_rates_com = {
-    "A": 25200, "B": 19920, "C": 15960, "D": 12840,
-    "E": 10800, "F": 9480, "G": 8040, "H": 3960
+    "A": 25200,
+    "B": 19920,
+    "C": 15960,
+    "D": 12840,
+    "E": 10800,
+    "F": 9480,
+    "G": 8040,
+    "H": 3960,
 }
 
-# DDA / CGHS rates
+# DDA / CGHS built-up rates (per sq. mtr.)
 AREA_CATEGORY_RATES = {
     "residential": {
         "upto_30": 50400,
@@ -60,9 +87,14 @@ UNIFORM_RATES_MORE_THAN_4 = {
     "commercial": 100800,
 }
 
-# ---------------- STREAMLIT BASE CONFIG ----------------
+# -------------------------------------------------
+# STREAMLIT PAGE CONFIG & THEME
+# -------------------------------------------------
 
-st.set_page_config(page_title="Delhi Property Price Calculator", layout="wide")
+st.set_page_config(
+    page_title="Delhi Property Price Calculator",
+    layout="wide",
+)
 
 st.markdown(
     """
@@ -104,12 +136,13 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# ---------------- DB INIT ----------------
+# -------------------------------------------------
+# DB INIT & SESSION STATE
+# -------------------------------------------------
 
 init_db()
 conn = get_connection()
 
-# ---------------- AUTH HELPERS ----------------
 
 def hash_password(pw: str) -> str:
     return hashlib.sha256(pw.encode()).hexdigest()
@@ -140,23 +173,24 @@ def create_user(email: str, password_hash: str):
 
 
 def ensure_session_state():
-    if "user_id" not in st.session_state:
-        st.session_state.user_id = None
-    if "user_email" not in st.session_state:
-        st.session_state.user_email = None
-    if "pending_signup_email" not in st.session_state:
-        st.session_state.pending_signup_email = None
-    if "otp_sent" not in st.session_state:
-        st.session_state.otp_sent = False
-    if "last_result" not in st.session_state:
-        st.session_state.last_result = None
-    if "last_result_tab" not in st.session_state:
-        st.session_state.last_result_tab = None
+    for key, default in [
+        ("user_id", None),
+        ("user_email", None),
+        ("pending_signup_email", None),
+        ("otp_sent", False),
+        ("last_result", None),
+        ("last_result_tab", None),
+    ]:
+        if key not in st.session_state:
+            st.session_state[key] = default
 
 
 ensure_session_state()
 
-# ---------------- COLONIES FROM DB ----------------
+# -------------------------------------------------
+# COLONIES FROM DB
+# -------------------------------------------------
+
 
 @st.cache_data
 def load_colonies_from_db():
@@ -171,7 +205,10 @@ def load_colonies_from_db():
 
 COLONY_NAMES, COLONY_MAP = load_colonies_from_db()
 
-# ---------------- COMMON CALC HELPERS ----------------
+# -------------------------------------------------
+# CALC HELPERS
+# -------------------------------------------------
+
 
 def convert_sq_yards_to_sq_meters(sq_yards: float) -> float:
     return round(sq_yards * 0.8361, 2)
@@ -210,6 +247,7 @@ def run_calculation(
     custom_cons: float,
     colony_name: str | None = None,
 ):
+    # Choose rate tables
     if property_type == "Residential":
         circlerates = circlerates_res
         construction_rates = construction_rates_res
@@ -258,7 +296,7 @@ def run_calculation(
     tds = final_consideration * 0.01 if final_consideration > 5_000_000 else 0.0
     total_payable = stamp_duty + e_fees + tds
 
-    result = {
+    return {
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "property_type": property_type,
         "colony_name": colony_name,
@@ -286,7 +324,6 @@ def run_calculation(
         "construction_value": construction_value,
         "parking_cost": parking_cost,
     }
-    return result
 
 
 def determine_area_category(plinth_area_sqm: float) -> str:
@@ -318,8 +355,10 @@ def dda_minimum_value(
     value = plinth_area_sqm * rate
     return rate, value
 
+# -------------------------------------------------
+# HISTORY SAVE / SUMMARY BLOCK
+# -------------------------------------------------
 
-# ---------------- SAVE HISTORY ----------------
 
 def save_history_to_db(res: dict):
     if st.session_state.user_id is None:
@@ -374,7 +413,8 @@ def render_summary_block(res: dict, save_key: str):
 
     if res["custom_consideration"] > 0:
         st.write(
-            f"**Custom Consideration Entered:** ₹{math.ceil(res['custom_consideration']):,}"
+            f"**Custom Consideration Entered:** "
+            f"₹{math.ceil(res['custom_consideration']):,}"
         )
 
     st.write(
@@ -385,7 +425,8 @@ def render_summary_block(res: dict, save_key: str):
     st.write("---")
     st.write("### Govt. Duty Calculation")
     st.write(
-        f"**Stamp Duty ({res['stamp_rate']*100:.3f}%):** ₹{math.ceil(res['stamp_duty']):,}"
+        f"**Stamp Duty ({res['stamp_rate']*100:.3f}%):** "
+        f"₹{math.ceil(res['stamp_duty']):,}"
     )
     st.write(f"**Mutation Fees:** ₹{math.ceil(res['mutation']):,}")
     st.write(f"**E-Fees (1% + mutation):** ₹{math.ceil(res['e_fees']):,}")
@@ -402,8 +443,10 @@ def render_summary_block(res: dict, save_key: str):
 
     st.markdown("</div>", unsafe_allow_html=True)
 
+# -------------------------------------------------
+# AUTH SIDEBAR (LOGIN / SIGNUP + OTP)
+# -------------------------------------------------
 
-# ---------------- AUTH UI (SIGNUP / LOGIN) ----------------
 
 def auth_sidebar():
     with st.sidebar:
@@ -412,7 +455,7 @@ def auth_sidebar():
         if st.session_state.user_id is None:
             tab_login, tab_signup = st.tabs(["Login", "Sign Up"])
 
-            # ---- LOGIN TAB ----
+            # ---------- LOGIN ----------
             with tab_login:
                 email = st.text_input("Email", key="login_email")
                 password = st.text_input(
@@ -433,7 +476,7 @@ def auth_sidebar():
                             st.session_state.user_email = u_email
                             st.success(f"Logged in as {u_email}")
 
-            # ---- SIGNUP TAB ----
+            # ---------- SIGNUP ----------
             with tab_signup:
                 signup_email = st.text_input(
                     "Email for Signup", key="signup_email"
@@ -449,7 +492,6 @@ def auth_sidebar():
                                 "This email is already registered. Please login."
                             )
                         else:
-                            # OTP is generated inside email_otp.send_otp_email
                             otp, err = send_otp_email(signup_email)
                             if err:
                                 st.error(
@@ -458,9 +500,7 @@ def auth_sidebar():
                                 st.text(str(err))
                             else:
                                 create_otp(signup_email, otp)
-                                st.session_state.pending_signup_email = (
-                                    signup_email
-                                )
+                                st.session_state.pending_signup_email = signup_email
                                 st.session_state.otp_sent = True
                                 st.success("OTP sent to your email.")
 
@@ -486,8 +526,7 @@ def auth_sidebar():
                             else:
                                 pw_hash = hash_password(new_password)
                                 user = create_user(
-                                    st.session_state.pending_signup_email,
-                                    pw_hash,
+                                    st.session_state.pending_signup_email, pw_hash
                                 )
                                 st.session_state.user_id = user[0]
                                 st.session_state.user_email = user[1]
@@ -501,8 +540,9 @@ def auth_sidebar():
                 st.session_state.user_email = None
                 st.experimental_rerun()
 
-
-# ---------------- HEADER ----------------
+# -------------------------------------------------
+# HEADER
+# -------------------------------------------------
 
 header_col1, header_col2 = st.columns([1, 6])
 with header_col1:
@@ -522,10 +562,12 @@ with header_col2:
 
 st.write("---")
 
-# Sidebar auth (calculators open even if not logged in)
+# Sidebar auth
 auth_sidebar()
 
-# ---------------- TABS ----------------
+# -------------------------------------------------
+# MAIN TABS
+# -------------------------------------------------
 
 tab_home, tab_res, tab_com, tab_dda, tab_history, tab_about = st.tabs(
     [
@@ -538,7 +580,7 @@ tab_home, tab_res, tab_com, tab_dda, tab_history, tab_about = st.tabs(
     ]
 )
 
-# -------- HOME TAB --------
+# ---------- HOME TAB ----------
 
 with tab_home:
     st.markdown(
@@ -551,15 +593,15 @@ with tab_home:
         </p>
         <ul>
             <li>Use <b>Residential</b> / <b>Commercial</b> tabs for circle rate based calculations.</li>
-            <li>Use <b>DDA/CGHS</b> tab for DDA & CGHS flat calculations.</li>
-            <li>Saving summaries & history requires login, but calculators are free to use.</li>
+            <li>Use <b>DDA/CGHS</b> tab for DDA &amp; CGHS flat calculations.</li>
+            <li>Saving summaries &amp; history requires login, but calculators are free to use.</li>
         </ul>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-# -------- RESIDENTIAL TAB --------
+# ---------- RESIDENTIAL TAB ----------
 
 with tab_res:
     st.markdown('<div class="box">', unsafe_allow_html=True)
@@ -679,7 +721,7 @@ with tab_res:
 
     st.markdown("</div>", unsafe_allow_html=True)
 
-# -------- COMMERCIAL TAB --------
+# ---------- COMMERCIAL TAB ----------
 
 with tab_com:
     st.markdown('<div class="box">', unsafe_allow_html=True)
@@ -799,7 +841,7 @@ with tab_com:
 
     st.markdown("</div>", unsafe_allow_html=True)
 
-# -------- DDA / CGHS TAB --------
+# ---------- DDA / CGHS TAB ----------
 
 with tab_dda:
     st.markdown('<div class="box">', unsafe_allow_html=True)
@@ -853,12 +895,12 @@ with tab_dda:
             plinth_area_sqm, more_than_4_flag, usage_key
         )
 
-        # Govt value block
         duty_rate_govt = get_stampduty_rate(dda_owner, govt_value)
         stamp_govt = govt_value * duty_rate_govt
-        mutation_govt = (
-            1136 if (usage_key == "residential" and govt_value > 5_000_000) else 1124
-        )
+        if usage_key == "residential":
+            mutation_govt = 1136 if govt_value > 5_000_000 else 1124
+        else:
+            mutation_govt = 1124
         e_fees_govt = govt_value * 0.01 + mutation_govt
         tds_govt = govt_value * 0.01 if govt_value > 5_000_000 else 0.0
         total_govt = stamp_govt + e_fees_govt + tds_govt
@@ -893,18 +935,17 @@ with tab_dda:
             f"**Total Govt Liability on Govt Value: ₹{math.ceil(total_govt):,}**"
         )
 
-        # Optional: custom consideration for DDA
+        # Optional custom consideration
         if dda_calc_custom and dda_custom_cons > 0:
             st.write("---")
             st.write("### Govt. Duty on Your Custom Consideration")
             custom_cons = dda_custom_cons
             duty_rate_c = get_stampduty_rate(dda_owner, custom_cons)
             stamp_c = custom_cons * duty_rate_c
-            mutation_c = (
-                1136
-                if (usage_key == "residential" and custom_cons > 5_000_000)
-                else 1124
-            )
+            if usage_key == "residential":
+                mutation_c = 1136 if custom_cons > 5_000_000 else 1124
+            else:
+                mutation_c = 1124
             e_fees_c = custom_cons * 0.01 + mutation_c
             tds_c = custom_cons * 0.01 if custom_cons > 5_000_000 else 0.0
             total_c = stamp_c + e_fees_c + tds_c
@@ -926,7 +967,7 @@ with tab_dda:
 
     st.markdown("</div>", unsafe_allow_html=True)
 
-# -------- HISTORY TAB --------
+# ---------- HISTORY TAB ----------
 
 with tab_history:
     st.markdown('<div class="box">', unsafe_allow_html=True)
@@ -942,7 +983,7 @@ with tab_history:
                    consideration, stamp_duty, e_fees, tds, total_govt_duty
             FROM history
             WHERE user_id = ?
-            ORDER BY created_at DESC
+            ORDER BY created_at DESC;
             """,
             (st.session_state.user_id,),
         )
@@ -977,7 +1018,7 @@ with tab_history:
 
     st.markdown("</div>", unsafe_allow_html=True)
 
-# -------- ABOUT TAB --------
+# ---------- ABOUT TAB ----------
 
 with tab_about:
     st.markdown('<div class="box">', unsafe_allow_html=True)
@@ -1022,7 +1063,7 @@ with tab_about:
 
     st.markdown("</div>", unsafe_allow_html=True)
 
-# -------- FOOTER --------
+# ---------- FOOTER ----------
 
 st.markdown(
     '<div class="footer">Created by <b>Rishav Singh</b> · Aggarwal Documents &amp; Legal Consultants</div>',

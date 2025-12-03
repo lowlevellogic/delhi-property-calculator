@@ -1,7 +1,6 @@
 import streamlit as st
 import math
 from datetime import datetime
-import sqlite3
 import hashlib
 import pandas as pd
 import random
@@ -118,18 +117,25 @@ def hash_password(pw: str) -> str:
 
 def get_user_by_email(email: str):
     c = conn.cursor()
-    c.execute("SELECT id, email, password_hash, is_verified FROM users WHERE email = ?;", (email.lower(),))
+    c.execute(
+        "SELECT id, email, password_hash, is_verified FROM users WHERE email = ?;",
+        (email.lower(),),
+    )
     return c.fetchone()
 
 
 def create_user(email: str, password_hash: str):
     c = conn.cursor()
     c.execute(
-        "INSERT INTO users (email, password_hash, is_verified, created_at) VALUES (?, ?, ?, ?);",
+        "INSERT INTO users (email, password_hash, is_verified, created_at) "
+        "VALUES (?, ?, ?, ?);",
         (email.lower(), password_hash, 1, datetime.utcnow().isoformat()),
     )
     conn.commit()
-    c.execute("SELECT id, email, password_hash, is_verified FROM users WHERE email = ?;", (email.lower(),))
+    c.execute(
+        "SELECT id, email, password_hash, is_verified FROM users WHERE email = ?;",
+        (email.lower(),),
+    )
     return c.fetchone()
 
 
@@ -156,7 +162,7 @@ ensure_session_state()
 def load_colonies_from_db():
     df = pd.read_sql_query(
         "SELECT colony_name, category FROM colonies ORDER BY colony_name;",
-        conn
+        conn,
     )
     names = df["colony_name"].tolist()
     mapping = dict(zip(df["colony_name"], df["category"]))
@@ -294,9 +300,11 @@ def determine_area_category(plinth_area_sqm: float) -> str:
         return "above_100"
 
 
-def dda_minimum_value(plinth_area_sqm: float,
-                      building_more_than_4_storeys: bool,
-                      usage: str) -> tuple[float, float]:
+def dda_minimum_value(
+    plinth_area_sqm: float,
+    building_more_than_4_storeys: bool,
+    usage: str,
+) -> tuple[float, float]:
     usage = usage.lower()
     if usage not in AREA_CATEGORY_RATES:
         raise ValueError("Usage must be 'residential' or 'commercial'.")
@@ -404,9 +412,12 @@ def auth_sidebar():
         if st.session_state.user_id is None:
             tab_login, tab_signup = st.tabs(["Login", "Sign Up"])
 
+            # ---- LOGIN TAB ----
             with tab_login:
                 email = st.text_input("Email", key="login_email")
-                password = st.text_input("Password", type="password", key="login_pw")
+                password = st.text_input(
+                    "Password", type="password", key="login_pw"
+                )
                 if st.button("Login", key="login_btn"):
                     row = get_user_by_email(email)
                     if not row:
@@ -422,34 +433,48 @@ def auth_sidebar():
                             st.session_state.user_email = u_email
                             st.success(f"Logged in as {u_email}")
 
+            # ---- SIGNUP TAB ----
             with tab_signup:
-                signup_email = st.text_input("Email for Signup", key="signup_email")
+                signup_email = st.text_input(
+                    "Email for Signup", key="signup_email"
+                )
+
                 if st.button("Send OTP", key="send_otp_btn"):
                     if not signup_email:
                         st.error("Please enter an email.")
                     else:
                         existing = get_user_by_email(signup_email)
                         if existing:
-                            st.error("This email is already registered. Please login.")
+                            st.error(
+                                "This email is already registered. Please login."
+                            )
                         else:
-                            otp = f"{random.randint(100000, 999999)}"
-                            try:
-                                send_otp_email(signup_email, otp)
+                            # OTP is generated inside email_otp.send_otp_email
+                            otp, err = send_otp_email(signup_email)
+                            if err:
+                                st.error(
+                                    "Failed to send OTP. Check email settings."
+                                )
+                                st.text(str(err))
+                            else:
                                 create_otp(signup_email, otp)
-                                st.session_state.pending_signup_email = signup_email
+                                st.session_state.pending_signup_email = (
+                                    signup_email
+                                )
                                 st.session_state.otp_sent = True
                                 st.success("OTP sent to your email.")
-                            except Exception as e:
-                                st.error("Failed to send OTP. Check email settings.")
-                                st.text(str(e))
 
                 if st.session_state.otp_sent and st.session_state.pending_signup_email:
-                    st.write(f"OTP sent to: {st.session_state.pending_signup_email}")
+                    st.write(
+                        f"OTP sent to: {st.session_state.pending_signup_email}"
+                    )
                     otp_input = st.text_input("Enter OTP", key="otp_input")
                     new_password = st.text_input(
                         "Set Password", type="password", key="signup_pw"
                     )
-                    if st.button("Verify OTP & Create Account", key="verify_otp_btn"):
+                    if st.button(
+                        "Verify OTP & Create Account", key="verify_otp_btn"
+                    ):
                         if not otp_input or not new_password:
                             st.error("Please enter both OTP and password.")
                         else:
@@ -461,7 +486,8 @@ def auth_sidebar():
                             else:
                                 pw_hash = hash_password(new_password)
                                 user = create_user(
-                                    st.session_state.pending_signup_email, pw_hash
+                                    st.session_state.pending_signup_email,
+                                    pw_hash,
                                 )
                                 st.session_state.user_id = user[0]
                                 st.session_state.user_email = user[1]
@@ -496,13 +522,20 @@ with header_col2:
 
 st.write("---")
 
-# Sidebar auth (Option B: calculators open even if not logged in)
+# Sidebar auth (calculators open even if not logged in)
 auth_sidebar()
 
 # ---------------- TABS ----------------
 
 tab_home, tab_res, tab_com, tab_dda, tab_history, tab_about = st.tabs(
-    ["🏠 Home", "📄 Residential", "🏬 Commercial", "🏢 DDA/CGHS Flats", "📚 History", "ℹ️ About"]
+    [
+        "🏠 Home",
+        "📄 Residential",
+        "🏬 Commercial",
+        "🏢 DDA/CGHS Flats",
+        "📚 History",
+        "ℹ️ About",
+    ]
 )
 
 # -------- HOME TAB --------
@@ -560,10 +593,18 @@ with tab_res:
             )
 
         r_total_storey = st.number_input(
-            "Total Storeys", value=1, min_value=1, step=1, key="r_total_storey"
+            "Total Storeys",
+            value=1,
+            min_value=1,
+            step=1,
+            key="r_total_storey",
         )
         r_user_storey = st.number_input(
-            "Storeys Buying", value=1, min_value=1, step=1, key="r_user_storey"
+            "Storeys Buying",
+            value=1,
+            min_value=1,
+            step=1,
+            key="r_user_storey",
         )
 
     with col2:
@@ -620,7 +661,11 @@ with tab_res:
             r_constructed_area,
             r_year_built,
             r_custom_cons,
-            colony_name=None if not r_colony_choice or r_colony_choice == "(Not using colony)" else r_colony_choice,
+            colony_name=(
+                None
+                if not r_colony_choice or r_colony_choice == "(Not using colony)"
+                else r_colony_choice
+            ),
         )
         st.session_state.last_result = res
         st.session_state.last_result_tab = "Residential"
@@ -668,10 +713,18 @@ with tab_com:
             )
 
         c_total_storey = st.number_input(
-            "Total Storeys", value=1, min_value=1, step=1, key="c_total_storey"
+            "Total Storeys",
+            value=1,
+            min_value=1,
+            step=1,
+            key="c_total_storey",
         )
         c_user_storey = st.number_input(
-            "Storeys Buying", value=1, min_value=1, step=1, key="c_user_storey"
+            "Storeys Buying",
+            value=1,
+            min_value=1,
+            step=1,
+            key="c_user_storey",
         )
 
     with col2:
@@ -728,7 +781,11 @@ with tab_com:
             c_constructed_area,
             c_year_built,
             c_custom_cons,
-            colony_name=None if not c_colony_choice or c_colony_choice == "(Not using colony)" else c_colony_choice,
+            colony_name=(
+                None
+                if not c_colony_choice or c_colony_choice == "(Not using colony)"
+                else c_colony_choice
+            ),
         )
         st.session_state.last_result = res
         st.session_state.last_result_tab = "Commercial"
@@ -789,21 +846,19 @@ with tab_dda:
 
     if st.button("Calculate DDA / CGHS Value", key="dda_calc_btn"):
         usage_key = dda_usage_pretty.lower()
-        more_than_4_flag = dda_more_than_4.lower() == "Yes".lower()
+        more_than_4_flag = dda_more_than_4.lower() == "yes"
 
         plinth_area_sqm = convert_sq_yards_to_sq_meters(dda_area_yards)
         rate_per_sqm, govt_value = dda_minimum_value(
             plinth_area_sqm, more_than_4_flag, usage_key
         )
 
+        # Govt value block
         duty_rate_govt = get_stampduty_rate(dda_owner, govt_value)
         stamp_govt = govt_value * duty_rate_govt
-
-        if usage_key == "residential":
-            mutation_govt = 1136 if govt_value > 5_000_000 else 1124
-        else:
-            mutation_govt = 1124
-
+        mutation_govt = (
+            1136 if (usage_key == "residential" and govt_value > 5_000_000) else 1124
+        )
         e_fees_govt = govt_value * 0.01 + mutation_govt
         tds_govt = govt_value * 0.01 if govt_value > 5_000_000 else 0.0
         total_govt = stamp_govt + e_fees_govt + tds_govt
@@ -838,6 +893,35 @@ with tab_dda:
             f"**Total Govt Liability on Govt Value: ₹{math.ceil(total_govt):,}**"
         )
 
+        # Optional: custom consideration for DDA
+        if dda_calc_custom and dda_custom_cons > 0:
+            st.write("---")
+            st.write("### Govt. Duty on Your Custom Consideration")
+            custom_cons = dda_custom_cons
+            duty_rate_c = get_stampduty_rate(dda_owner, custom_cons)
+            stamp_c = custom_cons * duty_rate_c
+            mutation_c = (
+                1136
+                if (usage_key == "residential" and custom_cons > 5_000_000)
+                else 1124
+            )
+            e_fees_c = custom_cons * 0.01 + mutation_c
+            tds_c = custom_cons * 0.01 if custom_cons > 5_000_000 else 0.0
+            total_c = stamp_c + e_fees_c + tds_c
+
+            st.write(f"**Consideration Value:** ₹{custom_cons:,.2f}")
+            st.write(f"**Stamp Duty Rate:** {duty_rate_c*100:.2f}%")
+            st.write(f"**Stamp Duty Amount:** ₹{math.ceil(stamp_c):,}")
+            st.write(f"**Mutation Fees:** ₹{mutation_c:,}")
+            st.write(f"**E-Fees (1% + mutation):** ₹{math.ceil(e_fees_c):,}")
+            if tds_c > 0:
+                st.write(f"**TDS (1% > ₹50L):** ₹{math.ceil(tds_c):,}")
+            else:
+                st.write("**TDS (1% > ₹50L):** Not applicable")
+            st.success(
+                f"**Total Govt Liability on Custom Value: ₹{math.ceil(total_c):,}**"
+            )
+
         st.markdown("</div>", unsafe_allow_html=True)
 
     st.markdown("</div>", unsafe_allow_html=True)
@@ -869,15 +953,24 @@ with tab_history:
             df = pd.DataFrame(
                 rows,
                 columns=[
-                    "Time", "Colony", "Type", "Category",
-                    "Consideration (₹)", "Stamp Duty (₹)",
-                    "E-Fees (₹)", "TDS (₹)", "Total Govt Duty (₹)",
+                    "Time",
+                    "Colony",
+                    "Type",
+                    "Category",
+                    "Consideration (₹)",
+                    "Stamp Duty (₹)",
+                    "E-Fees (₹)",
+                    "TDS (₹)",
+                    "Total Govt Duty (₹)",
                 ],
             )
             st.dataframe(df, use_container_width=True)
 
             if st.button("Clear My History"):
-                c.execute("DELETE FROM history WHERE user_id = ?;", (st.session_state.user_id,))
+                c.execute(
+                    "DELETE FROM history WHERE user_id = ?;",
+                    (st.session_state.user_id,),
+                )
                 conn.commit()
                 st.success("Your history has been cleared.")
                 st.experimental_rerun()

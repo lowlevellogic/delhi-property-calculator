@@ -130,6 +130,15 @@ st.markdown(
             font-size: 13px;
             color: #d0e8ff;
         }
+
+        /* Make all widget labels & input text white for visibility */
+        label, .stMarkdown, .stTextInput label, .stNumberInput label,
+        .stSelectbox label, .stRadio label, .stCheckbox label {
+            color: #ffffff !important;
+        }
+        input, textarea {
+            color: #ffffff !important;
+        }
     </style>
     """,
     unsafe_allow_html=True,
@@ -491,6 +500,7 @@ def auth_sidebar():
                                 "This email is already registered. Please login."
                             )
                         else:
+                            # send_otp_email returns (otp, error_message)
                             otp, err = send_otp_email(signup_email)
                             if err:
                                 st.error(
@@ -608,6 +618,7 @@ with tab_res:
 
     col1, col2 = st.columns(2)
     with col1:
+        # Colony search + auto category
         r_colony_choice = None
         if COLONY_NAMES:
             r_colony_choice = st.selectbox(
@@ -615,6 +626,7 @@ with tab_res:
                 ["(Not using colony)"] + COLONY_NAMES,
                 key="r_colony",
             )
+
         r_land_area_yards = st.number_input(
             "Land Area (Sq. Yards)",
             value=50.0,
@@ -625,7 +637,7 @@ with tab_res:
 
         if r_colony_choice and r_colony_choice != "(Not using colony)":
             r_category = COLONY_MAP.get(r_colony_choice, "G")
-            st.info(f"Detected Category: **{r_category}**")
+            st.info(f"Detected Category: **{r_category}** (from colony list)")
         else:
             r_category = st.selectbox(
                 "Property Category (A–H)",
@@ -728,6 +740,7 @@ with tab_com:
 
     col1, col2 = st.columns(2)
     with col1:
+        # Colony search + auto category
         c_colony_choice = None
         if COLONY_NAMES:
             c_colony_choice = st.selectbox(
@@ -735,6 +748,7 @@ with tab_com:
                 ["(Not using colony)"] + COLONY_NAMES,
                 key="c_colony",
             )
+
         c_land_area_yards = st.number_input(
             "Land Area (Sq. Yards)",
             value=50.0,
@@ -745,7 +759,7 @@ with tab_com:
 
         if c_colony_choice and c_colony_choice != "(Not using colony)":
             c_category = COLONY_MAP.get(c_colony_choice, "G")
-            st.info(f"Detected Category: **{c_category}**")
+            st.info(f"Detected Category: **{c_category}** (from colony list)")
         else:
             c_category = st.selectbox(
                 "Property Category (A–H)",
@@ -1067,4 +1081,4 @@ with tab_about:
 st.markdown(
     '<div class="footer">Created by <b>Rishav Singh</b> · Aggarwal Documents &amp; Legal Consultants</div>',
     unsafe_allow_html=True,
-            )
+)

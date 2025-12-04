@@ -6,6 +6,7 @@ import streamlit as st
 
 from database import get_connection, init_db
 
+
 # -----------------------------------------
 # BASIC CONFIG
 # -----------------------------------------
@@ -49,6 +50,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+
 # -----------------------------------------
 # DB + HELPERS
 # -----------------------------------------
@@ -70,10 +72,10 @@ def ensure_admin_session():
 
 ensure_admin_session()
 
+
 # -----------------------------------------
 # ADMIN AUTH
 # -----------------------------------------
-
 
 def admin_login_ui():
     st.markdown(
@@ -92,6 +94,7 @@ def admin_login_ui():
     st.markdown('<div class="box">', unsafe_allow_html=True)
     st.subheader("🔐 Admin Login")
 
+    # SECRET ADMIN CREDENTIALS
     admin_email_secret = st.secrets["admin"]["email"]
     admin_password_secret = st.secrets["admin"]["password"]
 
@@ -103,7 +106,7 @@ def admin_login_ui():
             st.session_state.admin_logged_in = True
             st.session_state.admin_email = email
             st.success("Admin login successful.")
-            st.experimental_rerun()
+            st.rerun()
         else:
             st.error("Invalid admin credentials.")
 
@@ -119,7 +122,6 @@ def require_admin():
 # -----------------------------------------
 # ADMIN PAGES
 # -----------------------------------------
-
 
 def page_overview():
     st.markdown('<div class="box">', unsafe_allow_html=True)
@@ -146,12 +148,9 @@ def page_overview():
         total_colonies = "N/A"
 
     col1, col2, col3 = st.columns(3)
-    with col1:
-        st.metric("Total Users", total_users)
-    with col2:
-        st.metric("History Records", total_history)
-    with col3:
-        st.metric("Colonies", total_colonies)
+    col1.metric("Total Users", total_users)
+    col2.metric("History Records", total_history)
+    col3.metric("Colonies", total_colonies)
 
     st.markdown("</div>", unsafe_allow_html=True)
 
@@ -181,9 +180,8 @@ def page_users():
     with col_create:
         st.markdown("#### ➕ Create User Manually")
         new_email = st.text_input("New User Email", key="admin_new_user_email")
-        new_pw = st.text_input(
-            "New User Password", type="password", key="admin_new_user_pw"
-        )
+        new_pw = st.text_input("New User Password", type="password", key="admin_new_user_pw")
+
         if st.button("Create User", key="btn_create_user"):
             if not new_email or not new_pw:
                 st.error("Enter email and password.")
@@ -195,16 +193,11 @@ def page_users():
                         INSERT INTO users (email, password_hash, is_verified, created_at)
                         VALUES (?, ?, ?, ?);
                         """,
-                        (
-                            new_email.lower(),
-                            pw_hash,
-                            1,
-                            datetime.utcnow().isoformat(),
-                        ),
+                        (new_email.lower(), pw_hash, 1, datetime.utcnow().isoformat()),
                     )
                     conn.commit()
                     st.success(f"User '{new_email}' created.")
-                    st.experimental_rerun()
+                    st.rerun()
                 except Exception as e:
                     st.error("Error creating user.")
                     st.text(str(e))
@@ -212,12 +205,9 @@ def page_users():
     # ----- RESET PASSWORD -----
     with col_reset:
         st.markdown("#### 🔁 Reset User Password")
-        reset_email = st.text_input(
-            "User Email to Reset", key="admin_reset_email"
-        )
-        new_pw2 = st.text_input(
-            "New Password", type="password", key="admin_reset_pw"
-        )
+        reset_email = st.text_input("User Email", key="admin_reset_email")
+        new_pw2 = st.text_input("New Password", type="password", key="admin_reset_pw")
+
         if st.button("Reset Password", key="btn_reset_pw"):
             if not reset_email or not new_pw2:
                 st.error("Enter email and new password.")
@@ -229,6 +219,7 @@ def page_users():
                         (pw_hash, reset_email.lower()),
                     )
                     conn.commit()
+
                     if c.rowcount == 0:
                         st.warning("No user found with that email.")
                     else:
@@ -240,9 +231,8 @@ def page_users():
     # ----- DELETE USER -----
     with col_delete:
         st.markdown("#### 🗑️ Delete User")
-        del_email = st.text_input(
-            "User Email to Delete", key="admin_del_email"
-        )
+        del_email = st.text_input("User Email to Delete", key="admin_del_email")
+
         if st.button("Delete User", key="btn_delete_user"):
             if not del_email:
                 st.error("Enter email to delete.")
@@ -250,11 +240,12 @@ def page_users():
                 try:
                     c.execute("DELETE FROM users WHERE email = ?;", (del_email.lower(),))
                     conn.commit()
+
                     if c.rowcount == 0:
-                        st.warning("No user found with that email.")
+                        st.warning("No user found.")
                     else:
                         st.success("User deleted.")
-                        st.experimental_rerun()
+                        st.rerun()
                 except Exception as e:
                     st.error("Error deleting user.")
                     st.text(str(e))
@@ -292,6 +283,7 @@ def page_colonies():
             ["A", "B", "C", "D", "E", "F", "G", "H"],
             key="new_colony_cat",
         )
+
         if st.button("Add Colony", key="btn_add_colony"):
             if not new_name:
                 st.error("Enter colony name.")
@@ -303,22 +295,21 @@ def page_colonies():
                     )
                     conn.commit()
                     st.success("Colony added.")
-                    st.experimental_rerun()
+                    st.rerun()
                 except Exception as e:
                     st.error("Error adding colony.")
                     st.text(str(e))
 
-    # ----- UPDATE COLONY CATEGORY -----
+    # ----- UPDATE COLONY -----
     with col_update:
         st.markdown("#### ✏️ Update Category")
-        upd_name = st.text_input(
-            "Existing Colony Name", key="upd_colony_name"
-        )
+        upd_name = st.text_input("Existing Colony Name", key="upd_colony_name")
         upd_cat = st.selectbox(
             "New Category (A–H)",
             ["A", "B", "C", "D", "E", "F", "G", "H"],
             key="upd_colony_cat",
         )
+
         if st.button("Update Category", key="btn_upd_colony"):
             if not upd_name:
                 st.error("Enter colony name.")
@@ -329,11 +320,8 @@ def page_colonies():
                         (upd_cat, upd_name.strip()),
                     )
                     conn.commit()
-                    if c.rowcount == 0:
-                        st.warning("No colony found with that name.")
-                    else:
-                        st.success("Colony category updated.")
-                        st.experimental_rerun()
+                    st.success("Colony updated.")
+                    st.rerun()
                 except Exception as e:
                     st.error("Error updating colony.")
                     st.text(str(e))
@@ -341,9 +329,8 @@ def page_colonies():
     # ----- DELETE COLONY -----
     with col_delete:
         st.markdown("#### 🗑️ Delete Colony")
-        del_name = st.text_input(
-            "Colony Name to Delete", key="del_colony_name"
-        )
+        del_name = st.text_input("Colony Name to Delete", key="del_colony_name")
+
         if st.button("Delete Colony", key="btn_del_colony"):
             if not del_name:
                 st.error("Enter colony name.")
@@ -354,11 +341,8 @@ def page_colonies():
                         (del_name.strip(),),
                     )
                     conn.commit()
-                    if c.rowcount == 0:
-                        st.warning("No colony found with that name.")
-                    else:
-                        st.success("Colony deleted.")
-                        st.experimental_rerun()
+                    st.success("Colony deleted.")
+                    st.rerun()
                 except Exception as e:
                     st.error("Error deleting colony.")
                     st.text(str(e))
@@ -372,7 +356,6 @@ def page_history():
 
     c = conn.cursor()
     try:
-        # Join with users to see email
         df_hist = pd.read_sql_query(
             """
             SELECT h.id,
@@ -396,39 +379,33 @@ def page_history():
         st.write("Last 500 history records:")
         st.dataframe(df_hist, use_container_width=True)
     except Exception as e:
-        st.error("Error loading history table.")
+        st.error("Error loading history.")
         st.text(str(e))
-        st.markdown("</div>", unsafe_allow_html=True)
         return
 
     st.write("---")
     st.markdown("#### 🗑️ Delete History Records")
 
     del_all = st.checkbox("Delete ALL history records (for all users)")
-    del_user_email = st.text_input(
-        "Or delete by user email (leave blank to skip)", key="hist_del_email"
-    )
+    del_user_email = st.text_input("Or delete by user email", key="hist_del_email")
 
     if st.button("Delete Selected History", key="btn_del_hist"):
         try:
             if del_all:
                 c.execute("DELETE FROM history;")
                 conn.commit()
-                st.success("All history records deleted.")
-                st.experimental_rerun()
+                st.success("All history deleted.")
+                st.rerun()
             elif del_user_email:
                 c.execute(
-                    """
-                    DELETE FROM history
-                    WHERE user_id IN (SELECT id FROM users WHERE email = ?);
-                    """,
+                    "DELETE FROM history WHERE user_id IN (SELECT id FROM users WHERE email = ?);",
                     (del_user_email.lower(),),
                 )
                 conn.commit()
-                st.success("History for that user deleted (if existed).")
-                st.experimental_rerun()
+                st.success("History deleted for that user.")
+                st.rerun()
             else:
-                st.warning("Select 'Delete ALL' or enter a user email.")
+                st.warning("Select delete all or enter a user email.")
         except Exception as e:
             st.error("Error deleting history.")
             st.text(str(e))
@@ -442,14 +419,13 @@ def page_otps():
 
     try:
         df_otps = pd.read_sql_query(
-            "SELECT * FROM otps ORDER BY created_at DESC LIMIT 200;", conn
+            "SELECT * FROM otps ORDER BY created_at DESC LIMIT 200;",
+            conn,
         )
         st.write("Last 200 OTP records:")
         st.dataframe(df_otps, use_container_width=True)
     except Exception as e:
-        st.warning(
-            "Could not load OTP table. It may not exist or has a different structure."
-        )
+        st.warning("OTP table may not exist.")
         st.text(str(e))
 
     st.markdown("</div>", unsafe_allow_html=True)
@@ -478,7 +454,7 @@ with header_col2:
     if st.button("Logout", key="admin_logout"):
         st.session_state.admin_logged_in = False
         st.session_state.admin_email = None
-        st.experimental_rerun()
+        st.rerun()
 
 st.write("---")
 

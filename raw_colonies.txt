@@ -1,0 +1,2335 @@
+Colony Name	Category
+Aali	H
+AB Extn Colony	F
+Abhey Garden	G
+Abul Fazal Enclave	F
+Acharya Niketan	F
+Adarsh Bhawan Coop. H.B. Society	E
+Adarsh Nagar	E
+Adarsh Nagar Bindapur Extn	G
+Adarsh Nagar Extension	F
+AdhChini	E
+Adhyapak Nagar, Nangloi	G
+Agar Nagar, Mubarkapur Road	G
+AGCR Enclave	D
+Ahata Thakur Das Sarai Rohilla	D
+Ahera Kishan	G
+Ahinsha Enclave, Mehrauli	F
+Air India Colony	F
+Ajanta Park	D
+Ajay Enclave	E
+Ajay Nagar Nangloi	G
+Ajit Nagar	F
+Ajit Vihar, Burari	G
+Ajmere Gate	E
+Akal Garh	G
+Akash Vihar Ranhola	G
+Akbar Pur Majra	H
+Alaknanda	C
+Ali Extension	G
+Aliganj	E
+Alipur Village	H
+Ali Vihar Badarpur	G
+Aman Puri, Najafgarh Road	G
+Aman Vihar (Kailash Vihar)	G
+Amar Colony	F
+Amar Colony, Lajpat Nagar	D
+Amar Colony (Mundka)	G
+Amar Colony, Rohtak Road	G
+Amar Jyoti Kunj	G
+Amar Mohalla	F
+Amar Park	D
+Amar Vihar	G
+Amba Enclave	E
+Ambarhai Village	G
+Ambedkar Basti (Seelampur)	G
+Ambedkar Camp	G
+Ambedkar Nagar (East Delhi)	G
+Ambedkar Nagar (Jahangirpuri)	G
+Ambedkar Nagar, Shahdara	F
+Amber Vihar	G
+Ambey Garden	G
+Ambica Vihar	D
+Ambika Enclave, Kakraula	G
+Ambika Vihar, Karawal Nagar	G
+Ami Chand Khand	F
+Amrit Kaur Puri	F
+Amrit Nagar	D
+Amrit Nagar, Shahdara	F
+Amrit Puri	E
+Amrit Puri Ranhola	G
+Anaj Mandi Market, Najafgarh	G
+Anand Gram	F
+Anand Kunj	D
+Anand Lok	B
+Anand Mohalla	F
+Anand Nagar	F
+Anand Niketan	A
+Anand Parbat	F
+Anand Park Extn., Shakrawati	G
+Anand Pur Dham Karala	G
+Anand Ram Park	G
+Anand Vihar	D
+Anand Vihar Colony, Pooth Khurd	G
+Anand Vihar, Gurpreet Nagar	G
+Anand Vihar (Hari Nagar)	D
+Anand Vihar, Nithari	G
+Anand Vihar (Rani Bagh)	D
+Anand Vihar Uttam Nagar	F
+Anarkali Colony	F
+Anarkali Garden	F
+Anaz Mandi	F
+Andha Mughal	E
+Andheria Mor	E
+Andrews Ganj	B
+Ankur Enclave, Karawal Nagar	G
+—	—
+Colony Name	Category
+Anna Nagar	D
+Anupam Apartment	C
+Anupam Garden & Others Colonies (Cluster)	D
+Anup Nagar Uttam Nagar	G
+Anup Vihar	F
+Arab Ki Sarai	E
+Aram Bagh	D
+Aram Nagar	E
+Aram Park	G
+Arihant Nagar	E
+Arjan Park	F
+Arjun Garh (Bijwasan)	E
+Arjun Garh (Chattarpur)	E
+Arjun Mohalla	F
+Arjun Nagar	E
+Arjun Nagar East	F
+Arjun Nagar (Sewa Nagar)	D
+Arjun Nagar West	F
+Arjun Park Colony Najafgarh	G
+Aruna Nagar	F
+Arunodya Society	F
+Arvind Enclave	G
+Arvind Nagar	F
+Arya Bhatt Enclave	C
+Arya Mohalla	G
+Arya Nagar (Anand Vihar)	G
+Arya Nagar (Pahar Ganj)	E
+Arya Pura	G
+Arya Samaj Road, Uttam Nagar	G
+Asalatpur	F
+Asalatpur Khawad	H
+Asha Park	E
+Asha Vihar, Kamal Pur, Burari	G
+Ashoka Pahari	E
+Ashoka Park Main	F
+Ashok Mohalla	G
+Ashok Mohalla, Shahdara	F
+Ashok Nagar Extn., Mandoli Road	F
+Ashok Nagar, Nand Nagri	G
+Ashok Nagar, Tihar	E
+Ashok Niketan, Anand Vihar	D
+Ashok Niketan, Naraina	D
+Ashok Park Extn.	E
+Ashok Vihar	D
+Asian Games Village Complex	A
+Asola	H
+Asola Extn	G
+Auchandi	H
+Avtar Enclave	D
+Avtar Vihar	G
+Aya Nagar Colony	G
+Aya Nagar Village	H
+Ayodhya Enclave	E
+Azad Camp	G
+Azad Market	E
+Azad Nagar (Kishan Ganj)	F
+Azad Nagar (Krishna Nagar)	F
+Azad Palace, Burari	G
+Azadpur	G
+Azadpur Commercial Complex	E
+Azim Dairy	G
+Baba Hari Dass Enclave, Najafgarh	G
+Baba Hari Dass Nagar, Tikri Border	G
+Baba Hari Dass Nagar (Tikri Khurd)	G
+Baba Mela Enclave, Badarpur	G
+Baba Nagar / Colony, Burari	G
+Babarpur (East & West)	G
+Babu Jagjiwan Ram Colony	G
+Babu Nagar	G
+Badarpur	G
+Badarpur Extn.	G
+Colony Name	Category
+Badhosra	H
+Badli Industrial Area	F
+Badli Village	G
+Badusarai	H
+Bagdola Village	G
+Baggichi Madhodas	E
+Bagh Raoji Colony	F
+Bagiabad (Badarpur)	H
+Bagichi Allauddin	E
+Bagichi Peerji	E
+Bagichi Phool Singh	F
+Bahar Garh	E
+Bahubali Enclave	D
+Bahubali Extn	D
+Bajaj Enclave	F
+Bajaj Enclave Uttam Nagar	G
+Bakarwala	H
+Bakhtawar Pur	H
+Bakhtawarpur Extn	G
+Balaji Estate	B
+Balbir Nagar	G
+Balbir Nagar (90)	G
+Balbir Nagar Extn	G
+Balbir Vihar, Kirari	G
+Baldev Park	F
+Baldev Park, Madan Pur Dabas	G
+Baldev Vihar, Karala Extn	G
+Bali Nagar	D
+Baljit Nagar	F
+Baljit Vihar	G
+Balmiki Basti	D
+Balmiki Colony	D
+Bal Mukund Khand	F
+Balswa Jahangir	G
+Balswa Jahangir Village	H
+Bal Udyan Marg	G
+Bamnoli Village	G
+Banarsi Das Estate	C
+Bandar Wali Khui	D
+Bandhu Vihar	G
+Bank Colony, Mandoli	G
+Bank Enclave, Geeta Colony	E
+Bankkauli	H
+Bankner	H
+Bankur Vihar	F
+Bapa Nagar, Dev Nagar	F
+Bapraula	H
+Bapraula Extn, Najafgarh	G
+Bapu Park	E
+Baqar Garh (Begampur)	H
+Bara Chamarwara	E
+Baradari	F
+Bara Hindu Rao	F
+Bara Mohalla, Khanpur	F
+Bara More Sarai	E
+Baraula Village	H
+Bari Wala Bagh	E
+Barwala Village	H
+Basant Enclave, Ghevra Nizampur Road	G
+Basant Gaon	E
+Basant Lok DDA Complex	A
+Basant Vihar, Ghevra	G
+Basi Darapur	G
+Basti Bheekham Singh	G
+Basti Harphool Singh	E
+Batla House	G
+Bawana Extn	G
+Bawana Village	H
+Bazid Pur Thakran	H
+Beadonpura	D
+Bees Sutri Colony	G
+Bees Sutri Harijan Basti	G
+Begampur	G
+Begam Vihar	G
+Begumpur Village	F
+Begum Pur Village	H
+Behari Pur	H
+Behlolpur Bangar	F
+Colony Name	Cat.
+Behlol Pur Colony, Maharani Bagh	F
+Bengali Colony, Burari	G
+Beri Wala Bagh	F
+Ber Sarai	E
+Bhagat Enclave	G
+Bhagat Singh Colony	G
+Bhagat Singh Enclave	F
+Bhagat Singh Park	G
+Bhagat Vihar	G
+Bhagat Vihar Karawal Nagar	G
+Bhagirathi Vihar	G
+Bhagwan Das Nagar	D
+Bhagwan Das Nagar Extn.	E
+Bhagwan Nagar	E
+Bhagwan Park, Jharoda Mazra	G
+Bhagwanpur Khera	G
+Bhagwati Garden	G
+Bhagwati Vihar	G
+Bhagya Vihar	G
+Bhai Parmanand Nagar	E
+Bhajanpura	F
+Bhalswa Dairy	G
+Bharat Garden Matiala Road	F
+Bharat Nagar	E
+Bharat Nagar, New Friends Colony	F
+Bharat Vihar Begum Pur Extn	G
+Bharat Vihar (Kakraula)	G
+Bharat Vihar Vashisht Park	G
+Bharaula	G
+Bharaula	G
+Bharthal	G
+Bharti Artist Colony	D
+Bhati	H
+Bhavishyanidhi Enclave	B
+Bhera Enclave	D
+Bheram Puri	G
+Bhikaji Cama Palace	A
+Bhim Nagri	E
+Bhogal	E
+Bhola Nagar	D
+Bhola Nath Nagar	F
+Bhola Ram Enclave Village Pochanpur	G
+Bhoomi Heen Camp	G
+Bhor Garh	H
+Bihari Colony	F
+Bihari Colony, Mustafabad	G
+Bihari Park	G
+Bihari Puri Extn.	F
+Bihari Pur, Mustafabad	G
+Bijwasan	G
+Bindapur	G
+Bindapur Village	G
+Braham Puri	F
+Brijpuri	F
+Brijpuri, Sherpur	G
+Brij Vihar	E
+Brij Vihar Pehladpur Vihar Extn	G
+British India Colony	G
+Budhan Pur	H
+Budhela Village	G
+Budh Nagar (JJ Colony)	G
+Budhpur Bijapur	H
+Budh Vihar	G
+Budh Vihar Colony, Tajpur Pahari	G
+Budh Vihar, Mandoli	F
+Bulbuli Khan	E
+Bulund Masjid (Shastri Park)	G
+Bunker Colony	G
+Burari	H
+Burari Extn. Colony	G
+Canal Colony Okhla	G
+Carriappa Marg	E
+CC Colony (Rajpura)	D
+Chaju Colony	F
+Chaman Park	F
+Chanakya Place, Uttam Nagar	F
+Chanchal Park Colony (Nangloi)	G
+Colony Name	Cat.
+Chandan Garden	G
+Chandan Hola	H
+Chandan Park	G
+Chandan Vihar	G
+Chandan Vihar, Burari	G
+Chandar Nagar	D
+Chand Bagh	F
+Chander Lok	D
+Chander Nagar Karawal Nagar	G
+Chander Vihar, Mandawali	G
+Chander Vihar, Nilothi	G
+Chand Mohalla	F
+Chand Nagar	F
+Chandni Chowk	E
+Chandni Mahal	E
+Chand Pur	H
+Chandra Lok	F
+Chandra Nagar	F
+Chandra Park, Dwarka	G
+Chandra Park, Karala	G
+Chandra Shekhar Azad Colony	F
+Chandrawal Village	G
+Chandu Nagar Karawal Nagar	G
+Chandu Park	F
+Chand Vihar	G
+Chatta Lal Miya	E
+Chhatar Pur	H
+Chhatar Pur Colony	F
+Chauhan Bangar	F
+Chaukhandi	G
+Chaukhandi Extn	F
+Chaukri Mubarkabad	G
+Chawla Park	F
+Chchuna Lal Park	D
+Chhaju Ram Colony	G
+Chhatta Bhawani Shankar	E
+Chhawla	H
+Chhippy Wada	E
+Chhota Chamarwara	E
+Chilla Janata Flats	G
+Chilla Saroda Bangar	H
+Chilla Saroda Khadar	H
+Chirag Coop. H.B. Society	C
+Chirag Enclave	B
+Chiragh Delhi Village	F
+Chitla Gate Area	E
+Chitrakoot	F
+Chitra Vihar	D
+Chittaranjan Park	C
+Chowk Nai Basti	E
+Christian Colony	E
+Christian Colony Mehrauli	G
+Chuna Mandi	E
+Citizens Enclave	E
+Civil Lines	C
+Cottage Enclave	D
+Dabar Enclave, Jaffarpur	G
+Dabri Extn	G
+Dabri Extn Village	G
+Dairy Colony	G
+Dairy Mansha Ram	G
+Dakshinpuri	G
+Dakshinpuri Extn Block 19, South Enclave	G
+Dalai Mohalla	F
+Dallupura	H
+Dalmia Vihar	D
+Daryaganj	D
+Darya Pur Kalan	H
+Daryapur Khurd	H
+Dasghera Village	H
+Dashrath Puri	G
+Dashrath Puri, Palam Road	G
+Data Ram Park near Dindarpur	G
+Colony Name	Cat.
+Daulat Pur	H
+Dawat Nagar	F
+Daya Basti	F
+Dayalpark Sagarpur	G
+Dayalpur	G
+Dayal Pur (Behari Pur Village)	H
+Dayalsar Colony	F
+Dayanand Block	F
+Dayanand Colony	D
+Dayanand Vihar	D
+Deepak Vihar	G
+Deepali	D
+Deep Colony Bawana	G
+Deep Enclave	C
+Deep Enclave, Hastsal	G
+Deep Vihar	G
+Defence Colony	B
+Defence Enclave	D
+Defence Enclave, Mahipalpur	E
+Dehroti	G
+Delhi Dayal Coop H.B. Society	C
+Delhi University South Campus & Army Area	B
+Deoli Colony	G
+Deoli Village	H
+Deorala	H
+Dera	H
+Derawal Nagar	D
+Devaram Park	F
+Devi Nagar	G
+Dev Kunj (Raj Nagar)	G
+Dev Nagar	E
+Dhaka	G
+Dhaka Johar near Dr. Mukherjee Nagar	G
+Dhanka Colony, Nangloi Jat	G
+Dhansa	H
+Dhansa Extn	G
+Dharam Kunj	E
+Dharam Pura, Chandni Chowk	E
+Dharam Pura Colony, Najafgarh	G
+Dharam Pura, Gandhi Nagar	F
+Dharam Vihar, Dwarka	G
+Dharma Colony	G
+Dhirpur Village	G
+Dhruv Enclave	G
+Dhul Siras Village	G
+Dichaon Enclave	G
+Dichaon Kalan	H
+Dilkhush Bagh	D
+Dilkhush Bagh Industrial Area	E
+Dilshad Colony	F
+Dilshad Garden (82, 83)	F
+Dindar Pur	H
+Dindarpur Extn, Najafgarh	G
+DLF Industrial Area	E
+Dori Walan	E
+Dr. Ambedkar Colony Andheri Mor	G
+Dr. Ambedkar Colony, Bijwasan	G
+Dr. Ambedkar Colony, Johripur	G
+Dr. Ambedkar Nagar, Haiderpur	G
+Dr. Ambedkar Nagar (Madangir)	G
+Dr. Bhimrao Ambedkar Colony	F
+DR Lohia Industrial Area	F
+Duggal Colony	F
+Duragapuri	F
+Durga Enclave, Jaffarpur Kalan	G
+Durga Mohalla	G
+Durga Park Colony	G
+Durga Park Colony, Dabri	G
+Durga Park, Najafgarh	G
+Durga Park, Nasirpur	G
+Durga Puri, Dabri	G
+Durgapuri Extn	G
+Durga Vihar, Deoli	G
+Durga Vihar, Dwarka	G
+Durga Vihar, Najafgarh	G
+Durga Vihar, Tughlakabad	F
+Colony Name	Cat.
+Dwarka	D
+Dwarkapuri	F
+East End Apartments	D
+East End Enclave	E
+East Krishna Nagar	F
+East Moti Bagh (Karol Bagh)	F
+East of Kailash	C
+East Old Seelampur	F
+East Patel Nagar	C
+East Uttam Nagar	G
+EIL Friends Society	G
+Eklaviya Enclave	E
+Ekta Vihar	C
+Ekta Vihar, Jaitpur	G
+Ekta Vihar, Najafgarh	G
+Electricity Colony, Punjabi Bagh	E
+Electricity Colony, Shalimar Bagh	D
+Engineers Enclave	D
+Escort Area	C
+Farash Khana	E
+Faridpuri	F
+Farsh Bazar	F
+Fateh Nagar	F
+Fateh Nagar Village	G
+Fateh Pur Beri	H
+Fatehpuri Bari Extn	E
+Fatehpur Jat	H
+Fathepuri	E
+Firoz Shah Kotla Stadium	C
+Freedom Fighter Vihar	F
+Friends Colony	A
+Friends Colony East	A
+Friends Colony Mundka	G
+Friends Colony West	A
+Friends Enclave, Nangloi	G
+Friends Enclave Part-2	F
+Friends Enclave Sultanpur Road	G
+Fyaz Ganj	E
+Gadaipur	H
+Gafoor Nagar	F
+Gagan Vihar	D
+Gagan Vihar Badarpur	G
+Gagan Vihar Extn	E
+Gamini Park, Nangli Sakrawati	G
+Gamri	F
+Gandhi Market Area	D
+Gandhi Nagar	E
+Gandhi Nagar (Mandawali)	F
+Gandhi Vihar	F
+Ganesh Nagar	E
+Ganesh Nagar II	F
+Ganesh Park	F
+Ganeshpura	F
+Ganga Ram Park	G
+Gangaram Vatika	E
+Ganga Sahai Colony, Mandoli	G
+Ganga Vihar	F
+Garhi Extn	D
+Garhi Jharia Maria	F
+Garhi Khasru	H
+Garhi Khurd	H
+Garhi Mendu	G
+Garhi Mendu Village	H
+Garhi Peeran	G
+Garhi Rindhala	H
+Gashi Pura Prem Vihar	G
+Gaurav Nagar, Anand Nagar	G
+Gauri Shankar Enclave, Mundka	G
+Gautam Colony	G
+Gautam Marg	G
+Gautam Nagar	D
+Gautampuri	G
+Gautam Puri I & II (JJ Colony)	G
+Gautampuri, IP Estate	G
+Gautampuri (Jaffrabad)	F
+Gautam Vihar, Harkesh Nagar	F
+Gazzu Katra	F
+G B Road Area	E
+Geeta Colony	F
+Geetanjali Enclave	B
+Geetanjali Enclave, Dabri	F
+Geetanjali Park	F
+Ghaffar Manzil Colony	F
+Ghalib Pur	H
+Gharo	H
+Gharoli Extn	G
+Gharoli Village	H
+Gharonda Apartment, Shrestha Vihar	D
+Gharonda Neemka Khadar	H
+Ghasipura	G
+Ghasi Pura Nangli Dairy	G
+Ghas Mandi	F
+Ghatesar	H
+Ghazipur	G
+Ghazipur	G
+Ghazipur Dairy Farm	G
+Gheora Extn. Colony	G
+Gheora Village	H
+Ghisa	F
+Ghitorni Village	H
+Ghoga	H
+Ghonda Colony	F
+Ghonda Neemka	G
+Ghonda Village	G
+Ghondli Village	G
+Gian Park	F
+Gilahari Bagh	D
+Giri Nagar	F
+Gitanjali Apt	D
+Gobind Mohalla	E
+Gobind Pura	F
+Goela Dairy	G
+Goela Khurd	H
+Goela Vihar	G
+Gokhale Market	E
+Gokulpuri	F
+Gokulpur Village	H
+Gola Kuan	G
+Golden Park	F
+Golden Park (Jagatpuri)	F
+Goman Hera	H
+Gopalnagar	F
+Gopal Nagar	F
+Gopal Nagar Extn, Khaira Road	G
+Gopal Nagar, Najafgarh	G
+Gopal Park	G
+Gopal Park Budh Vihar	G
+Gopal Park (Jagatpuri)	F
+Gopal Pur Extn	F
+Gopalpur (Haiderpur)	H
+Gopal Vihar	G
+Gorakh Park	F
+Goverdhan Behari Colony	F
+Govind Garh	F
+Govind Khand	F
+Govind Park	F
+Govindpuri	F
+Govindpuri Extn	F
+Govind Vihar	G
+Greater Kailash Enclave I & II	B
+Greater Kailash I	B
+Greater Kailash II	B
+Greater Kailash III	B
+Greater Kailash IV (NRI Colony)	B
+Green Park	B
+Green Park Extn	B
+Colony Name	Cat.
+Green Valley Enclave, Ghavera Nizampur Road	G
+GT Karnal Rd Industrial Area	E
+Gua Shala	F
+Gudahi Mohalla	F
+Gujarat Vihar	D
+Gujranwala	D
+Gujranwala (Vikas Puri)	F
+Gulab Bagh	G
+Gulabi Bagh	E
+Gulabi Park	G
+Gulmohar Park	B
+Gulshan Park, Nangloi	G
+Gupta Enclave, Ranhola Road	G
+Gupta Park Najafgarh Road	G
+Gurpreet Nagar, Uttam Nagar	F
+Guru Amardas Nagar	F
+Guru Angad Nagar East	F
+Guru Angad Nagar Extn	F
+Guru Arjun Nagar	E
+Guru Hari Kishan Nagar, Nilothi Extn	G
+Guru Harkishan Nagar	D
+Guru Har Krishan Nagar Near Matiala	G
+Gurukul Vihar	G
+Gurunanak Nagar	E
+Guru Nanak Nagar	G
+Guru Nanak Ngr	F
+Guru Nanakpura	F
+Guru Nanak Pura	F
+Guru Nanak Vihar	G
+Guru Ram Dass Nagar	F
+Guru Ravi Dass Nagar Harijan Basti	G
+Guru Teg Bahadur Enclave	F
+Guru Teg Bahadur Nagar	D
+Gyan Kunj	E
+Gyan Mohalla	F
+Haibatpur	G
+Haidarpur Village	G
+Haji Colony	F
+Hakikat Nagar	D
+Hamdard Nagar	B
+Hamidpur	H
+Hans Nagar Colony, Pindwala Kalan	G
+Hanuman Enclave	G
+Hanuman Mandir Colony	G
+Hardev Nagar, Jharoda Majra Extn	G
+Hardev Puri	G
+Hardev Vihar	G
+Hareoli	H
+Hargovind Enclave	D
+Har Govind Enclave Raj Pur Khurd	G
+Hari Das Colony	G
+Hari Enclave	G
+Harijan Basti Amar Colony Mundka	G
+Harijan Basti, Ashok Nagar	G
+Harijan Basti Bawana	G
+Harijan Basti, Bijwasan	G
+Harijan Basti Bindapur	G
+Harijan Basti, Dallupura	G
+Harijan Basti Extn, Sadatpur Karawal Nagar	G
+Harijan Basti, Jharoda Majra, Burari	G
+Harijan Basti, Jyoti Nagar West	G
+Harijan Basti, Karkardooma	G
+Harijan Basti, Kondli	G
+Harijan Basti, Lal Kuan	G
+Harijan Basti, Mandoli Extn	G
+Harijan Basti, Masudpur	G
+Harijan Basti, Mithapur	G
+Harijan Basti, New Rohtak Road	G
+Harijan Basti, Okhla	G
+Harijan Basti, Palam	G
+Harijan Basti, Patparganj	G
+Harijan Basti, Sagarpur	G
+Harijan Basti, Sultanpuri	G
+Harijan Colony	G
+Harijan Colony	G
+Harijan Colony Begum Pur	G
+Harijan Colony Neb Sarai	G
+Harijan Colony (Outram Lines)	F
+Harijan Colony, Tilak Nagar	G
+Harijan Colony, Wazir Pur	G
+Hari Krishna Nagar	G
+Hari Nagar (19,20)	F
+Hari Nagar Ashram	G
+Hari Nagar Ashram Colony	E
+Hari Nagar Extn, Jaitpur Road	G
+Hari Nagar, Najafgarh	G
+Hari Nagar Village	H
+Hari Singh Park	E
+Harit Niketan	E
+Harit Vihar, Burari	G
+Hari Vihar Colony, Kakraula Road	G
+Harkeh Nagar	F
+Harkesh Nagar	G
+Harkishan Nagar Matiala Extn	G
+Harsarup Colony Fatehpur Beri	G
+Harshdev Colony	G
+Harsh Dev Park, Budh Vihar (Rithala Road)	G
+Harsh Vihar	D
+Harsh Vihar (Dilshad Garden)	F
+Hasanpur	H
+Hasanpur Colony	G
+Hasanpur (Preet Vihar)	G
+Hastal Colony	G
+Hastsal	G
+Hastsal (Janta Flats)	G
+Hastsal Vihar	H
+Hathi Khana	E
+Hauz Khas	B
+Hauz Khas Village	E
+Hauz Qazi	E
+Hauz Rani	G
+Hauz Rani Mohalla	G
+Haveli Haider Kuli	E
+Hawaldar Muktiyar Singh Marg	G
+Hazara Park	F
+Hazari Park (Holambi)	G
+Hemant Vihar, Rajpur Khurd	G
+Hemkunt Colony	B
+Hill View Apartment, Vasant Vihar	C
+Himgiri Enclave	G
+Himgiri Enclave, Mukandpur	G
+Himmatpuri	G
+Hind Nagar	F
+Hiranki	H
+Hira Park, Najafgarh	G
+Holambi Kalan	H
+Holambi Khurd	H
+HUDCO Place	A
+Hudson Line (Kingsway)	D
+Humayanpur	E
+IAAI Colony	E
+Ibrahim Pur	H
+Ibrahimpur Extn	G
+Ideal Society, Dabri	G
+IINAA Housing Complex	E
+IIT Area	B
+INA Colony	B
+Inderaj Colony, Bawana	G
+Inder Enclave	D
+Inder Enclave (Kanjhawala)	G
+Inder Enclave Phase 1	G
+Inder Enclave Phase-II	G
+Inderlok A Block	F
+Inderlok B Block	F
+Inder Prastha, Amrit Vihar, Burari	G
+Inderpuri	E
+Indian Air Lines Colony	E
+Indira Camp (Jhilmil Colony)	F
+Indira Jheel	G
+Indira Kalyan Vihar	G
+Indira Nagar	G
+Indira Nagar Bhatti Mines	G
+Indira Park Palam	G
+Indira Vihar	D
+Indira Vihar (Gokalpur)	F
+Indira Vikas Colony	F
+Indra Colony (Narela)	G
+Indra Enclave Neb Sarai	F
+Indra Park	G
+Indra Park Extn	G
+Indra Park (Preet Vihar)	F
+Indraprastha Colony, Nathupura	G
+Indraprastha Extension	D
+Indraprasth Estate	A
+Institutional Area, Pankha Road	C
+Iradat Nagar (Naya Bans)	H
+Isapur (Jafrabad)	H
+Ishwar Colony	D
+Ishwar Colony, Bawana	G
+Ishwar Colony (Nangli Dairy)	G
+Ishwar Nagar	B
+Islam Colony Mehrauli	F
+Jafarpur Alias Hiran Kudna	H
+Jafar Pur Kalan	H
+Jaffarpur Extn	G
+Jaffrabad	F
+Jagadamba Vihar Sagarpur	G
+Jagat Pur (Burari)	H
+Jagatpur Extn	G
+Jagatpuri	F
+Jagat Puri A Block	F
+Jagatpuri (Bhagwanpur)	F
+Jagat Puri, Preet Vihar	F
+Jagat Ram Park, M,N,L (Laxmi Nagar)	F
+Jagdamba, Badarpur	G
+Jagjeet Nagar	G
+Jagjeevan Nagar	G
+Jagjeevan Nagar	G
+Jagjivan Ram Housing Society	E
+Jagriti Enclave	D
+Jahangirpuri	G
+Jahangirpuri Industrial Area	F
+Jai Bharat Enclave	G
+Jai Dev Park	D
+Jai Dev Park (DDA Flats)	E
+Jain Colony	G
+Jain Colony (Uttam Nagar)	F
+Jain Colony (Vir Nagar)	E
+Jain Mohalla	F
+Jain Nagar	G
+Jain Park, Pankha Road	G
+Jain Park (Uttam Nagar)	F
+Jainpur	H
+Jai Prakash Mohalla	G
+Jai Prakash Nagar	F
+Jaipur Estate	B
+Jait Pur	H
+Jait Pur Extn	G
+Jai Vihar	G
+Jai Vihar Colony, Najafgarh	G
+Jai Vihar, Nangloi Road	G
+Jal Vihar	D
+Jama Masjid	E
+Jamia Nagar	F
+Janak Park	F
+Janakpuri	D
+Jangpura A	D
+Jangpura B	F
+Jangpura Extension	D
+Janki Puri, Jeewan Park (Uttam Nagar)	G
+Janta Colony	G
+Janta Colony JJ Cluster	G
+Janta Colony (Paschim Puri)	E
+Janta Colony, Raghubir Nagar	F
+Janta Colony, Shahdara	F
+Janta Flats Paschim Vihar	D
+Janta Vihar Colony, Najafgarh	G
+Jasola	G
+Jasola Vihar	D
+Jatav Basti, Mehrauli	G
+Jat Khor	H
+Jaunti	H
+Jawahar Camp	G
+Jawaharlal Nehru Camp	G
+Jawahar Nagar	D
+Jawahar Park	F
+Jawalaheri	G
+Jawala Nagar	F
+Jawalapuri	D
+Jawalapuri Extension	G
+Jeevan Niketan	D
+Jeevan Park	F
+Jeevan Park (Uttam Nagar)	G
+Colony Name	Cat.
+Jeevan Sarita	F
+Jhagu Mal Colony	F
+Jhandewalan Area	C
+Jhandewalan Extn	C
+Jhangola	H
+Jharoda Dairy	G
+Jharoda Extn Burari	G
+Jharoda Kalan	H
+Jharoda Majra Burari	H
+Jhatikra	H
+Jheel Khurenja	F
+Jheemar Pura Village	H
+Jhilmil Colony	G
+Jhilmil Industrial Area	F
+Jhilmil Tahirpur	G
+Jhuggi Jhonpri Colony	G
+Jhuljhuli	H
+Jia Sarai	E
+Jitar Nagar	F
+Jiwan Nagar	E
+Jiwan Pur Alias Joshipura	H
+JJ Colony Hastsal	G
+JJ Colony (Khanpur)	G
+JJ Colony Nangloi	G
+JJ Colony Wazirpur	G
+JJ Indra Camp Saidullajaib	G
+JNU Campus Area	B
+JNU Old Campus	B
+Joga Bai Extn	F
+Joga Bai Village	G
+Jogiwana	E
+Joharipur	F
+Jonapur	H
+Joorbagh	F
+Joshi Colony	F
+Jyoti Colony	F
+Jyoti Nagar East	F
+Jyoti Nagar West Extn	F
+Kabir Basti	G
+Kabir Bastu	F
+Kabir Nagar	F
+Kabul Nagar	F
+Kaccha Bagh Area	E
+Kachi Colony, Vijay Park	G
+Kadi Pur	H
+Kadi Pur Vihar	G
+Kailash Colony	B
+Kailash Enclave	D
+Kailash Extn Nasirpur	G
+Kailash Hill	C
+Kailash Kunj	C
+Kailash Nagar	F
+Kailash Park	E
+Kailash Puri (Nasirpur)	G
+Kailash Puri (Palam Colony)	G
+Kailash Ram Park Uttam Nagar	G
+Kailash Vihar	G
+Kair	H
+Kaithwara	F
+Kaithwara Village	F
+Kakraola	G
+Kakrola Extn (Village)	G
+Kalander	F
+Kalan Mahal	E
+Kali Basti	G
+Kalindi Colony	A
+Kalkaji	C
+Kalkaji Extn	D
+Kalu Sarai	E
+Kalyan Puri	G
+Kalyanvas	F
+Kalyan Vihar	D
+Kamal Kunj Najafgarh	G
+Kamal Park Palam Colony	G
+Kamal Pur	H
+Kamal Pur (Kamal Vihar)	G
+Kamal Vihar Madhu Vihar	G
+Kamaruddin Nagar	G
+Kamla Market	D
+Kamla Market Roshanpura	G
+Kamla Nagar	D
+Kanchipur	F
+Kanchipur Village	G
+Kangan Heri	H
+Kangra Niketan	D
+Kangra Vihar Mohan Garden Extn	G
+Kanhiya Nagar	F
+Kanjhawala	H
+Kankar Khera	G
+Kankar Khera Village	H
+Kanti Nagar	F
+Kanti Nagar Extn	F
+Kanwar Singh Nagar Nangloi	G
+Kapas Hara Extn	F
+Kapas Hera Village	H
+Kapil Vihar	D
+Kapoor Basti	F
+Karala	H
+Karala Majri	G
+Karampura	F
+Karampura Industrial Area	E
+Karan Vihar (Nangloi)	G
+Karawal Nagar	H
+Karawal Nagar	F
+Kardampuri	G
+Karkar Duma Colony	D
+Karkar Duma Village	G
+Karol Bagh	D
+Kartar Nagar	F
+Kaseru Walan	E
+Kashmere Gate	E
+Kashmiri Colony	G
+Kasturba Nagar	F
+Kasturba Nagar (Sewa Nagar)	D
+Kasturba Niketan	E
+Kasum Pur Village	H
+Katewra	H
+Kathputli Colony JJ Cluster	G
+Katra Asharfi	E
+Katra Chhotey Lal	E
+Katra Dhobl	E
+Katra Ghel	E
+Katra Husain Bax	E
+Katra Imli	E
+Katra Mashru	E
+Katra Nawab	E
+Katra Neel	E
+Katra Pedan	E
+Katra Shahenshah	E
+Katwaria Sarai	E
+Katyani Vihar	G
+Kaushik Enclave, Nathupura	G
+Kavita Colony, Nangloi	F
+Kedar Bagh (Rohtak Road)	E
+Keshav Nagar (Ibrahimpur)	G
+Keshav Puram (DDA Flats)	F
+Keshopur	G
+Keshopur	G
+Kewal Park	G
+Kewal Park Extension	E
+Kewal Park Pankha Road	F
+Khajan Basti	F
+Khajan Basti Extn	F
+Khajoori Colony	F
+Khajoori Khas	H
+Khajuri Village Extn	G
+Khampur	H
+Kham Pur Raya	G
+Khanpur Colony	G
+Khan Pur Dhani	H
+Khanpur Extn	G
+Khanpur Village	G
+Kharara Village	G
+Kharera	E
+Khari Baoli	E
+Kharkhari Jatmal	H
+Kharkhari Nahar	H
+Kharkhari Road	H
+Khayala	G
+Khera	H
+Khera Dabar	H
+Khera Kalan	H
+Khera Khurd	H
+Kheria Mohalla	E
+Khichripur Village	G
+Khirki Ext	E
+Khirki Village	F
+Khizrabad	F
+Khub Ram Park, Nangloi	G
+Khubsoorat Vihar, Mubarakpur Road	G
+Khureji Khas	G
+Khush Dil	E
+Khusi Ram Park	G
+Khyala Phase I/II/III	G
+Khyber Pass	E
+Kilokari Extn	E
+Kilokri	E
+Kilokri Ring Road	B
+Kiran Garden	G
+Kiran Vihar	D
+Kirari Extn Part 1–4	G
+Kirari Suleman Nagar	H
+Kirari Suleman Nagar Colony	G
+Kirari Village	H
+Kirpal Bagh	D
+Kirti Nagar	D
+Kirti Nagar Industrial Area	E
+Kishan Ganj	E
+Kishangarh Colony	E
+Kishangarh Village	G
+Kohat Enclave	D
+Kondali Extn	G
+Kondli Village	H
+Kotla	G
+Kotla Mahingiran	H
+Kotla Mubarakpur	E
+Kotla Vihar Tilangpur	G
+Kotla Village	G
+Krishan Kunj	F
+Krishan Vihar Colony Bawana	G
+Krishan Vihar Najafgarh	G
+Krishi Kunj	D
+Krishi Niketan	D
+Krishi Vihar	B
+Krishna Enclave Najafgarh	G
+Krishna Estate	G
+Krishna Nagar	E
+Krishna Nagar (Karol Bagh)	D
+Krishna Nagar (Singhu)	G
+Krishna Nagar (South Delhi)	E
+Krishnan Society	G
+Krishna Park	D
+Krishna Park Extn	D
+Krishna Park Khanpur Deovli	G
+Krishna Park Tughlakabad	G
+Krishnapuri (22)	D
+Krishna Puri (87)	G
+Krishna Puri Mandavli	G
+Krishna Vihar	G
+Krishna Vihar	G
+Kucha Alam	E
+Kucha Bulaki Begam	E
+Kucha Ghasiram	E
+Kucha Lal Man	E
+Kucha Mahajani	E
+Kucha Natwa	E
+Kucha Pandit	E
+Kucha Pati Ram	E
+Kucha Sohan Lal	E
+Kucha Tiku Sah	E
+Kuldeep Nagar	G
+Kumar Enclave, Dindarpur	G
+Kuncha Rahman	E
+Kundan Nagar	F
+Kunwar Singh Park Ranhola	G
+Kureni	H
+Kushak	G
+Kushak No.1 & 2 Burari	G
+Lachaman Park	F
+Ladha Sarai	G
+Lado Sarai	F
+Lado Sarai Extn	F
+1091 Ladpur — H
+1092 Lajpat Nagar-I — C
+1093 Lajpat Nagar-II — C
+1094 Lajpat Nagar-III — C
+1095 Lajpat Nagar-IV — C
+1096 Lajwanti Garden — E
+1097 Lakhi Ram Park — G
+1098 Lakh Pat Colony Meetha Pur Extn — G
+1099 Lakshmi Nagar — F
+1100 Lakshmi Park — G
+1101 Lal Bagh — E
+1102 Lal Gumbad & JJC — G
+1103 Lalita Park — F
+1104 Lalkuan Bazar — E
+1105 Lal Kuan, M B Road — G
+1106 Lal Quarters — G
+1107 Lampur — H
+1108 Lawrence Rd Indl Area — E
+1109 Laxman Puri, Roshanpura — G
+1110 Laxmi Garden, Chotey Lal Park — E
+1111 Laxmi Garden, Najafgarh — G
+1112 Laxmi Garden, Roshanpura — G
+1113 Laxmi Kunj — E
+1114 Laxmi Nagar (Nangloi) — G
+1115 Laxmi Park, Ranhola — G
+1116 Laxmi Vihar — G
+1117 Laxmi Vihar, Najafgarh — G
+1118 Laxmi Vihar (Nangloi) — G
+1119 Laxmi Vihar (Uttam Nagar) — G
+1120 Lekhu Nagar — F
+1121 Leprosy Colony — F
+1122 Libaspur Village — H
+1123 Lodhi Colony — B
+1124 Lodi Road Institutional Area — A
+1125 Loha Mandi — E
+1126 Loharheri — G
+1127 Lokesh Park Najafgarh — G
+1128 Lok Sewak Coop H.B. Society — C
+1129 Lok Vihar — D
+1130 Madangir Camp — G
+1131 Madangir Village — F
+1132 Madan Park — E
+1133 Madanpur Dabas — G
+1134 Madanpur Dabas Village — H
+1135 Madan Pur Extn — G
+1136 Madanpuri — G
+1137 Madanpur Khader — G
+1138 Madanpur Khader Extn (JJ Colony) — G
+1139 Madarasi Colony Mori Gate — E
+1140 Madhuban — D
+1141 Madhuban Enclave — E
+1142 Madhu Vihar — D
+1143 Madhu Vihar, Uttam Nagar — F
+1144 Madipur — G
+1145 Madipur Colony — F
+1146 Maha Lakshmi Enclave — F
+1147 Maharam Mohalla — F
+1148 Maharana Pratap Enclave — D
+1149 Maharani Bagh — A
+1150 Maharani Enclave (Uttam Nagar) — G
+1151 Maharishi Enclave, Sagarpur — G
+1152 Mahavir Block — F
+1153 Mahavir Colony (Narela) — G
+1154 Mahavir Enclave Part I — G
+1155 Mahavir Enclave Part II — F
+1156 Mahavir Enclave (Uttam Nagar) — F
+1157 Mahavir Nagar — E
+1158 Mahavir Vihar — F
+1159 Mahavir Vihar Kanjhawala — G
+1160 Mahavir Vihar Palam — G
+1161 Mahendra Enclave — D
+1162 Mahendra Park — G
+1163 Mahesh Vihar, Uttam Nagar — G
+1164 Mahila Colony, Shahdara — F
+1165 Mahindra Park — F
+1166 Mahindra Park (Janakpuri) — G
+1167 Mahindra Park, Uttam Nagar — F
+1168 Mahipalpur — F
+1169 Mahipalpur Extn — F
+1170 Maidan Garhi — H
+1171 Maidan Garhi Extn. — F
+1172 Maj Bhupender Singh Nagar — E
+1173 Majlis Park — E
+1174 Majnu Ka Tila — F
+1175 Major Bhola Ram Enclave — F
+1176 Makki Sarai — F
+1177 Maksudabad Extn. — G
+1178 Malikpur Chhawani — G
+1179 Malikpur Kohi Alias Rangpuri — H
+1180 Malik Pur Zer Najafgarh — H
+1181 Malka Ganj — D
+1182 Mall Apartment, Mall Road — D
+1183 Mall Road Kishan Garh — E
+1184 Malviya Nagar — C
+1185 Mamoor Pur — H
+1186 Manak Pura — F
+1187 Manak Vihar — D
+1188 Manak Vihar Extn. — F
+1189 Manak Vihar Extn. Tihar — E
+1190 Manak Vihar (Subhash Nagar) — F
+1191 Manas Kunj — G
+1192 Mandavli Fazalpur — G
+1193 Mandawali Unchepar — F
+1194 Mandli — H
+1195 Mandli — H
+1196 Mandli Pahari, Arjungarh — G
+1197 Mandoli Chowk Colony — G
+1198 Mandoli Kachi — G
+1199 Mangalam Place — C
+1200 Mangalam Vihar — G
+
+1201 Mange Ram Park Budh Vihar — G
+1202 Mange Ram Park Pooth Kalan — G
+1203 Manglapuri — G
+1204 Mangla Puri, Palam — G
+1205 Mangolpuri — G
+1206 Mangolpuri Industrial Area — E
+1207 Mangolpur Kalan — G
+1208 Mangolpur Khurd — G
+1209 Manhari Junk (Meethapur) — G
+1210 Maniram Park — G
+1211 Manohar Nagar — D
+1212 Manohar Park — E
+1213 Mansa Ram Park — G
+1214 Mansa Ram Park, Najafgarh — G
+1215 Mansa Ram Park, Uttam Nagar — G
+1216 Mansarowar Garden — D
+1217 Mansarowar Park — F
+1218 Man Singh Nagar — G
+1219 Mantola Mohalla — E
+1220 Masihgarh — E
+1221 Masjid Moth — E
+1222 Masjid Moth DDA Flats — C
+1223 Master Block — F
+1224 Master Mohalla — G
+1225 Master Mohalla, Tughlakabad — G
+1226 Masudabad — G
+1227 Masudpur Village — F
+1228 Mata Rameshwari Nehru Nagar — E
+1229 Mata Sundari Railway Colony — D
+1230 Matiala Extn, Uttam Nagar — G
+1231 Matiala Extn, Uttam Nagar — F
+1232 Matia Mahal — E
+1233 Matiyala — G
+1234 Maujpur Colony — F
+1235 Maujpur Village — G
+1236 Maurice Nagar — B
+1237 Maurya Enclave — D
+1238 Mausam Vihar — D
+1239 Maya Enclave — D
+1240 Mayapuri Industrial Area — E
+1241 Mayfair Garden — A
+1242 Mayur Vihar — D
+1243 Meena Bazar — E
+1244 Meera Bagh — D
+1245 Meera Enclave, Ranhola — G
+1246 Meer Dard Basti, Baroon Road — G
+1247 Meer Vihar, Mubarakpur — G
+1248 Meet Nagar, Shahdara — F
+1249 Meet Nagar, Wazirabad Road — G
+1250 Mehram Nagar — E
+
+1251 Mehrauli — F
+1252 Meitri Enclave (Narela) — G
+1253 Milan Enclave, Daulatpur — G
+1254 Milan Vihar — G
+1255 Milap Nagar — G
+1256 Minakshi Garden — E
+1257 Mini Subhash Camp — G
+1258 Minto Road Flats (CPWD, PWD, MCD) — D
+1259 Mir Pur Turk — H
+1260 Mirza Galib Bara Khamba — F
+1261 Mirzapur — G
+1262 Mirzapur Village — G
+1263 Mitha Pur — H
+1264 Mitha Pur Extension — G
+1265 Mithla Vihar Nangloi — G
+1266 Mitra Mandal Mohalla (Narela) — G
+1267 Mitraon — H
+1268 Mitraon Extn. Najafgarh — G
+1269 Miyanwali Nagar — D
+1270 Mochi Bagh Arakpur — E
+1271 Mochi Gaon — E
+1272 Model Basti — E
+1273 Model Hsg Society — D
+1274 Model Town — D
+1275 Mohalla Ram Nagar — F
+1276 Mohalla Sarai — F
+1277 Mohalla Subhash — G
+1278 Mohan Baba Nagar Tajpur Extn — G
+1279 Mohan Block, Pankha Road — G
+1280 Mohan Cooperative Industrial Estate — D
+1281 Mohan Garden (Uttam Nagar) — G
+1282 Mohan Nagar, Pankha Road — G
+1283 Mohan Park — G
+1284 Mohan Park — F
+1285 Mohan Park, Navin Shahdara — G
+1286 Mohd. Pur Majra — H
+1287 Mohd. Pur Ramjan Pur — H
+1288 Mohinder Singh Park, Najafgarh — G
+1289 Mohindra Park, Pankha Road — G
+1290 Mohit Nagar — G
+1291 Mojiwala Bagh — E
+1292 Molarband Extn — G
+1293 Molar Band, Nasirpur — G
+1294 Molarband Village — H
+1295 Mool Chand Colony — E
+1296 Mori Gate — E
+1297 Motia Bagh — E
+1298 Motia Khan — E
+1299 Motibagh Industrial Area — F
+1300 Moti Bagh Industrial Area (Karol Bagh) — F
+
+1301 Moti Nagar — E
+1302 Moti Park — G
+1303 Mubarakpur Dabas — H
+1304 Muhammadpur — E
+1305 Mujeeb Bagh — F
+1306 Mukand Pur — H
+1307 Mukand Pur (Burari) — G
+1308 Mukand Vihar — G
+1309 Mukharjee Nagar — D
+1310 Mukherjee Park Extn — F
+1311 Mukhimpura — G
+1312 Mukhmel Pur — H
+1313 Mukhram Garden — F
+1314 Mukhram Park Extn — G
+1315 Mukti Ashram Colony Ibrahimpur — G
+1316 Multani Dhanda — E
+1317 Multani Mohalla — F
+1318 Mundhala Kalan — H
+1319 Mundhala Khurd — H
+1320 Mundka Extn — G
+1321 Mundka Village — H
+1322 Munga Nagar — G
+1323 Mungesh Pur — H
+1324 Munirka DDA Flats — C
+1325 Munirka Enclave — C
+1326 Munirka Vihar — C
+1327 Munirka Village — E
+1328 Munshiram Dairy Colony — G
+1329 Muradabad Pahari — H
+1330 Mustafabad — F
+1331 Mustafabad Village — H
+1332 Nabi Karim — E
+1333 Nagla Machi — F
+1334 Nagli Vihar — G
+1335 Naharpur Village — G
+1336 Nai Basti — G
+1337 Nai Basti — E
+1338 Nai Basti Anand Parbat — F
+1339 Nai Basti Bankner — G
+1340 Nai Basti, Mehrauli — G
+1341 Nai Wala — E
+1342 Nai Walan — E
+1343 Najafgarh — G
+1344 Najafgarh Extn — G
+1345 Najafgarh Park, Nangloi — G
+1346 Najafgarh Road Industrial Area — E
+1347 Nala Par Basti, Sagarpur — G
+1348 Namdhari Colony — G
+1349 Namdhari Colony — D
+1350 Nanak Enclave — F
+1351 Nanak Heri — H
+1352 Nanakpura — D
+1353 Nanak Pura (Mayapuri) — D
+1354 Nanakpura Shakarpur — F
+1355 Nanda Block — G
+1356 Nanda Enclave Najafgarh — G
+1357 Nand Nagri — F
+1358 Nand Ram Park (Uttam Nagar) — G
+1359 Nand Ram Park, Uttam Nagar — G
+1360 Nand Vihar Kakrola Road — G
+1361 Nangal Dairy — G
+1362 Nangal Dewat — H
+1363 Nangal Raya — G
+1364 Nangal Raya Extn — G
+1365 Nangal Raya Shopping Centre — D
+1366 Nangal Thakran — H
+1367 Nangla — G
+1368 Nanglee Jalib Village — G
+1369 Nangli — F
+1370 Nangli Poona — H
+1371 Nangli Poona Extn — G
+1372 Nangli Razapur — G
+1373 Nangli Razapur — H
+1374 Nangli Sakrawati — G
+1375 Nangli Vihar, Najafgarh Road — G
+1376 Nangloi Enclave (B Block) — G
+1377 Nangloi Extn — G
+1378 Nangloi Jat — H
+1379 Nangloi JJ Colony No. 2 — G
+1380 Nangloi Sayad — G
+1381 Nanhey Park (Uttam Nagar) — F
+1382 Nanhey Ram Park — G
+1383 Naraina Industrial Area Phase I & II — E
+1384 Naraina Vihar — D
+1385 Naraina Vihar (Mundka) — G
+1386 Naraina Village — G
+1387 Narang Colony — D
+1388 Narang Colony (Tri Nagar) — F
+1389 Narayan Nagar — F
+1390 Narela Mandi — G
+1391 Narela Mandi Extn — G
+1392 Naresh Enclave, Barwala — G
+1393 Naresh Park — G
+1394 Naresh Park, Nangloi — G
+1395 Narsingh Garden, Khayala — G
+1396 Narsingh Park — G
+1397 Nathu Colony — F
+1398 Nathu Colony — G
+1399 Nathu Pura — G
+1400 Nathu Vaid Colony — G
+
+1401 National Park — C
+1402 Nauroji Nagar — B
+1403 Naveen Kunj Society — G
+1404 Naveen Palace, Najafgarh — G
+1405 Naveen Vihar — G
+1406 Navin Shahdra — F
+1407 Navinta — D
+1408 Navjeewan Camp — G
+1409 Navjivan Vihar — B
+1410 Nav Raj Block, Najafgarh — G
+1411 Nav Sansad Vihar — D
+1412 Navyug Block — G
+1413 Nawab Ganj — E
+1414 Nawada — G
+1415 Nawada Extn — G
+1416 Nawada House Complex, Najafgarh Road — G
+1417 Naya Bazar — E
+1418 Naya Bazar, Najafgarh — G
+1419 Nayagaon — G
+1420 Naya Mohalla — E
+1421 Neb Sarai — H
+1422 Neb Sarai Extn — F
+1423 Neb Valley — F
+1424 Neelwal — H
+1425 Neemri Village — G
+1426 Neeti Bagh — B
+1427 Nehru Enclave — B
+1428 Nehru Nagar (Anand Parbat) — F
+1429 Nehru Nagar (Bhogal) — E
+1430 Nehru Place — A
+1431 Nehru Vihar — G
+1432 Nehru Vihar (Timarpur) — F
+1433 Netaji Subhash Place — C
+1434 Netaji Subhash Vihar Tikri Kalan Rohtak Road — G
+1435 New Anarkali Colony — F
+1436 New Ashok Nagar — G
+1437 New Chauhanpur — G
+1438 New Friends Colony — A
+1439 New Ganesh Park, Shastri Park — F
+1440 New Gobind Pura — F
+1441 New Gobind Pura Extn — F
+1442 New Gopal Nagar, Najafgarh — G
+1443 New Gupta Colony — E
+1444 New Guru Harkishan Nagar, Nilothi — G
+1445 New Hira Park, Najafgarh — G
+1446 New Jaffrabad — F
+1447 New Jagatpuri Extn — F
+1448 New Kathwara — G
+1449 New Kondli — G
+1450 New Krishna Nagar — F
+
+1451 New Krishna Nagar Extn — F
+1452 New Lahore Colony — G
+1453 New Lahore Extn, Shastri Nagar — F
+1454 New Lahore Mohalla, Shastri Nagar — F
+1455 New Lahore Munshi Colony, Shastri Nagar — F
+1456 New Layalpur Colony — F
+1457 New Layalpur Extn (Jagat Puri) — F
+1458 New Modern Shahdara — F
+1459 New Moti Nagar — F
+1460 New Multan Nagar — D
+1461 New Patel Nagar — D
+1462 New Police Line — C
+1463 New Rajdhani Enclave — D
+1464 New Rajinder Nagar — D
+1465 New Ranjit Nagar — E
+1466 New Rashid Market — F
+1467 New Roshan Pura — G
+1468 New Sabzi Mandi — E
+1469 New Sainik Vihar, Najafgarh Road — G
+1470 New Sainik Vihar, Vikas Nagar — G
+1471 New Sarup Nagar — G
+1472 New Usmanpur — F
+1473 New Uttam Nagar — G
+1474 New Vishwas Nagar — F
+1475 New Yadav Enclave — G
+1476 Nigam Colony — G
+1477 Nihal Vihar — G
+1478 Nilothi Extn — G
+1479 Nilothi Village — H
+1480 Nimri Colony — E
+1481 Niranjan Park, Najafgarh Road — G
+1482 Nirankari Colony — F
+1483 Nirmal Puri Colony (Old Double Storey) — D
+1484 Nirman Vihar — D
+1485 Nishant Kunj — D
+1486 Nishat Park, Kakrola — G
+1487 Nishkam Society — G
+1488 Nithari — H
+1489 Niti Vihar (Kirari Mubarak Pur Road) — G
+1490 Nizam Pur Rasid Pur — H
+1491 Nizamuddin East — B
+1492 Nizamuddin West — C
+1493 Noor Illahi Colony — G
+1494 Noor Nagar & Extn — F
+1495 North Avenue Neb Sarai — F
+1496 North Chajjupur — G
+1497 Northern Camp — F
+1498 North Extn. Area, Pusa Road — C
+1499 Okhla — G
+1500 Okhla Industrial Estate — D
+1501 Okhla Industrial Area — D
+1502 Okhla Vihar — F
+1503 Old Anar Kali — F
+1504 Oldanpur — F
+1505 Old Brijpuri — F
+1506 Old Chandrawal — F
+1507 Old Daryaganj Area (Pataudi House) — E
+1508 Old Gobind Pura — F
+1509 Old Gupta Colony — D
+1510 Old Indra Puri Karkardooma — F
+1511 Old Rajinder Nagar — D
+1512 Old Slum Quarters Madipur — G
+1513 Om Nagar Badarpur — G
+1514 Om Vihar Colony — G
+1515 Om Vihar Colony (Alipur) — G
+1516 Om Vihar (Uttam Nagar) — F
+1517 Onkar Nagar — F
+1518 Outram Lines — D
+1519 Padam Nagar — F
+1520 Padmini Enclave (Hauz Khas) — B
+1521 Pahar Ganj — E
+1522 Pahari Dhiraj — E
+1523 Pai Walan — E
+1524 Palam Apartments, Bijwasan — D
+1525 Palam Colony — G
+1526 Palam Enclave — E
+1527 Palam Part II — G
+1528 Palam Vihar — G
+1529 Palam Village — G
+1530 Palla — H
+1531 Pamposh Enclave — B
+1532 Panchsheel Enclave — B
+1533 Panchsheel Extn — C
+1534 Panchsheel Garden, Shahdara — G
+1535 Panchsheel Park (Seelampur) — F
+1536 Panchsheel Vihar — C
+1537 Panchshila — A
+1538 Panchshila Park — A
+1539 Panchshil Enclave (Uttam Nagar) — G
+1540 Panchwati — E
+
+1541 Panchwati (Bijwasan) — D
+1542 Pandav Nagar — F
+1543 Pandit Park — F
+1544 Pandu Nagar — E
+1545 Pansoli Village — H
+1546 Pant Nagar — D
+1547 Paprawat — H
+1548 Param Puri — G
+1549 Parda Bagh — F
+1550 Parhlad Vihar — G
+1551 Parhlad Vihar Colony — G
+1552 Parjapat Colony — G
+1553 Park End — D
+1554 Parmanand Nagar — D
+1555 Parshan Enclave, Bapraula — G
+1556 Partap Garden Bindapur — G
+1557 Partap Nagar, Saboli — G
+1558 Partapura — F
+1559 Partap Vihar Part 1 to 3 — G
+1560 Parvana Vihar — E
+1561 Parvitiya Anchal Burari — G
+1562 Parwana Road Societies, Pitampura — D
+1563 Paryatan Vihar — D
+1564 Paryavaran Complex — F
+1565 Paschimabad — F
+1566 Paschim Enclave — D
+1567 Paschimpuri — D
+1568 Paschim Vihar — D
+1569 Paschim Vihar Extn — E
+1570 Patel Garden, Najafgarh Road — G
+1571 Patel Vihar — G
+1572 Patparganj Industrial Area — E
+1573 Paul Colony Uttari Rithala — G
+1574 Pawan Dham, Bakhtawarpur — G
+1575 Pehladpur Bangar Village — H
+1576 Pervesh Nagar — G
+1577 Phool Bagh — F
+1578 Pilanji — E
+1579 Pindwala Kalan — H
+1580 Pindwala Khurd — H
+1581 Pipalthala Sarai — G
+1582 Pira Garhi Relief Camp — G
+1583 Pitampura — D
+1584 Pitampura Indl Area — D
+1585 Pitampura Village — G
+1586 Pochanpur — G
+1587 Pochan Pur Extn — G
+1588 Pooth Kalan Village — H
+1589 Pooth Khurd — H
+1590 Poshangipur — D
+1591 Poshangipur Village — G
+1592 Pragati Maidan — A
+1593 Pragati Vihar — B
+1594 Prahlad Vihar — G
+1595 Prakash Mohalla — D
+1596 Prakash Vihar — G
+1597 Pram Nagar Lal Kuan M.B. Road — F
+1598 Prasad Nagar (LIG, MIG Flats) — D
+1599 Prashant Vihar — D
+1600 Pratap Enclave, Uttam Nagar — G
+1601 Pratap Khand — G
+1602 Pratap Nagar — F
+1603 Pratap Nagar (69) — F
+1604 Pratap Nagar (Andha Mughal) — F
+1605 Prayog Vihar — F
+1606 Preet Vihar — D
+1607 Prema Kunj — B
+1608 Prem Colony, Bawana Road — G
+1609 Prem Enclave (Narela) — G
+1610 Prem Nagar — G
+1611 Prem Nagar — E
+1612 Prem Nagar — F
+1613 Prem Nagar (18) — E
+1614 Prem Nagar (East Patel Nagar) — D
+1615 Prem Nagar (Kanjhawala) — G
+1616 Prem Nagar, Najafgarh — G
+1617 Prem Nagar (Nangloi) — G
+1618 Prem Nagar (Sewa Nagar) — D
+1619 Prem Vihar — G
+1620 Press Area — A
+1621 Press Colony — E
+1622 Press Enclave — C
+1623 Press Enclave, Hastsal — G
+1624 Press Enclave (Minto Road) — D
+1625 Prince Colony, Jait Pur Extn — G
+1626 Prithvi Park — F
+1627 Priyadarshani — D
+1628 Priya Darshani Vihar — D
+1629 Priyadarshini Vihar — E
+1630 Priya Enclave — D
+1631 Pul Pehlad Extn — G
+1632 Pul Pehladpur Village — H
+1633 Pundrik Vihar — D
+1634 Punjab Garden — E
+1635 Punjabi Bagh Apartment (208 DDA SFS Flats) — D
+1636 Punjabi Bagh Colony (Narela) — G
+1637 Punjabi Bagh East — C
+1638 Punjabi Bagh Extn — C
+1639 Punjabi Bagh West — C
+1640 Punjabi Basti — F
+1641 Punjabi Basti (Nangloi) — G
+1642 Punjabi Basti (Sabzi Mandi) — F
+1643 Punjabi Colony Alipur — G
+1644 Punjabi Colony Bawana — G
+1645 Punjab Khor — H
+1646 Purannagar — G
+1647 Puran Nagar, Madhu Vihar — G
+1648 Pur (Pitampura) — H
+1649 Pushkar Enclave — D
+1650 Pushpa Bhawan — A
+
+1651 Pushpanjali — D
+1652 Pushpanjali Enclave, Pitampura — D
+1653 Pushp Vihar — D
+1654 Qazi Pur — H
+1655 Qullakpur — H
+1656 Qutab Garh — H
+1657 Qutab Institutional Area — B
+1658 Qutab Pur Village — H
+1659 Qutab Vihar, Najafgarh — G
+1660 Radha Vihar, Nand Nagri — G
+1661 Radhey Puri — F
+1662 Radhey Puri Extn 1 & 2 — F
+1663 Radhey Shyam Park — F
+1664 Raghubarpura — F
+1665 Raghubir Nagar (Tagore Garden Extn) — F
+1666 Raghu Enclave, Dabri — G
+1667 Raghu Nagar, Pankha Road — G
+1668 Raghupur — H
+1669 Raghuwar Vihar — G
+1670 Rahat Ganj — E
+1671 Railway Colony / Qtrs Nangloi Extn — G
+1672 Raja Enclave — D
+1673 Raja Garden — D
+1674 Raja Garden (WZ Area) — E
+1675 Rajan Enclave — G
+1676 Rajan Vihar — G
+1677 Raja Park — F
+1678 Raja Puri Colony (Uttam Nagar) — F
+1679 Rajasthan Udyog Nagar — E
+1680 Raja Vihar Colony Siraspur — G
+1681 Raja Vihar (Near BIE) — G
+1682 Rajbir Colony — G
+1683 Rajdhani Enclave — D
+1684 Rajdhani Park, Nangloi — G
+1685 Rajeev Camp (Okhla) — G
+1686 Rajeev Colony Narela — G
+1687 Rajeev Nagar (Bhalswa Dairy) — G
+1688 Rajeev Nagar, Kakrola — G
+1689 Rajeev Nagar Kanjhawala Road — G
+1690 Rajeev Park — G
+1691 Rajendra Park — G
+1692 Rajendra Place — A
+1693 Raj Garh — F
+1694 Rajgarh Colony — F
+1695 Rajindra Park, Pusa Road — C
+1696 Rajindra Park, Shanker Road — C
+1697 Rajiv Colony (Jhilmil Colony) — F
+1698 Rajiv Gandhi Nagar, Mustafabad — G
+1699 Rajiv Nagar Begampur — G
+1700 Rajiv Nagar, Karawal Nagar — G
+1701 Rajiv Nagar, Mandoli — G
+1702 Rajiv Pur, Samaypur — G
+1703 Raj Nagar — D
+1704 Raj Nagar I — G
+1705 Raj Nagar Khera Kalan — G
+1706 Raj Nagar, Palam Colony — G
+1707 Rajnagri, Uttam Nagar — G
+1708 Rajokri Harijan Basti — G
+1709 Rajokri Village — H
+1710 Rajouri Garden — D
+
+1711 Rajouri Garden (WZ Area) — E
+1712 Raj Park — G
+1713 Rajpura & Gurmandi Duplex Qtrs — E
+1714 Rajpur Chhawni — G
+1715 Rajpur Colony — F
+1716 Rajpur Khurd — H
+1717 Raju Camp — G
+1718 Raju Park, Deoli — G
+1719 Raju Park, Kakrola — G
+1720 Rakab Ganj — E
+1721 Rama Block — F
+1722 Rama Colony — F
+1723 Rama Enclave — G
+1724 Rama Garden — G
+1725 Ramakrishan Puram — B
+1726 Rama Market, Munirka — F
+1727 Rama Park, Siras Pur — G
+1728 Rama Park (Uttam Nagar) — G
+1729 Rama Vihar, Mohd. Pur Majri — G
+1730 Ramchandran Park — E
+1731 Ram Datt Enclave — G
+1732 Ramesh Enclave, Kirari — G
+1733 Ramesh Nagar — D
+1734 Ramesh Nagar Bawana — G
+1735 Ramesh Nagar (Laxmi Nagar) — F
+1736 Ramesh Park — F
+1737 Rameshwar Nagar — F
+1738 Ramgarh — F
+1739 Ramgarh (Rajouri Garden) — E
+1740 Ram Nagar — E
+1741 Ram Nagar Colony, Nangloi — G
+1742 Ram Nagar Extn — E
+1743 Ram Nagar (Jagatpuri) — F
+1744 Ram Nagar, Kakrola — G
+1745 Ram Nagar near Tilak Nagar — F
+1746 Ram Nagar (Rohtas Nagar) — G
+1747 Ram Pura — F
+1748 Ram Pura — F
+1749 Ram Pura Extn Colonies — F
+1750 Rampura Industrial Area — F
+1751 Rampuri — C
+1752 Ram Vihar — D
+1753 Rana Colony, Mehrauli — F
+1754 Ranaji Enclave (Uttam Nagar) — G
+1755 Rana Park, Siraspur — G
+1756 Rana Pratap Bagh — D
+1757 Rangpuri — E
+1758 Ranhola Shaffipur — H
+1759 Ranhola Vihar — G
+1760 Rani Bagh — D
+1761 Rani Enclave — G
+1762 Rani Garden — F
+1763 Rani Khera — G
+1764 Rani Khera Village — H
+1765 Ranjit Nagar — E
+1766 Ranjit Park — F
+1767 Ranjit Vihar, Nilothi — G
+1768 Raota — H
+1769 Rao Vihar, Nangloi — G
+1770 Rashid Market — F
+1771 Rasulpur — G
+1772 Ratanakar Vihar — G
+1773 Ratan Bagh — G
+1774 Ratan Bagh (Veena Enclave) — G
+1775 Ratan Nagar — E
+1776 Ratan Park — G
+1777 Ratan Vihar — F
+1778 Rattan Bagh — F
+1779 Rattan Park — G
+1780 Rattan Vihar, Kirari — G
+
+1781 Ravi Das Colony, Narela — G
+1782 Ravi Nagar — F
+1783 Ravi Nagar Extn — G
+1784 Raza Pur Kalan — H
+1785 Raza Pur Khurd — H
+1786 RBI Colony — D
+1787 RC Khichripur — G
+1788 RC Khyala — G
+1789 RC Madipur — G
+1790 Rehgarpura — E
+1791 Reserve Bank Colony — D
+1792 Rewala Khanpur — H
+1793 Ring Road Bungalows — A
+1794 Risala Garden (Uttam Nagar) — G
+1795 Rishab Vihar — D
+1796 Rishal Vihar, Chhawla Extn — G
+1797 Rishib Nagar, Mohan Park — G
+1798 Rishi Kadam Pur Harijan Colony — G
+1799 Rishi Nagar — E
+1800 Rithala Village — G
+1801 Rohini — E
+1802 Rohini Institutional Area — C
+1803 Rohini Kunj, Bawana — G
+1804 Rohit Kunj — D
+1805 Rohtash Nagar — F
+1806 Rohtas Nagar, Janakpuri — G
+1807 Roopali Enclave, Karala — G
+1808 Roop Nagar — D
+1809 Roop Nagar (Keshav Puram) — E
+1810 Roshan Garden (Najafgarh) — G
+1811 Roshan Mandi, Najafgarh — G
+1812 Roshan Pura — E
+1813 Roshanpura Allies, Dichaon Khurd — H
+1814 Roshan Pura Colony Najafgarh — G
+1815 Roshanpura, Najafgarh — G
+1816 Roshan Vihar, Kakrola Road — G
+1817 Roshan Vihar, Najafgarh — G
+1818 Rouse Avenue, Institutional Area — B
+1819 RPS Colony — F
+1820 Ruchi Vihar — E
+1821 Sabhepur — H
+1822 Sabhepur Colony — G
+1823 Sabhey Pur Gujran — H
+1824 Saboli — G
+1825 Saboli Colony — F
+1826 Saboli Extension — F
+1827 Sabzi Mandi — E
+1828 Sadar Bazar — E
+1829 Sadatpur — G
+1830 Sadbora Khurd — G
+1831 Sadhana Enclave — B
+1832 Sadh Nagar Part I & II, Palam — G
+1833 Sadiq Nagar — D
+1834 Safdarjung Development Area — B
+1835 Safdarjung Enclave — B
+1836 Sagar Pur Main & West — G
+1837 Sahibpura — F
+1838 Sahipur Village — G
+1839 Sahupura — G
+1840 Sahyog Vihar — F
+1841 Sai Enclave, Roshanpura — G
+1842 Saini Enclave — D
+1843 Sainik Enclave (Uttam Nagar) — G
+1844 Sainik Farm — D
+1845 Sainik Nagar, Uttam Nagar — G
+1846 Sainik Nagar (Uttam Nagar) — G
+1847 Sainik Vihar — D
+1848 Sainik Vihar, Mohan Garden — G
+1849 Saini Vihar — G
+1850 Saiyad Ul Ajaib Extn — F
+1851 Saiyad Ul Ajaib Village — H
+1852 Sakdarpur — F
+1853 Saket — C
+1854 Saket Block — G
+1855 Salah Pur Majra — H
+1856 Salah Pur Village — H
+1857 Salatpur Khadak — F
+1858 Salempur Majra Burari Colony — G
+1859 Sama Garden — D
+1860 Samaspur Extn — F
+1861 Samay Vihar — E
+1862 Sambhalka Village — H
+1863 Samrat Enclave — D
+1864 Samrat Enclave, Najafgarh — G
+1865 Sandesh Vihar — D
+1866 Sangam Park — D
+1867 Sangam Vihar — G
+1868 Sangam Vihar at M.B. Road — G
+1869 Sangarpur — H
+1870 Sanjay Amar Colony — F
+1871 Sanjay Colony Bhatti Mines — G
+1872 Sanjay Colony Narela — G
+1873 Sanjay Colony (Okhla) — G
+1874 Sanjay Enclave — G
+1875 Sanjay Enclave (Uttam Nagar) — G
+1876 Sanjay Gandhi Transport Nagar — E
+1877 Sanjay Mohalla — F
+1878 Sanjay Nagar Bawana Extn — G
+1879 Sanjay Nagar (Jahangirpuri) — G
+1880 Sanjay Nagar Near Gulabi Bagh — E
+1881 Sanoth — H
+1882 Sanskrit Nagar — E
+1883 Santgarh — F
+1884 Sant Nagar — D
+1885 Sant Nagar (Burari) — G
+1886 Sant Nagar Extn — F
+1887 Sant Nagar (Nizamuddin) — G
+1888 Sant Nagar (North) — F
+1889 Sant Nagar (Tagore Garden) — F
+1890 Santosh Park (Uttam Nagar) — G
+1891 Sanwal Nagar — E
+1892 Saoda — H
+1893 Sarai Basti — G
+1894 Sarai Jhuliana — G
+1895 Sarai Kale Khan — F
+1896 Sarai Kale Khan — G
+1897 Sarai Rohilla — E
+1898 Sarangpur — H
+1899 Saraswati Garden — D
+1900 Saraswati Kunj — B
+1901 Saraswati Kunj & Apartments — F
+1902 Saraswati Park — E
+1903 Saraswati Vihar — D
+1904 Sardar Nagar (near CC Colony) — D
+1905 Sarita Vihar — D
+1906 Sarojani Naidu Park (Shastri Nagar) — F
+1907 Sarojani Park (Shastri Nagar) — F
+1908 Saroop Nagar (Libaspur) — G
+1909 Saroop Vihar (Burari) — G
+1910 Sarup Nagar (University) — E
+1911 Sarup Vihar (Kadipur) — G
+1912 Sarvapriya Vihar — B
+1913 Sarvodaya Enclave — B
+1914 Satbari Colony — F
+1915 Satberi Village — H
+1916 Sat Nagar — E
+1917 Satnam Park — F
+1918 Satyam Vihar — E
+1919 Satyanand Nagar (Mehrauli) — G
+1920 Satya Niketan — D
+1921 Satyawati Nagar — F
+1922 Savai Phoos Colony — E
+1923 Savita Vihar — D
+1924 Savitri Nagar — D
+1925 Sawan Park — F
+1926 SBM Colony — E
+1927 Seelampur — G
+1928 Seelampur Village — G
+1929 Seemapuri — F
+1930 Sewak Park (Nangloi) — G
+1931 Sewak Park (Uttam Nagar) — G
+1932 Sewa Kutir — F
+1933 Sewa Nagar — D
+1934 Shadipur Market — E
+1935 Shadipur (Shadi Khampur) — G
+1936 Shahabad Mohammadpur — G
+1937 Shahdara — G
+1938 Shahbad Dairy — G
+1939 Shahbad Dairy — H
+1940 Shahbad Daulat Pur — H
+1941 Shaheed Bhagat Singh Colony (Seelampur) — G
+1942 Shaheed Bhagat Singh Nagar, Karala — G
+1943 Shaheed Camp — F
+1944 Shah Ganj — E
+1945 Shahibabad Estate (Daulatpur) — G
+1946 Shahi Idgah Colony — E
+1947 Shahi Masjid Colony — F
+1948 Shahjadabagh — F
+1949 Shah Nagar (Mangla Puri) — G
+1950 Shahpura — F
+
+1951 Shah Pur Garhi — H
+1952 Shahpur Jat — E
+1953 Shahur Pur — H
+1954 Shahzadabagh Extn — F
+1955 Shakarpur — F
+1956 Shakarpur Khas — G
+1957 Shakti Nagar — D
+1958 Shakti Nagar Extn — D
+1959 Shakti Vihar — D
+1960 Shakti Vihar (Molarband Extn) — G
+1961 Shakurbasti — E
+1962 Shakurpur Colony — E
+1963 Shakurpur Village — G
+1964 Shalimar Bagh — D
+1965 Shalimar Extn — C
+1966 Shalimar Park — F
+1967 Shalimar Village — G
+1968 Shamas Pur — H
+1969 Shamaspur Village — G
+1970 Shamazpur Khalsa — H
+1971 Shambu Nagar — G
+1972 Sham Nagar (Jagatpuri) — F
+1973 Sham Nagar (Khyala) — G
+1974 Shampur (Khampur) — H
+1975 Shankar Garden — D
+1976 Shankar Nagar — F
+1977 Shankar Nagar Extn — F
+1978 Shankarpura — G
+1979 Shankar Vihar — D
+1980 Shanti Mohalla — F
+1981 Shanti Nagar — F
+1982 Shanti Niketan — A
+1983 Shanti Park — G
+1984 Shanti Vihar — D
+1985 Shanti Vihar (Najafgarh) — G
+1986 Sharda Niketan — D
+1987 Shardapuri — D
+1988 Sharma Enclave (Mubarakpur Extn) — G
+1989 Sharman Vihar — F
+1990 Shashi Garden — F
+1991 Shastri Nagar — F
+1992 Shastri Park — F
+1993 Shastri Park (Beadon Pura) — E
+1994 Shastri Park (Nathu Pura) — G
+1995 Shastri Park (Seelampur) — F
+1996 Sheesh Mahal — E
+1997 Sheikh Sarai Phase I — C
+1998 Sheikh Sarai Phase II — D
+1999 Sheikh Sarai Village — F
+2000 Sherpur — F
+
+2001 Sherpur Deri — H
+2002 Sherpur Village — H
+2003 Sher Singh Enclave (Karala) — G
+2004 Shikar Pur — H
+2005 Shikshak Sadan — D
+2006 Shish Mahal Enclave — G
+2007 Shiva Enclave — D
+2008 Shiva Enclave (Hiranki) — G
+2009 Shiva Enclave (Paschim Vihar) — D
+2010 Shiva Enclave (Uttam Nagar) — G
+2011 Shivaji Enclave — E
+2012 Shivaji Nagar — F
+2013 Shivaji Nagar (Narela) — G
+2014 Shivaji Park — F
+2015 Shivaji Park (Madipur) — E
+2016 Shiva Khand — G
+2017 Shivalik Colony — C
+2018 Shivani Enclave (Kakrola) — G
+2019 Shivani Vihar (Kakrola) — G
+2020 Shiv Colony, Budh Vihar — G
+2021 Shiv Enclave (Dichaon Road) — G
+2022 Shiv Mandir Mohalla (Badli) — G
+2023 Shiv Nagar — F
+2024 Shiv Nagar (Uttam Nagar) — F
+2025 Shiv Park (Deoli) — F
+2026 Shiv Puri Extn — F
+2027 Shiv Puri (Jagatpuri) — F
+2028 Shivpuri Mithapur Extn — G
+2029 Shiv Puri (Samaypur) — G
+2030 Shiv Puri (Sagarpur) — G
+2031 Shiv Ram Park (Nangloi) — G
+2032 Shiv Ram Park (Uttam Nagar) — G
+2033 Shiv Vihar — G
+2034 Shiv Vihar (Karala) — G
+2035 Shiv Vihar (Karawal Nagar) — G
+2036 Shiv Vihar (Uttam Nagar) — G
+2037 Shora Kothi — E
+2038 Shree Enclave — G
+2039 Shree Nagar — E
+2040 Shree Nagar Extn — E
+2041 Shreshtha Vihar — D
+2042 Shri Ram Colony — F
+2043 Shri Ram Nagar — F
+2044 Shri Sai Nagar (Mithapur) — G
+2045 Shubhadra Colony — F
+2046 Shubham Enclave — D
+2047 Shubh Enclave — D
+2048 Shubh Enclave (Paschim Vihar) — D
+2049 Shukla Enclave (Ghevra Road) — H
+2050 Shyama Prashad Mukherjee Park — F
+
+2051 Shyam Enclave — D
+2052 Shyam Nagar — D
+2053 Shyam Park (Nawada) — G
+2054 Shyam Vihar — G
+2055 Siddhipura — F
+2056 Sidhartha Extension — E
+2057 Sidhartha Nagar — E
+2058 Sidharth Enclave — D
+2059 Sidhora Kalan — G
+2060 Silver Park — F
+2061 Singalpur — F
+2062 Singar Pur — F
+2063 Singhola — H
+2064 Singhu — H
+2065 Siras Pur Village — H
+2066 Siri Fort Institutional Area — A
+2067 Sita Puri (Pankha Road) — G
+2068 Sitaram Bazar — E
+2069 Sita Saran Colony — E
+2070 SKD Basti — F
+2071 Soami Nagar — B
+2072 Somesh Vihar Colony — F
+2073 Som Vihar — C
+2074 Sonia Gandhi JJ Camps — F
+2075 Sonia Vihar — G
+2076 Sorabh Vihar (Hari Nagar Extn) — E
+2077 South Anarkali — F
+2078 South Extension (NDSE) — B
+2079 South Moti Bagh — B
+2080 South Patel Nagar — D
+2081 Sri Chand Park (Matiala) — G
+2082 Sri Fort Banglows — A
+2083 Sri Nagar Garden — F
+2084 Srinivaspuri JJ Colony — G
+2085 Sriniwaspuri — D
+2086 Sriniwaspuri Extn — E
+2087 State Bank Colony (GT Karnal Road) — D
+2088 State Bank Nagar — D
+2089 Subhas Camp — F
+2090 Subhash Khand — F
+2091 Subhash Mohalla — F
+2092 Subhash Nagar — F
+2093 Subhash Park — F
+2094 Subhash Park Extn — G
+2095 Subhash Park (Rohtas Nagar) — F
+2096 Subhash Vihar — F
+2097 Subodh Park (Uttam Nagar) — G
+2098 Sudarshan Park — E
+2099 Sudarshan Park (Mithapur Extn) — G
+2100 Sudarshan Park (Uttam Nagar) — F
+2101 Suiwalan Area — E
+2102 Sukhdev Park — D
+2103 Sukhdev Vihar — B
+2104 Sukhdev Vihar (DDA Flats) — C
+2105 Sukh Ram Park — F
+2106 Sukh Vihar — D
+2107 Sukhvir Nagar (Karala) — G
+2108 Sultanpur — H
+2109 Sultan Pur Dabas — H
+2110 Sultanpuri — G
+2111 Sultanpur Majra — G
+2112 Sumit Vihar — F
+2113 Sundar Block — F
+2114 Sunder Nagar — A
+2115 Sunder Nagri — F
+2116 Sunder Park — F
+2117 Sunder Park (Shastri Nagar) — F
+2118 Sunder Vihar — D
+2119 Sunlight Colony–I — E
+2120 Sunlight Colony–II — E
+
+2121 Supreme Enclave & Societies — D
+2122 Suraja Camp — F
+2123 Surajmal Vihar — D
+2124 Suraj Nagar — F
+2125 Suraj Park (Sameypur) — F
+2126 Surakhpur — H
+2127 Suraksha Enclave — D
+2128 Suraksha Vihar (Hastsal) — G
+2129 Surat Vihar — G
+2130 Surera — H
+2131 Surya Enclave — D
+2132 Surya Niketan — D
+2133 Sushant Vihar (Ibrahimpur) — G
+2134 Sushila Garden (Mandoli) — G
+2135 Swami Ramtirth Nagar — E
+2136 Swami Shraddhanand Park — G
+2137 Swarn Park (Mundka) — G
+2138 Swasthya Vihar — D
+2139 Swatantra Nagar (Narela) — G
+2140 Swayamsidha Colony — E
+2141 Sweepers Colony — G
+2142 Syndicate Enclave — G
+2143 Tagore Garden (21) — D
+2144 Tagore Park — D
+2145 Tagore Park (21) — D
+2146 Tagore Park Extn — D
+2147 Taimoor Nagar — G
+2148 Taimoor Nagar (Pillanji) — G
+2149 Taimoor Nagar Village — G
+2150 Taj Enclave — F
+2151 Tajpur Kalan — H
+2152 Taj Pur Khurd — H
+2153 Tajpur Pahari Village — H
+2154 Tajpur Village — H
+2155 Talimabad — F
+2156 Tara Nagar (Kakrola) — G
+2157 Tarun Enclave — D
+2158 Tatarpur — G
+2159 Tatesar — H
+2160 Teachers Colony — G
+2161 Teachers Quarters — F
+2162 Tekhand — G
+2163 Telephone Colony — F
+2164 Telibara — F
+2165 Teliwara — E
+2166 Temple Colony (Shamypur) — G
+2167 Thakkar Bapa Nagar — E
+2168 Than Singh Nagar — F
+2169 Tigi Pur — H
+2170 Tigri Colony — G
+2171 Tigri Village — H
+2172 Tihar — G
+2173 Tikri Kalan — H
+2174 Tikri Khurd — H
+2175 Tilak Khand — F
+2176 Tilak Nagar — E
+2177 Tilak Vihar — F
+2178 Tilang Pur Kotla — H
+2179 Timarpur — D
+2180 Tirthanker Nagar — G
+2181 Tis Hazari — D
+2182 Todapur Village — H
+2183 Tokriwalan — E
+2184 Tomar Colony (Kamal Pur Majra) — G
+2185 Toot Sarai (Malviya Nagar) — F
+2186 Transit Camp — G
+2187 Transport Nagar (Tri Nagar) — F
+2188 Trilokpuri — G
+2189 Tri Nagar — F
+2190 Tughlakabad — G
+2191 Tughlakabad Extn — F
+2192 Tughlaqabad Institutional Area — C
+2193 Tukhmir Pur Extn — G
+2194 Tukhmir Pur Village — H
+2195 Tulsi Nagar — F
+2196 Tulsiram Bagichi (Nangal Raya) — G
+2197 Tunda Nagar — G
+2198 Tyagi Colony — G
+2199 Tyagi Vihar (Near Ghevra) — G
+2200 Uday Niketan — D
+2201 Uday Park — B
+2202 Uday Vihar — G
+2203 Uday Vihar Colony (Kanjhawala) — G
+2204 Udyog Nagar — E
+2205 Uggar Sain Park — G
+2206 Ujjawal — G
+2207 Ujwa — H
+2208 University Area (North Campus) — C
+2209 Upadhyay Block — F
+2210 Usha Enclave & Societies — D
+2211 Usha Park — F
+2212 Usmanpur Village — G
+2213 Utsav Vihar (Karala) — G
+2214 Uttam Nagar (17) — F
+2215 Uttam Vihar — G
+2216 Uttaranchal Colony — F
+2217 Uttranchal Enclave (Kamal Pur) — G
+2218 Vaishali — D
+2219 Vaishali Colony (Dabri) — G
+2220 Vakil Pura — E
+2221 Vandana Vihar (Nangloi) — G
+2222 Vani Vihar — G
+2223 Vardhman Nagar — E
+2224 Vardhwan Vihar (Najafgarh) — G
+2225 Vardman Enclave (Karala) — G
+2226 Varun Enclave — F
+2227 Varun Kunj — G
+2228 Varun Niketan — D
+2229 Vasant Enclave — B
+2230 Vasant Kunj — C
+2231 Vasant Vihar — A
+2232 Vashisht Park — G
+2233 Vasudha Enclave — D
+2234 Vasundhara Enclave — D
+2235 Vayusenabad — C
+2236 Veena Enclave — G
+2237 Veer Savarkar Block — F
+2238 Vidhya Vihar — D
+2239 Vidya Vihar (Hastsal) — F
+2240 Vigyan Lok — D
+2241 Vigyan Vihar — D
+2242 Vijay Colony (Bawana) — G
+2243 Vijay Enclave — G
+2244 Vijay Laxmi Park (Nilothi) — G
+2245 Vijay Mandal Enclave — C
+2246 Vijay Mohalla — G
+2247 Vijay Nagar — D
+2248 Vijay Park — F
+2249 Vijay Vihar — G
+2250 Vijay Vihar (Hastsal) — G
+2251 Vijay Vihar (Uttam Nagar) — G
+2252 Vijeta Vihar — G
+2253 Vikas Enclave (Hastsal) — G
+2254 Vikash Sadan — D
+2255 Vikas Nagar (Hastsal) — G
+2256 Vikas Nagar (Kakraula) — G
+2257 Vikaspuri — D
+2258 Vikas Vihar (Kakraula) — G
+2259 Vikas Vihar (Uttam Nagar) — G
+2260 Vikram Nagar — F
+2261 Vikram Vihar — C
+2262 Vikrant Enclave — F
+2263 Vinoba Puri — D
+2264 Vinod Nagar — F
+2265 Virendra Nagar — F
+2266 Virsingh Colony — G
+2267 Vishakha Enclave — D
+2268 Vishal Ban Housing Society — G
+2269 Vishal Enclave — D
+2270 Vishkarma Nagar — F
+2271 Vishnu Garden — G
+2272 Vishnu Garden — F
+2273 Vishnu Park — G
+2274 Vishwakarma Park — F
+2275 Vishwas Nagar — F
+2276 Vishwas Park — F
+2277 Vishwa Vihar — E
+2278 Viswakarma Colony — G
+2279 Vivekanand Puri — F
+2280 Vivek Vihar Phase II — D
+2281 Vivek Vihar Phase I — D
+2282 Wazirabad — G
+2283 Wazirabad — F
+2284 Wazir Nagar Colony — D
+2285 Wazir Nagar Village — E
+2286 Wazirpur — F
+2287 Wazirpur Industrial Area — E
+2288 Welcome Colony (Seelampur) — F
+2289 West Enclave & Apartments — D
+2290 West End — A
+2291 Western Extn. Karol Bagh — D
+2292 West Gorakh Park — F
+2293 West Kanti Nagar — F
+2294 West Patel Nagar — D
+2295 Yadav Enclave — G
+2296 Yadav Nagar — G
+2297 Yadav Nagar (Samaypur) — G
+2298 Yadav Park (Nangloi Rohtak Road) — G
+2299 Yakutpur — H
+2300 Yamuna Bazar — E
+2301 Yamuna Vihar — E
+2302 Yograj Colony — G
+2303 Yojana Vihar — D
+2304 Yusuf Sarai — E
+2305 Yusuf Sarai DDA Flats — C
+2306 Zakhira — F
+2307 Zakir Bagh — D
+2308 Zakir Nagar (Okhla) — F
+2309 Zamrudpur — E
+2310 Zimidinpur — H
+2311 Zindpur — H
+

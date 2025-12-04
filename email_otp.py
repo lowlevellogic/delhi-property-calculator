@@ -1,40 +1,35 @@
 import smtplib
 from email.mime.text import MIMEText
+import random
+import string
 import streamlit as st
 
 
-def send_otp_email(to_email: str, otp_code: str):
-    """
-    Sends OTP email using Gmail SMTP.
-    Configure in .streamlit/secrets.toml as:
+def generate_otp():
+    return ''.join(random.choices(string.digits, k=6))
 
-    [email]
-    USER = "aggarwal.dlc@gmail.com"
-    APP_PASSWORD = "your-16-digit-app-password"
-    """
-    from_email = st.secrets["email"]["USER"]
-    app_password = st.secrets["email"]["APP_PASSWORD"]
 
-    subject = "Your OTP for Aggarwal Documents & Legal Consultants"
-    body = f"""
-Namaste,
+def send_otp_email(receiver_email: str):
 
-Your OTP for creating an account on Aggarwal Documents & Legal Consultants (Delhi Property Calculator) is:
+    try:
+        sender_email = st.secrets["email_auth"]["email"]
+        sender_password = st.secrets["email_auth"]["password"]
 
-    {otp_code}
+        otp = generate_otp()
 
-This OTP is valid for about 10 minutes.
-If you did not request this, you can ignore this email.
+        msg = MIMEText(
+            f"Your OTP for verification is:\n\n{otp}\n\nRegards,\nAggarwal Documents & Legal Consultants"
+        )
+        msg["Subject"] = "Your OTP Verification Code"
+        msg["From"] = sender_email
+        msg["To"] = receiver_email
 
-Regards,
-Aggarwal Documents & Legal Consultants
-"""
+        with smtplib.SMTP("smtp.gmail.com", 587) as server:
+            server.starttls()
+            server.login(sender_email, sender_password)
+            server.send_message(msg)
 
-    msg = MIMEText(body)
-    msg["Subject"] = subject
-    msg["From"] = from_email
-    msg["To"] = to_email
+        return otp, None
 
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-        server.login(from_email, app_password)
-        server.send_message(msg)
+    except Exception as error:
+        return None, str(error)

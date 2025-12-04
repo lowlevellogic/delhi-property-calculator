@@ -419,13 +419,16 @@ def page_otps():
 
     try:
         df_otps = pd.read_sql_query(
-            "SELECT * FROM otps ORDER BY created_at DESC LIMIT 200;",
-            conn,
+            "SELECT id, email, otp_code, expires_at, used FROM otps ORDER BY id DESC LIMIT 200;",
+            conn
         )
         st.write("Last 200 OTP records:")
         st.dataframe(df_otps, use_container_width=True)
+
     except Exception as e:
-        st.warning("OTP table may not exist.")
+        st.warning(
+            "Could not load OTP table. It may not exist or has a different structure."
+        )
         st.text(str(e))
 
     st.markdown("</div>", unsafe_allow_html=True)
@@ -476,3 +479,4 @@ with tab_history:
 
 with tab_otps:
     page_otps()
+

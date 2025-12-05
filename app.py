@@ -527,20 +527,14 @@ def render_auth_modal():
     st.markdown('<div class="auth-wrapper"><div class="auth-card">', unsafe_allow_html=True)
 
     # -------------- CENTERED LOGO (WORKS PERFECTLY) --------------
-    st.markdown(
-        """
-        <div style="
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-top: 10px;
-            margin-bottom: 15px;
-        ">
-            <img src="logo.jpg" width="120">
-        </div>
-        """,
-        unsafe_allow_html=True
+    # -------- Centered Logo (GitHub Hosted Image) --------
+st.markdown(
+    """
+    <div style='width:100%;display:flex;justify-content:center;margin-bottom:15px;'>
+        <img src="https://raw.githubusercontent.com/lowlevellogic/delhi-property-calculator/main/logo.jpg" width="120">
+    </div>
+    """,
+    unsafe_allow_html=True
     )
 
     # EXTRA CSS TO FORCE CENTER (Backup)
@@ -1078,6 +1072,7 @@ st.markdown(
     f'{date.today().year} Rishav Singh · Aggarwal Documents & Legal Consultants</div>',
     unsafe_allow_html=True,
     )
+
 
 
 

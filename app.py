@@ -534,7 +534,7 @@ def render_auth_modal():
             justify-content: center;
             margin-bottom: 10px;
         ">
-            <img src="logo.jpg" width="120">
+            st.image("logo.jpg", width="120">
         </div>
     """, unsafe_allow_html=True)
 
@@ -1059,6 +1059,7 @@ st.markdown(
     f'{date.today().year} Rishav Singh · Aggarwal Documents & Legal Consultants</div>',
     unsafe_allow_html=True,
     )
+
 
 
 

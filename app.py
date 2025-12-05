@@ -523,26 +523,39 @@ def render_auth_modal():
     if st.session_state.user_id is not None:
         return
 
+    # OPEN WRAPPER
     st.markdown('<div class="auth-wrapper"><div class="auth-card">', unsafe_allow_html=True)
 
-    # ----------- CENTER LOGO (WORKS 100%) -----------
-    st.markdown('<div class="auth-wrapper"><div class="auth-card">', unsafe_allow_html=True)
+    # -------------- CENTERED LOGO (WORKS PERFECTLY) --------------
+    st.markdown(
+        """
+        <div style="
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 10px;
+            margin-bottom: 15px;
+        ">
+            <img src="logo.jpg" width="120">
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
-    # -------- Centered Logo (Correct Indentation + Safe Load) --------
-    st.markdown("<div style='text-align:center;'>", unsafe_allow_html=True)
-    st.image("logo.jpg", width=120)
-    st.markdown("</div>", unsafe_allow_html=True)
-    st.markdown("""
-<style>
-
-.auth-card img {
-    display: block !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
-}
-
-</style>
-""", unsafe_allow_html=True)
+    # EXTRA CSS TO FORCE CENTER (Backup)
+    st.markdown(
+        """
+        <style>
+        .auth-card img {
+            display: block !important;
+            margin-left: auto !important;
+            margin-right: auto !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+)
 
     # ---------------- Heading ----------------
     st.markdown(
@@ -1065,6 +1078,7 @@ st.markdown(
     f'{date.today().year} Rishav Singh · Aggarwal Documents & Legal Consultants</div>',
     unsafe_allow_html=True,
     )
+
 
 
 

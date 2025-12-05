@@ -19,7 +19,7 @@ st.set_page_config(
 # GLOBAL CSS – PREMIUM GLASS LOGIN + DARK ADMIN UI
 # -------------------------------------------------
 
-st.markdown("""
+st.markdown(""" 
 <style>
 
 .stApp {
@@ -91,7 +91,6 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-
 # -------------------------------------------------
 # SUPABASE CLIENT
 # -------------------------------------------------
@@ -126,7 +125,6 @@ def load_table(name: str, select="*"):
 def render_login():
     st.markdown("<br><br><br>", unsafe_allow_html=True)
 
-    # Center container
     with st.container():
         st.image("logo.jpg", width=130)
 
@@ -261,12 +259,105 @@ with tab_users:
                 st.rerun()
 
 # -------------------------------------------------
-# COLONIES TAB
+# COLONY MASTER TAB (FULL CONTROL)
 # -------------------------------------------------
 
 with tab_colonies:
+    st.subheader("🏙 Colony Master (Add / Edit / Delete)")
+    st.caption("Manage colonies & update land / construction rates.")
+
     df = load_table("colonies")
-    st.dataframe(df, use_container_width=True)
+
+    # ------------------------
+    # SEARCH
+    # ------------------------
+    st.write("### 🔍 Search Colonies")
+    q = st.text_input("Search colony name...")
+    if q:
+        df_show = df[df["colony_name"].str.contains(q, case=False, na=False)]
+    else:
+        df_show = df
+
+    st.dataframe(df_show, use_container_width=True)
+
+    st.write("---")
+
+    # ------------------------
+    # ADD NEW COLONY
+    # ------------------------
+    st.write("### ➕ Add New Colony")
+    c1, c2 = st.columns(2)
+
+    with c1:
+        new_colony = st.text_input("Colony Name", key="new_colony_name")
+    with c2:
+        new_category = st.selectbox("Category", list("ABCDEFGH"), key="new_colony_category")
+
+    if st.button("Add Colony"):
+        if not new_colony:
+            st.error("Enter colony name.")
+        else:
+            supabase.table("colonies").insert({
+                "colony_name": new_colony,
+                "category": new_category,
+                "res_land_rate": None,
+                "res_const_rate": None,
+                "com_land_rate": None,
+                "com_const_rate": None,
+            }).execute()
+            st.success("Colony added successfully.")
+            st.rerun()
+
+    st.write("---")
+
+    # ------------------------
+    # EDIT RATES
+    # ------------------------
+    st.write("### ✏ Update Colony Rates")
+
+    colony_list = df["colony_name"].tolist()
+    selected = st.selectbox("Select colony", ["Select colony"] + colony_list)
+
+    if selected != "Select colony":
+        sel = df[df["colony_name"] == selected].iloc[0]
+
+        r1, r2 = st.columns(2)
+        r3, r4 = st.columns(2)
+
+        with r1:
+            new_rl = st.number_input("Residential Land Rate", value=sel.get("res_land_rate") or 0, step=100)
+        with r2:
+            new_rc = st.number_input("Residential Construction Rate", value=sel.get("res_const_rate") or 0, step=100)
+        with r3:
+            new_cl = st.number_input("Commercial Land Rate", value=sel.get("com_land_rate") or 0, step=100)
+        with r4:
+            new_cc = st.number_input("Commercial Construction Rate", value=sel.get("com_const_rate") or 0, step=100)
+
+        if st.button("Update Rates"):
+            supabase.table("colonies").update({
+                "res_land_rate": new_rl,
+                "res_const_rate": new_rc,
+                "com_land_rate": new_cl,
+                "com_const_rate": new_cc,
+            }).eq("colony_name", selected).execute()
+
+            st.success("Rates updated successfully.")
+            st.rerun()
+
+    st.write("---")
+
+    # ------------------------
+    # DELETE COLONY
+    # ------------------------
+    st.write("### 🗑 Delete Colony")
+
+    del_sel = st.selectbox("Select colony to delete", ["Select"] + colony_list)
+
+    if st.button("Delete Colony"):
+        if del_sel != "Select":
+            supabase.table("colonies").delete().eq("colony_name", del_sel).execute()
+            st.warning(f"{del_sel} deleted successfully!")
+            st.rerun()
 
 # -------------------------------------------------
 # HISTORY TAB

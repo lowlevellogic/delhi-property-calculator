@@ -518,40 +518,27 @@ def render_summary_block(res, save_key):
 # -------------------------------------------------
 
 def render_auth_modal():
+    """Center popup for login / signup. Can be closed to continue as guest."""
     if not st.session_state.show_auth_modal:
         return
     if st.session_state.user_id is not None:
         return
 
-    # OPEN WRAPPER
-    st.markdown('<div class="auth-wrapper"><div class="auth-card">', unsafe_allow_html=True)
-
-    # -------------- CENTERED LOGO (WORKS PERFECTLY) --------------
-    # -------- Centered Logo (GitHub Hosted Image) --------
-st.markdown(
-    """
-    <div style='width:100%;display:flex;justify-content:center;margin-bottom:15px;'>
-        <img src="https://raw.githubusercontent.com/lowlevellogic/delhi-property-calculator/main/logo.jpg" width="120">
-    </div>
-    """,
-    unsafe_allow_html=True
+    # Outer popup container
+    st.markdown(
+        '<div class="auth-wrapper"><div class="auth-card">',
+        unsafe_allow_html=True,
     )
 
-    # EXTRA CSS TO FORCE CENTER (Backup)
-    st.markdown(
-        """
-        <style>
-        .auth-card img {
-            display: block !important;
-            margin-left: auto !important;
-            margin-right: auto !important;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True
-)
+    # ---------- CENTERED LOGO (using columns) ----------
+    col_a, col_b, col_c = st.columns([1, 2, 1])
+    with col_b:
+        try:
+            st.image("logo.jpg", width=120)
+        except Exception:
+            st.write("")
 
-    # ---------------- Heading ----------------
+    # ---------- Heading ----------
     st.markdown(
         """
         <div class="auth-heading">
@@ -567,12 +554,23 @@ st.markdown(
 
     tab_login, tab_signup = st.tabs(["Login", "Sign Up"])
 
-    # ---------- LOGIN ----------
+    # ---------- LOGIN TAB ----------
     with tab_login:
-        identifier = st.text_input("Email or Username", key="login_identifier")
-        password = st.text_input("Password", type="password", key="login_pw")
-        remember = st.checkbox("Remember me on this device", key="remember_me_check")
+        identifier = st.text_input(
+            "Email or Username",
+            key="login_identifier",
+            placeholder="e.g. rishav@gmail.com or rishav123",
+        )
+        password = st.text_input(
+            "Password",
+            type="password",
+            key="login_pw",
+        )
+        remember = st.checkbox(
+            "Remember me on this device", key="remember_me_check"
+        )
 
+        # Forgot password toggle
         if st.button("Forgot password?", key="forgot_pw_link"):
             st.session_state.show_reset_form = True
 
@@ -592,52 +590,77 @@ st.markdown(
                 st.session_state.show_reset_form = False
                 update_last_login(row["id"])
                 log_event("login", f"{row['email']} logged in")
-                st.success("Welcome back!")
+                st.success("Welcome back! You are now signed in.")
                 st.rerun()
 
+        # --- Reset password flow (inside login tab) ---
         if st.session_state.show_reset_form:
             st.write("---")
             st.markdown("##### Reset your password")
-            reset_identifier = st.text_input("Registered Email or Username", key="reset_identifier")
+
+            reset_identifier = st.text_input(
+                "Registered Email or Username",
+                key="reset_identifier",
+                placeholder="we'll send an OTP to your email",
+            )
 
             if st.button("Send reset OTP", key="send_reset_otp_btn"):
-                email_to_use = None
-                if "@" in reset_identifier:
-                    email_to_use = reset_identifier.lower()
+                if not reset_identifier:
+                    st.error("Please enter your registered email or username.")
                 else:
-                    user = get_user_by_username(reset_identifier)
-                    if user:
-                        email_to_use = user["email"]
-
-                if email_to_use:
-                    if get_user_by_email(email_to_use):
-                        otp, err = send_otp_email(email_to_use)
-                        if not err:
-                            create_otp_record(email_to_use, otp, "reset")
-                            st.session_state.pending_signup_email = email_to_use
-                            st.session_state.pending_otp_purpose = "reset"
-                            st.session_state.otp_sent = True
-                            st.success("Reset OTP sent.")
+                    email_to_use = None
+                    if "@" in reset_identifier:
+                        email_to_use = reset_identifier.lower()
+                    else:
+                        user = get_user_by_username(reset_identifier)
+                        if not user:
+                            st.error("Username not found.")
                         else:
-                            st.error("Unable to send OTP.")
-                else:
-                    st.error("Invalid user.")
+                            email_to_use = user["email"]
 
-            if (st.session_state.otp_sent and 
-                st.session_state.pending_signup_email and
-                st.session_state.pending_otp_purpose == "reset"):
+                    if email_to_use:
+                        # Check that user exists by email
+                        if not get_user_by_email(email_to_use):
+                            st.error("This email is not registered.")
+                        else:
+                            otp, err = send_otp_email(email_to_use)
+                            if err:
+                                st.error("Unable to send OTP at the moment.")
+                            else:
+                                create_otp_record(email_to_use, otp, "reset")
+                                st.session_state.pending_signup_email = email_to_use
+                                st.session_state.pending_otp_purpose = "reset"
+                                st.session_state.otp_sent = True
+                                st.success("Reset OTP sent to your email.")
 
+            if (
+                st.session_state.otp_sent
+                and st.session_state.pending_signup_email
+                and st.session_state.pending_otp_purpose == "reset"
+            ):
                 otp2 = st.text_input("Enter reset OTP", key="reset_otp")
-                newpw = st.text_input("New password", type="password", key="reset_new_pw")
+                newpw = st.text_input(
+                    "New password", type="password", key="reset_new_pw"
+                )
 
                 if st.button("Confirm password reset", key="reset_pw_btn"):
                     if verify_otp_record(
-                        st.session_state.pending_signup_email, otp2, "reset"
+                        st.session_state.pending_signup_email,
+                        otp2,
+                        "reset",
                     ):
                         supabase.table("users").update(
                             {"password_hash": hash_password(newpw)}
-                        ).eq("email", st.session_state.pending_signup_email).execute()
-                        st.success("Password updated.")
+                        ).eq(
+                            "email", st.session_state.pending_signup_email
+                        ).execute()
+                        log_event(
+                            "password_reset",
+                            st.session_state.pending_signup_email,
+                        )
+                        st.success(
+                            "Password updated successfully. You can log in now."
+                        )
                         st.session_state.otp_sent = False
                         st.session_state.pending_signup_email = None
                         st.session_state.pending_otp_purpose = None
@@ -645,62 +668,113 @@ st.markdown(
                     else:
                         st.error("Invalid or expired OTP.")
 
-    # ---------- SIGNUP ----------
+    # ---------- SIGNUP TAB ----------
     with tab_signup:
-        signup_email = st.text_input("Email address", key="signup_email")
-        signup_username = st.text_input("Choose a username", key="signup_username_input")
+        signup_email = st.text_input(
+            "Email address",
+            key="signup_email",
+            placeholder="you@email.com",
+        )
+        signup_username = st.text_input(
+            "Choose a username",
+            key="signup_username_input",
+            placeholder="unique username (e.g. rishav123)",
+        )
 
         if st.button("Send verification OTP", key="send_signup_otp_btn"):
             if not signup_email or not signup_username:
                 st.error("Please enter both email and username.")
             elif get_user_by_email(signup_email):
-                st.error("This email already exists.")
+                st.error("This email is already registered.")
             elif get_user_by_username(signup_username):
-                st.error("Username already taken.")
+                st.error("This username is already taken. Please choose another.")
             else:
                 otp, err = send_otp_email(signup_email)
-                if not err:
+                if err:
+                    st.error("Unable to send OTP at the moment.")
+                else:
                     create_otp_record(signup_email, otp, "signup")
                     st.session_state.pending_signup_email = signup_email
                     st.session_state.pending_otp_purpose = "signup"
-                    st.session_state.signup_username = signup_username
                     st.session_state.otp_sent = True
-                    st.success("OTP sent.")
+                    st.session_state.signup_username = signup_username
+                    st.success(
+                        "OTP sent to your email. Please verify to create account."
+                    )
 
-        if (st.session_state.otp_sent and 
-            st.session_state.pending_signup_email and
-            st.session_state.pending_otp_purpose == "signup"):
+        if (
+            st.session_state.otp_sent
+            and st.session_state.pending_signup_email
+            and st.session_state.pending_otp_purpose == "signup"
+        ):
+            st.write("---")
+            st.markdown("##### Verify OTP & create account")
 
             otp_entry = st.text_input("Enter OTP", key="signup_otp")
-            final_username = st.text_input("Confirm username", value=st.session_state.signup_username, key="signup_uname2")
-            pw_new = st.text_input("Set password", type="password", key="signup_pw")
+            final_username = st.text_input(
+                "Confirm username",
+                key="signup_username_confirm",
+                value=st.session_state.get("signup_username", ""),
+            )
+            pw_new = st.text_input(
+                "Set password", type="password", key="signup_pw"
+            )
 
             if st.button("Create my account", key="signup_verify_btn"):
-                if verify_otp_record(st.session_state.pending_signup_email, otp_entry, "signup"):
+                if not final_username:
+                    st.error("Please confirm your username.")
+                elif get_user_by_username(final_username):
+                    st.error("This username is already taken. Please choose another.")
+                elif verify_otp_record(
+                    st.session_state.pending_signup_email,
+                    otp_entry,
+                    "signup",
+                ):
                     pw_hash = hash_password(pw_new)
-                    user = create_user(st.session_state.pending_signup_email, final_username, pw_hash)
+                    user = create_user(
+                        st.session_state.pending_signup_email,
+                        final_username,
+                        pw_hash,
+                    )
                     st.session_state.user_id = user["id"]
                     st.session_state.user_email = user["email"]
-                    st.session_state.username = user["username"]
-                    st.success("Account created.")
-                    st.session_state.show_auth_modal = False
+                    st.session_state.username = user.get("username")
+                    log_event(
+                        "signup",
+                        f"{user['email']} registered as {user.get('username')}",
+                    )
+                    st.success(
+                        "Account created successfully. You are now signed in."
+                    )
+                    # clear flags
                     st.session_state.otp_sent = False
                     st.session_state.pending_signup_email = None
                     st.session_state.pending_otp_purpose = None
+                    st.session_state.signup_username = ""
+                    st.session_state.show_auth_modal = False
                     st.rerun()
                 else:
-                    st.error("Invalid OTP")
+                    st.error("Invalid or expired OTP.")
 
+    # ---------- Guest button ----------
     st.write("")
-    _, col_guest = st.columns([1, 1])
-    if col_guest.button("Continue as Guest", use_container_width=True):
-        st.session_state.show_auth_modal = False
+    col_guest1, col_guest2 = st.columns([1, 1])
+    with col_guest2:
+        if st.button(
+            "Continue as guest",
+            key="continue_as_guest",
+            use_container_width=True,
+        ):
+            st.session_state.show_auth_modal = False
+            st.session_state.show_reset_form = False
 
     st.markdown(
-        "<div class='auth-footer'>Guest mode doesn't save history.</div>",
+        "<div class='auth-footer'>Using in guest mode will not save any history. "
+        "For best experience, create a free account.</div>",
         unsafe_allow_html=True,
     )
 
+    # Close auth-card & wrapper divs
     st.markdown("</div></div>", unsafe_allow_html=True)
 
 # -------------------------------------------------
@@ -1072,6 +1146,7 @@ st.markdown(
     f'{date.today().year} Rishav Singh · Aggarwal Documents & Legal Consultants</div>',
     unsafe_allow_html=True,
     )
+
 
 
 

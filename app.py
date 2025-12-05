@@ -1,4 +1,5 @@
 # app.py  – Delhi Property Price Calculator (with popup auth & usernames)
+# FINAL VERSION – with Supabase based colony master
 
 import math
 import hashlib
@@ -63,7 +64,7 @@ AREA_CATEGORY_RATES = {
         "above_100": 76200,
     },
     "commercial": {
-        "upto_30": 57840,
+        "uptpto_30": 57840,
         "30_50": 62520,
         "50_100": 75960,
         "above_100": 87360,
@@ -174,20 +175,17 @@ st.markdown(
 # SUPABASE CLIENT
 # -------------------------------------------------
 
-
 @st.cache_resource
 def get_supabase_client() -> Client:
     url = st.secrets["SUPABASE_URL"]
     key = st.secrets["SUPABASE_KEY"]
     return create_client(url, key)
 
-
 supabase = get_supabase_client()
 
 # -------------------------------------------------
 # SESSION STATE
 # -------------------------------------------------
-
 
 def ensure_session_state():
     defaults = {
@@ -200,21 +198,19 @@ def ensure_session_state():
         "remember_me": False,
         "last_result": None,
         "last_result_tab": None,
-        "show_auth_modal": True,      # popup on first visit
-        "show_reset_form": False,     # forgot-password view
+        "show_auth_modal": True,
+        "show_reset_form": False,
         "signup_username": "",
     }
     for k, v in defaults.items():
         if k not in st.session_state:
             st.session_state[k] = v
 
-
 ensure_session_state()
 
 # -------------------------------------------------
-# EVENT TRACKER  (events table: email, event_type, details, created_at)
+# EVENT TRACKER
 # -------------------------------------------------
-
 
 def log_event(event_type: str, details: str = ""):
     try:
@@ -226,10 +222,8 @@ def log_event(event_type: str, details: str = ""):
                 "created_at": datetime.utcnow().isoformat(),
             }
         ).execute()
-    except Exception:
-        # Avoid breaking the app on logging errors
+    except:
         pass
-
 
 log_event("visit", "User opened calculator")
 
@@ -237,32 +231,18 @@ log_event("visit", "User opened calculator")
 # DB HELPERS
 # -------------------------------------------------
 
-
 def hash_password(pw: str) -> str:
     return hashlib.sha256(pw.encode()).hexdigest()
 
-
 def get_user_by_email(email: str):
-    resp = (
-        supabase.table("users")
-        .select("id, email, username, password_hash, is_verified")
-        .eq("email", email.lower())
-        .execute()
-    )
+    resp = supabase.table("users").select("id, email, username, password_hash, is_verified").eq("email", email.lower()).execute()
     rows = resp.data or []
     return rows[0] if rows else None
-
 
 def get_user_by_username(username: str):
-    resp = (
-        supabase.table("users")
-        .select("id, email, username, password_hash, is_verified")
-        .eq("username", username.lower())
-        .execute()
-    )
+    resp = supabase.table("users").select("id, email, username, password_hash, is_verified").eq("username", username.lower()).execute()
     rows = resp.data or []
     return rows[0] if rows else None
-
 
 def get_user_by_email_or_username(identifier: str):
     ident = (identifier or "").strip().lower()
@@ -270,36 +250,26 @@ def get_user_by_email_or_username(identifier: str):
         return None
     if "@" in ident:
         return get_user_by_email(ident)
-    # treat as username
     return get_user_by_username(ident)
 
-
 def create_user(email: str, username: str, password_hash: str):
-    resp = (
-        supabase.table("users")
-        .insert(
-            {
-                "email": email.lower(),
-                "username": username.lower(),
-                "password_hash": password_hash,
-                "is_verified": True,
-                "created_at": datetime.utcnow().isoformat(),
-            }
-        )
-        .execute()
-    )
+    resp = supabase.table("users").insert(
+        {
+            "email": email.lower(),
+            "username": username.lower(),
+            "password_hash": password_hash,
+            "is_verified": True,
+            "created_at": datetime.utcnow().isoformat(),
+        }
+    ).execute()
     rows = resp.data or []
     return rows[0] if rows else None
 
-
 def update_last_login(uid):
     try:
-        supabase.table("users").update(
-            {"last_login": datetime.utcnow().isoformat()}
-        ).eq("id", uid).execute()
-    except Exception:
+        supabase.table("users").update({"last_login": datetime.utcnow().isoformat()}).eq("id", uid).execute()
+    except:
         pass
-
 
 def create_otp_record(email, otp, purpose="signup"):
     supabase.table("otps").insert(
@@ -311,7 +281,6 @@ def create_otp_record(email, otp, purpose="signup"):
             "expires_at": (datetime.utcnow() + timedelta(minutes=10)).isoformat(),
         }
     ).execute()
-
 
 def verify_otp_record(email, otp_code, purpose):
     now = datetime.utcnow().isoformat()
@@ -333,7 +302,6 @@ def verify_otp_record(email, otp_code, purpose):
 
     supabase.table("otps").update({"used": True}).eq("id", row["id"]).execute()
     return True
-
 
 def save_history_to_db(res: dict):
     if st.session_state.user_id is None:
@@ -358,72 +326,54 @@ def save_history_to_db(res: dict):
     st.success("Saved to your account history.")
 
 # -------------------------------------------------
-# COLONIES CSV
+# NEW: LOAD COLONIES FROM SUPABASE
 # -------------------------------------------------
 
-
 @st.cache_data
-def load_colonies_from_csv():
+def load_colonies_from_db():
     try:
-        df = pd.read_csv("colonies.csv")
-    except Exception:
-        return [], {}
+        res = supabase.table("colonies").select("*").order("colony_name").execute()
+        data = res.data or []
+        df = pd.DataFrame(data)
+        if df.empty:
+            return [], {}, df
 
-    df.columns = [c.strip().lower() for c in df.columns]
-    df["colony_name"] = df["colony_name"].astype(str)
-    df["category"] = df["category"].astype(str).str.upper()
+        names = df["colony_name"].tolist()
+        category_map = dict(zip(df["colony_name"], df["category"]))
 
-    names = df["colony_name"].tolist()
-    mapping = dict(zip(df["colony_name"], df["category"]))
-    return names, mapping
+        return names, category_map, df
+    except Exception as e:
+        st.error(f"Error loading colonies: {e}")
+        return [], {}, pd.DataFrame()
 
-
-COLONY_NAMES, COLONY_MAP = load_colonies_from_csv()
+COLONY_NAMES, COLONY_MAP, COLONY_FULL_DF = load_colonies_from_db()
 
 # -------------------------------------------------
 # CALC HELPERS
 # -------------------------------------------------
 
-
 def convert_sq_yards_to_sq_meters(y):
     return round(y * 0.8361, 2)
 
-
 def age_multiplier(year):
-    if year < 1960:
-        return 0.5
-    if year <= 1969:
-        return 0.6
-    if year <= 1979:
-        return 0.7
-    if year <= 1989:
-        return 0.8
-    if year <= 2000:
-        return 0.9
+    if year < 1960: return 0.5
+    if year <= 1969: return 0.6
+    if year <= 1979: return 0.7
+    if year <= 1989: return 0.8
+    if year <= 2000: return 0.9
     return 1.0
-
 
 def get_stampduty_rate(owner, val):
     base = stampdutyrates.get(owner, 0)
     return base + 0.01 if val > 2_500_000 else base
 
-
 def determine_area_category(plinth_area_sqm: float) -> str:
-    if plinth_area_sqm <= 30:
-        return "upto_30"
-    elif plinth_area_sqm <= 50:
-        return "30_50"
-    elif plinth_area_sqm <= 100:
-        return "50_100"
-    else:
-        return "above_100"
+    if plinth_area_sqm <= 30: return "upto_30"
+    elif plinth_area_sqm <= 50: return "30_50"
+    elif plinth_area_sqm <= 100: return "50_100"
+    return "above_100"
 
-
-def dda_minimum_value(
-    plinth_area_sqm: float,
-    building_more_than_4_storeys: bool,
-    usage: str,
-):
+def dda_minimum_value(plinth_area_sqm, building_more_than_4_storeys, usage):
     usage = usage.lower()
     if usage not in AREA_CATEGORY_RATES:
         raise ValueError("Usage must be 'residential' or 'commercial'.")
@@ -431,8 +381,8 @@ def dda_minimum_value(
     if building_more_than_4_storeys:
         rate = UNIFORM_RATES_MORE_THAN_4[usage]
     else:
-        category = determine_area_category(plinth_area_sqm)
-        rate = AREA_CATEGORY_RATES[usage][category]
+        cat = determine_area_category(plinth_area_sqm)
+        rate = AREA_CATEGORY_RATES[usage][cat]
 
     value = plinth_area_sqm * rate
     return rate, value
@@ -441,11 +391,9 @@ def dda_minimum_value(
 # CALCULATION WRAPPER
 # -------------------------------------------------
 
-
 def run_calculation(**kwargs):
     log_event("calculation_run", f"{kwargs.get('property_type')} calculation started")
     return _calc(**kwargs)
-
 
 def _calc(
     property_type,
@@ -534,7 +482,6 @@ def _calc(
 # SUMMARY BLOCK
 # -------------------------------------------------
 
-
 def render_summary_block(res, save_key):
     log_event("result_viewed", f"{res['property_type']} - {res['colony_name']}")
     st.markdown('<div class="box">', unsafe_allow_html=True)
@@ -567,12 +514,10 @@ def render_summary_block(res, save_key):
     st.markdown("</div>", unsafe_allow_html=True)
 
 # -------------------------------------------------
-# AUTH POPUP (LOGIN / SIGNUP / FORGOT)
+# AUTH POPUP
 # -------------------------------------------------
 
-
 def render_auth_modal():
-    """Center popup for login / signup. Can be closed to continue as guest."""
     if not st.session_state.show_auth_modal:
         return
     if st.session_state.user_id is not None:
@@ -580,13 +525,11 @@ def render_auth_modal():
 
     st.markdown('<div class="auth-wrapper"><div class="auth-card">', unsafe_allow_html=True)
 
-    # Logo
     try:
         st.image("logo.jpg", width=120)
-    except Exception:
-        st.write("")
+    except:
+        pass
 
-    # Heading
     st.markdown(
         """
         <div class="auth-heading">
@@ -602,21 +545,12 @@ def render_auth_modal():
 
     tab_login, tab_signup = st.tabs(["Login", "Sign Up"])
 
-    # ---------- LOGIN TAB ----------
+    # ---------- LOGIN ----------
     with tab_login:
-        identifier = st.text_input(
-            "Email or Username",
-            key="login_identifier",
-            placeholder="e.g. rishav@gmail.com or rishav123",
-        )
-        password = st.text_input(
-            "Password",
-            type="password",
-            key="login_pw",
-        )
+        identifier = st.text_input("Email or Username", key="login_identifier")
+        password = st.text_input("Password", type="password", key="login_pw")
         remember = st.checkbox("Remember me on this device", key="remember_me_check")
 
-        # Forgot password toggle
         if st.button("Forgot password?", key="forgot_pw_link"):
             st.session_state.show_reset_form = True
 
@@ -636,76 +570,52 @@ def render_auth_modal():
                 st.session_state.show_reset_form = False
                 update_last_login(row["id"])
                 log_event("login", f"{row['email']} logged in")
-                st.success("Welcome back! You are now signed in.")
+                st.success("Welcome back!")
                 st.rerun()
 
-        # --- Reset password flow (inside login tab) ---
         if st.session_state.show_reset_form:
             st.write("---")
             st.markdown("##### Reset your password")
-
-            reset_identifier = st.text_input(
-                "Registered Email or Username",
-                key="reset_identifier",
-                placeholder="we'll send an OTP to your email",
-            )
+            reset_identifier = st.text_input("Registered Email or Username", key="reset_identifier")
 
             if st.button("Send reset OTP", key="send_reset_otp_btn"):
-                if not reset_identifier:
-                    st.error("Please enter your registered email or username.")
+                email_to_use = None
+                if "@" in reset_identifier:
+                    email_to_use = reset_identifier.lower()
                 else:
-                    email_to_use = None
-                    if "@" in reset_identifier:
-                        email_to_use = reset_identifier.lower()
-                    else:
-                        user = get_user_by_username(reset_identifier)
-                        if not user:
-                            st.error("Username not found.")
-                        else:
-                            email_to_use = user["email"]
+                    user = get_user_by_username(reset_identifier)
+                    if user:
+                        email_to_use = user["email"]
 
-                    if email_to_use:
-                        # Check that user exists
-                            # (If we got here from username lookup, it exists)
-                        if not get_user_by_email(email_to_use):
-                            st.error("This email is not registered.")
+                if email_to_use:
+                    if get_user_by_email(email_to_use):
+                        otp, err = send_otp_email(email_to_use)
+                        if not err:
+                            create_otp_record(email_to_use, otp, "reset")
+                            st.session_state.pending_signup_email = email_to_use
+                            st.session_state.pending_otp_purpose = "reset"
+                            st.session_state.otp_sent = True
+                            st.success("Reset OTP sent.")
                         else:
-                            otp, err = send_otp_email(email_to_use)
-                            if err:
-                                st.error("Unable to send OTP at the moment.")
-                            else:
-                                create_otp_record(email_to_use, otp, "reset")
-                                st.session_state.pending_signup_email = email_to_use
-                                st.session_state.pending_otp_purpose = "reset"
-                                st.session_state.otp_sent = True
-                                st.success("Reset OTP sent to your email.")
+                            st.error("Unable to send OTP.")
+                else:
+                    st.error("Invalid user.")
 
-            if (
-                st.session_state.otp_sent
-                and st.session_state.pending_signup_email
-                and st.session_state.pending_otp_purpose == "reset"
-            ):
+            if (st.session_state.otp_sent and 
+                st.session_state.pending_signup_email and
+                st.session_state.pending_otp_purpose == "reset"):
+
                 otp2 = st.text_input("Enter reset OTP", key="reset_otp")
-                newpw = st.text_input(
-                    "New password", type="password", key="reset_new_pw"
-                )
+                newpw = st.text_input("New password", type="password", key="reset_new_pw")
 
                 if st.button("Confirm password reset", key="reset_pw_btn"):
                     if verify_otp_record(
-                        st.session_state.pending_signup_email,
-                        otp2,
-                        "reset",
+                        st.session_state.pending_signup_email, otp2, "reset"
                     ):
                         supabase.table("users").update(
                             {"password_hash": hash_password(newpw)}
-                        ).eq(
-                            "email", st.session_state.pending_signup_email
-                        ).execute()
-                        log_event(
-                            "password_reset",
-                            st.session_state.pending_signup_email,
-                        )
-                        st.success("Password updated successfully. You can log in now.")
+                        ).eq("email", st.session_state.pending_signup_email).execute()
+                        st.success("Password updated.")
                         st.session_state.otp_sent = False
                         st.session_state.pending_signup_email = None
                         st.session_state.pending_otp_purpose = None
@@ -713,101 +623,59 @@ def render_auth_modal():
                     else:
                         st.error("Invalid or expired OTP.")
 
-    # ---------- SIGNUP TAB ----------
+    # ---------- SIGNUP ----------
     with tab_signup:
-        signup_email = st.text_input(
-            "Email address",
-            key="signup_email",
-            placeholder="you@email.com",
-        )
-        signup_username = st.text_input(
-            "Choose a username",
-            key="signup_username_input",
-            placeholder="unique username (e.g. rishav123)",
-        )
+        signup_email = st.text_input("Email address", key="signup_email")
+        signup_username = st.text_input("Choose a username", key="signup_username_input")
 
         if st.button("Send verification OTP", key="send_signup_otp_btn"):
             if not signup_email or not signup_username:
                 st.error("Please enter both email and username.")
             elif get_user_by_email(signup_email):
-                st.error("This email is already registered.")
+                st.error("This email already exists.")
             elif get_user_by_username(signup_username):
-                st.error("This username is already taken. Please choose another.")
+                st.error("Username already taken.")
             else:
                 otp, err = send_otp_email(signup_email)
-                if err:
-                    st.error("Unable to send OTP at the moment.")
-                else:
+                if not err:
                     create_otp_record(signup_email, otp, "signup")
                     st.session_state.pending_signup_email = signup_email
                     st.session_state.pending_otp_purpose = "signup"
-                    st.session_state.otp_sent = True
                     st.session_state.signup_username = signup_username
-                    st.success("OTP sent to your email. Please verify to create account.")
+                    st.session_state.otp_sent = True
+                    st.success("OTP sent.")
 
-        if (
-            st.session_state.otp_sent
-            and st.session_state.pending_signup_email
-            and st.session_state.pending_otp_purpose == "signup"
-        ):
-            st.write("---")
-            st.markdown("##### Verify OTP & create account")
+        if (st.session_state.otp_sent and 
+            st.session_state.pending_signup_email and
+            st.session_state.pending_otp_purpose == "signup"):
 
             otp_entry = st.text_input("Enter OTP", key="signup_otp")
-            final_username = st.text_input(
-                "Confirm username",
-                key="signup_username_confirm",
-                value=st.session_state.get("signup_username", ""),
-            )
-            pw_new = st.text_input(
-                "Set password", type="password", key="signup_pw"
-            )
+            final_username = st.text_input("Confirm username", value=st.session_state.signup_username, key="signup_uname2")
+            pw_new = st.text_input("Set password", type="password", key="signup_pw")
 
             if st.button("Create my account", key="signup_verify_btn"):
-                if not final_username:
-                    st.error("Please confirm your username.")
-                elif get_user_by_username(final_username):
-                    st.error("This username is already taken. Please choose another.")
-                elif verify_otp_record(
-                    st.session_state.pending_signup_email,
-                    otp_entry,
-                    "signup",
-                ):
+                if verify_otp_record(st.session_state.pending_signup_email, otp_entry, "signup"):
                     pw_hash = hash_password(pw_new)
-                    user = create_user(
-                        st.session_state.pending_signup_email,
-                        final_username,
-                        pw_hash,
-                    )
+                    user = create_user(st.session_state.pending_signup_email, final_username, pw_hash)
                     st.session_state.user_id = user["id"]
                     st.session_state.user_email = user["email"]
-                    st.session_state.username = user.get("username")
-                    log_event(
-                        "signup",
-                        f"{user['email']} registered as {user.get('username')}",
-                    )
-                    st.success("Account created successfully. You are now signed in.")
-                    # clear flags
+                    st.session_state.username = user["username"]
+                    st.success("Account created.")
+                    st.session_state.show_auth_modal = False
                     st.session_state.otp_sent = False
                     st.session_state.pending_signup_email = None
                     st.session_state.pending_otp_purpose = None
-                    st.session_state.signup_username = ""
-                    st.session_state.show_auth_modal = False
-                    st.experimental_rerun()
+                    st.rerun()
                 else:
-                    st.error("Invalid or expired OTP.")
+                    st.error("Invalid OTP")
 
-    # ---------- Guest button ----------
     st.write("")
-    col_guest1, col_guest2 = st.columns([1, 1])
-    with col_guest2:
-        if st.button("Continue as guest", key="continue_as_guest", use_container_width=True):
-            st.session_state.show_auth_modal = False
-            st.session_state.show_reset_form = False
+    _, col_guest = st.columns([1, 1])
+    if col_guest.button("Continue as Guest", use_container_width=True):
+        st.session_state.show_auth_modal = False
 
     st.markdown(
-        "<div class='auth-footer'>Using in guest mode will not save any history. "
-        "For best experience, create a free account.</div>",
+        "<div class='auth-footer'>Guest mode doesn't save history.</div>",
         unsafe_allow_html=True,
     )
 
@@ -817,31 +685,23 @@ def render_auth_modal():
 # SIDEBAR STATUS
 # -------------------------------------------------
 
-
 def render_sidebar_status():
     with st.sidebar:
         st.markdown("### 👤 Account")
 
         if st.session_state.user_id is not None:
-            display_name = (
-                st.session_state.username
-                or st.session_state.user_email
-                or "Signed in"
-            )
+            display_name = st.session_state.username or st.session_state.user_email
             st.success(f"Signed in as **{display_name}**")
-            if st.button("Logout", key="logout_btn_sidebar", use_container_width=True):
-                log_event("logout", st.session_state.user_email or "")
+            if st.button("Logout", key="logout_btn_sidebar"):
                 st.session_state.user_id = None
                 st.session_state.user_email = None
                 st.session_state.username = None
-                st.session_state.remember_me = False
                 st.session_state.show_auth_modal = True
-                st.experimental_rerun()
+                st.rerun()
         else:
-            st.info("You are currently using the calculator in **guest mode**.")
-            if st.button("Login / Sign up", key="open_auth_from_sidebar", use_container_width=True):
+            st.info("Using as guest.")
+            if st.button("Login / Sign up", key="open_auth_from_sidebar"):
                 st.session_state.show_auth_modal = True
-
 
 # -------------------------------------------------
 # HEADER
@@ -851,8 +711,8 @@ col1, col2, col3 = st.columns([1, 5, 2])
 with col1:
     try:
         st.image("logo.jpg", width=70)
-    except Exception:
-        st.write("")
+    except:
+        pass
 with col2:
     st.markdown(
         """
@@ -865,20 +725,15 @@ with col2:
         """,
         unsafe_allow_html=True,
     )
-
 with col3:
     if st.session_state.user_id is None:
-        if st.button("🔐 Login / Sign up", key="open_auth_top", use_container_width=True):
+        if st.button("🔐 Login / Sign up", key="open_auth_top"):
             st.session_state.show_auth_modal = True
     else:
-        st.write("")
-        st.caption(
-            f"Logged in as **{st.session_state.username or st.session_state.user_email}**"
-        )
+        st.caption(f"Logged in as **{st.session_state.username or st.session_state.user_email}**")
 
 st.write("---")
 
-# Show sidebar status & auth popup
 render_sidebar_status()
 render_auth_modal()
 
@@ -887,14 +742,7 @@ render_auth_modal()
 # -------------------------------------------------
 
 tab_home, tab_res, tab_com, tab_dda, tab_history, tab_about = st.tabs(
-    [
-        "🏠 Home",
-        "📄 Residential",
-        "🏬 Commercial",
-        "🏢 DDA/CGHS Flats",
-        "📚 History",
-        "ℹ️ About",
-    ]
+    ["🏠 Home", "📄 Residential", "🏬 Commercial", "🏢 DDA/CGHS Flats", "📚 History", "ℹ️ About"]
 )
 
 # -------------------------------------------------
@@ -908,11 +756,7 @@ with tab_home:
         <h3>Welcome to the Delhi Property Price Calculator</h3>
         <p>
         Quickly estimate government circle-rate value, stamp duty, mutation, e-fees and TDS
-        for properties in Delhi – residential plots, commercial properties and DDA / CGHS flats.
-        </p>
-        <p>
-        You can use the app freely as a guest. If you sign in, your calculations will be
-        saved to your personal history for future reference.
+        for properties in Delhi.
         </p>
         </div>
         """,
@@ -929,65 +773,33 @@ with tab_res:
 
     col1, col2 = st.columns(2)
     with col1:
-        r_colony = st.selectbox(
-            "Colony (type to search)",
-            ["(Not using colony)"] + COLONY_NAMES,
-            key="r_colony",
-        )
+        r_colony = st.selectbox("Colony (type to search)", ["(Not using colony)"] + COLONY_NAMES, key="r_colony")
 
         if r_colony != "(Not using colony)":
             r_category = COLONY_MAP.get(r_colony, "G")
             st.info(f"Detected Category from master list: **{r_category}**")
-            log_event("colony_selected", r_colony)
         else:
-            r_category = st.selectbox(
-                "Manual Category", list(circlerates_res.keys()), key="r_manual_cat"
-            )
+            r_category = st.selectbox("Manual Category", list(circlerates_res.keys()), key="r_manual_cat")
 
-        r_land = st.number_input(
-            "Land Area (Sq. Yards)", value=50.0, key="r_land_area"
-        )
-
-        r_total = st.number_input(
-            "Total Floors in Building", min_value=1, value=1, key="r_total_floors"
-        )
-        r_buy = st.number_input(
-            "No. of Floors being Purchased", min_value=1, value=1, key="r_buy_floors"
-        )
+        r_land = st.number_input("Land Area (Sq. Yards)", value=50.0, key="r_land_area")
+        r_total = st.number_input("Total Floors", min_value=1, value=1, key="r_total_floors")
+        r_buy = st.number_input("Floors Purchased", min_value=1, value=1, key="r_buy_floors")
 
     with col2:
-        r_owner = st.selectbox(
-            "Buyer Category (for stamp duty)", ["male", "female", "joint"], key="r_owner"
-        )
-        r_const = st.radio(
-            "Includes Construction?", ["yes", "no"], key="r_const_radio"
-        )
-        r_parking = st.radio(
-            "Parking Included?", ["yes", "no"], key="r_parking_radio"
-        )
+        r_owner = st.selectbox("Buyer Category", ["male", "female", "joint"], key="r_owner")
+        r_const = st.radio("Includes Construction?", ["yes", "no"], key="r_const_radio")
+        r_parking = st.radio("Parking Included?", ["yes", "no"], key="r_parking_radio")
 
     r_area = 0.0
     r_year = 2000
     if r_const == "yes":
         col3, col4 = st.columns(2)
         with col3:
-            r_area = st.number_input(
-                "Construction Area (Sq. Yards)",
-                value=50.0,
-                key="r_const_area",
-            )
+            r_area = st.number_input("Construction Area (Sq. Yards)", value=50.0, key="r_const_area")
         with col4:
-            r_year = st.number_input(
-                "Year of Construction",
-                value=2005,
-                min_value=1900,
-                max_value=2100,
-                key="r_const_year",
-            )
+            r_year = st.number_input("Year of Construction", value=2005, min_value=1900, max_value=2100, key="r_const_year")
 
-    r_custom = st.number_input(
-        "Custom Consideration (₹, optional)", value=0, key="r_custom_cons"
-    )
+    r_custom = st.number_input("Custom Consideration (₹, optional)", value=0, key="r_custom_cons")
 
     if st.button("Calculate Residential", key="calc_res_btn"):
         result = run_calculation(
@@ -1008,10 +820,7 @@ with tab_res:
         st.session_state.last_result_tab = "Residential"
         st.success("Residential calculation completed.")
 
-    if (
-        st.session_state.last_result is not None
-        and st.session_state.last_result_tab == "Residential"
-    ):
+    if st.session_state.last_result is not None and st.session_state.last_result_tab == "Residential":
         render_summary_block(st.session_state.last_result, "save_res")
 
     st.markdown("</div>", unsafe_allow_html=True)
@@ -1026,67 +835,33 @@ with tab_com:
 
     col1, col2 = st.columns(2)
     with col1:
-        c_colony = st.selectbox(
-            "Colony (type to search)",
-            ["(Not using colony)"] + COLONY_NAMES,
-            key="c_colony",
-        )
+        c_colony = st.selectbox("Colony (type to search)", ["(Not using colony)"] + COLONY_NAMES, key="c_colony")
 
         if c_colony != "(Not using colony)":
             c_category = COLONY_MAP.get(c_colony, "G")
             st.info(f"Detected Category from master list: **{c_category}**")
-            log_event("colony_selected", c_colony)
         else:
-            c_category = st.selectbox(
-                "Manual Category",
-                list(circlerates_com.keys()),
-                key="c_manual_cat",
-            )
+            c_category = st.selectbox("Manual Category", list(circlerates_com.keys()), key="c_manual_cat")
 
-        c_land = st.number_input(
-            "Land Area (Sq. Yards)", value=50.0, key="c_land_area"
-        )
-
-        c_total = st.number_input(
-            "Total Floors in Building", min_value=1, value=1, key="c_total_floors"
-        )
-        c_buy = st.number_input(
-            "No. of Floors being Purchased", min_value=1, value=1, key="c_buy_floors"
-        )
+        c_land = st.number_input("Land Area (Sq. Yards)", value=50.0, key="c_land_area")
+        c_total = st.number_input("Total Floors", min_value=1, value=1, key="c_total_floors")
+        c_buy = st.number_input("Floors Purchased", min_value=1, value=1, key="c_buy_floors")
 
     with col2:
-        c_owner = st.selectbox(
-            "Buyer Category (for stamp duty)", ["male", "female", "joint"], key="c_owner"
-        )
-        c_const = st.radio(
-            "Includes Construction?", ["yes", "no"], key="c_const_radio"
-        )
-        c_parking = st.radio(
-            "Parking Included?", ["yes", "no"], key="c_parking_radio"
-        )
+        c_owner = st.selectbox("Buyer Category", ["male", "female", "joint"], key="c_owner")
+        c_const = st.radio("Includes Construction?", ["yes", "no"], key="c_const_radio")
+        c_parking = st.radio("Parking Included?", ["yes", "no"], key="c_parking_radio")
 
     c_area = 0.0
     c_year = 2000
     if c_const == "yes":
         col3, col4 = st.columns(2)
         with col3:
-            c_area = st.number_input(
-                "Construction Area (Sq. Yards)",
-                value=50.0,
-                key="c_const_area",
-            )
+            c_area = st.number_input("Construction Area (Sq. Yards)", value=50.0, key="c_const_area")
         with col4:
-            c_year = st.number_input(
-                "Year of Construction",
-                value=2005,
-                min_value=1900,
-                max_value=2100,
-                key="c_const_year",
-            )
+            c_year = st.number_input("Year of Construction", value=2005, min_value=1900, max_value=2100, key="c_const_year")
 
-    c_custom = st.number_input(
-        "Custom Consideration (₹, optional)", value=0, key="c_custom_cons"
-    )
+    c_custom = st.number_input("Custom Consideration (₹, optional)", value=0, key="c_custom_cons")
 
     if st.button("Calculate Commercial", key="calc_com_btn"):
         result = run_calculation(
@@ -1107,10 +882,7 @@ with tab_com:
         st.session_state.last_result_tab = "Commercial"
         st.success("Commercial calculation completed.")
 
-    if (
-        st.session_state.last_result is not None
-        and st.session_state.last_result_tab == "Commercial"
-    ):
+    if st.session_state.last_result is not None and st.session_state.last_result_tab == "Commercial":
         render_summary_block(st.session_state.last_result, "save_com")
 
     st.markdown("</div>", unsafe_allow_html=True)
@@ -1125,60 +897,24 @@ with tab_dda:
 
     col1, col2 = st.columns(2)
     with col1:
-        dda_area_yards = st.number_input(
-            "Plinth Area (Sq. Yards)",
-            min_value=1.0,
-            value=50.0,
-            step=1.0,
-            key="dda_area_yards",
-        )
-        dda_usage_pretty = st.radio(
-            "Usage Type",
-            ["Residential", "Commercial"],
-            horizontal=True,
-            key="dda_usage",
-        )
-        dda_more_than_4 = st.radio(
-            "Building has more than 4 storeys?",
-            ["No", "Yes"],
-            horizontal=True,
-            key="dda_more_than_4",
-        )
+        dda_area_yards = st.number_input("Plinth Area (Sq. Yards)", min_value=1.0, value=50.0, step=1.0)
+        dda_usage_pretty = st.radio("Usage Type", ["Residential", "Commercial"], horizontal=True)
+        dda_more_than_4 = st.radio("More than 4 floors?", ["No", "Yes"], horizontal=True)
     with col2:
-        dda_owner = st.selectbox(
-            "Buyer Category (for Stamp Duty)",
-            ["male", "female", "joint"],
-            key="dda_owner",
-        )
-        dda_calc_custom = st.checkbox(
-            "Also calculate on your own consideration value",
-            value=False,
-            key="dda_custom_checkbox",
-        )
-        dda_custom_cons = 0.0
-        if dda_calc_custom:
-            dda_custom_cons = st.number_input(
-                "Enter your own consideration value (₹)",
-                min_value=0.0,
-                step=10000.0,
-                key="dda_custom_cons",
-            )
+        dda_owner = st.selectbox("Buyer Category", ["male", "female", "joint"])
+        dda_calc_custom = st.checkbox("Calculate also on your consideration")
+        dda_custom_cons = st.number_input("Custom Consideration (₹)", min_value=0.0, value=0.0) if dda_calc_custom else 0.0
 
     if st.button("Calculate DDA / CGHS Value", key="dda_calc_btn"):
         usage_key = dda_usage_pretty.lower()
         more_than_4_flag = dda_more_than_4.lower() == "yes"
 
         plinth_area_sqm = convert_sq_yards_to_sq_meters(dda_area_yards)
-        rate_per_sqm, govt_value = dda_minimum_value(
-            plinth_area_sqm, more_than_4_flag, usage_key
-        )
+        rate_per_sqm, govt_value = dda_minimum_value(plinth_area_sqm, more_than_4_flag, usage_key)
 
         duty_rate_govt = get_stampduty_rate(dda_owner, govt_value)
         stamp_govt = govt_value * duty_rate_govt
-        if usage_key == "residential":
-            mutation_govt = 1136 if govt_value > 5_000_000 else 1124
-        else:
-            mutation_govt = 1124
+        mutation_govt = 1136 if (usage_key == "residential" and govt_value > 5_000_000) else 1124
         e_fees_govt = govt_value * 0.01 + mutation_govt
         tds_govt = govt_value * 0.01 if govt_value > 5_000_000 else 0.0
         total_govt = stamp_govt + e_fees_govt + tds_govt
@@ -1187,61 +923,42 @@ with tab_dda:
 
         st.markdown('<div class="box">', unsafe_allow_html=True)
         st.write("## 🔹 Government (Circle) Value – DDA/CGHS")
-
-        st.write(f"**Usage Type:** {dda_usage_pretty}")
-        st.write(
-            f"**Plinth Area:** {dda_area_yards:.2f} sq. yards "
-            f"({plinth_area_sqm:.2f} sq. meters)"
-        )
-        st.write(f"**Rate Applied:** ₹{rate_per_sqm:,.2f} per sq. meter")
+        st.write(f"Usage: **{dda_usage_pretty}**")
+        st.write(f"Plinth Area: **{dda_area_yards} sq. yards ({plinth_area_sqm:.2f} sq. mtr)**")
+        st.write(f"Rate Applied: **₹{rate_per_sqm:,.2f}/sqm**")
         if more_than_4_flag:
-            st.write("**Storey Rule:** Uniform rate (more than 4 storeys)")
+            st.write("Storey Rule: **Uniform Rate (More than 4 floors)**")
         else:
-            st.write("**Storey Rule:** Up to 4 storeys (area category-based rate)")
+            st.write("Storey Rule: **Up to 4 floors (Area Category Based)**")
 
-        st.success(f"**Minimum Govt. Value (Built-up): ₹{govt_value:,.2f}**")
+        st.success(f"Minimum Govt Value: ₹{govt_value:,.2f}")
 
         st.write("---")
         st.write("### Govt. Duty on Govt. Value")
-        st.write(f"**Stamp Duty Rate:** {duty_rate_govt*100:.2f}%")
-        st.write(f"**Stamp Duty Amount:** ₹{math.ceil(stamp_govt):,}")
-        st.write(f"**Mutation Fees:** ₹{mutation_govt:,}")
-        st.write(f"**E-Fees (1% + mutation):** ₹{math.ceil(e_fees_govt):,}")
-        if tds_govt > 0:
-            st.write(f"**TDS (1% > ₹50L):** ₹{math.ceil(tds_govt):,}")
-        else:
-            st.write("**TDS (1% > ₹50L):** Not applicable")
-        st.success(
-            f"**Total Govt Liability on Govt Value: ₹{math.ceil(total_govt):,}**"
-        )
+        st.write(f"Stamp Duty: ₹{math.ceil(stamp_govt):,}")
+        st.write(f"Mutation Fees: ₹{mutation_govt:,}")
+        st.write(f"E-Fees: ₹{math.ceil(e_fees_govt):,}")
+        if tds_govt:
+            st.write(f"TDS: ₹{math.ceil(tds_govt):,}")
+        st.success(f"Total Govt Duty: ₹{math.ceil(total_govt):,}")
 
-        # Optional custom consideration
         if dda_calc_custom and dda_custom_cons > 0:
             st.write("---")
-            st.write("### Govt. Duty on Your Custom Consideration")
+            st.write("### Govt Duty on Custom Value")
             custom_cons = dda_custom_cons
+
             duty_rate_c = get_stampduty_rate(dda_owner, custom_cons)
             stamp_c = custom_cons * duty_rate_c
-            if usage_key == "residential":
-                mutation_c = 1136 if custom_cons > 5_000_000 else 1124
-            else:
-                mutation_c = 1124
+            mutation_c = 1136 if (usage_key == "residential" and custom_cons > 5_000_000) else 1124
             e_fees_c = custom_cons * 0.01 + mutation_c
             tds_c = custom_cons * 0.01 if custom_cons > 5_000_000 else 0.0
             total_c = stamp_c + e_fees_c + tds_c
 
-            st.write(f"**Consideration Value:** ₹{custom_cons:,.2f}")
-            st.write(f"**Stamp Duty Rate:** {duty_rate_c*100:.2f}%")
-            st.write(f"**Stamp Duty Amount:** ₹{math.ceil(stamp_c):,}")
-            st.write(f"**Mutation Fees:** ₹{mutation_c:,}")
-            st.write(f"**E-Fees (1% + mutation):** ₹{math.ceil(e_fees_c):,}")
-            if tds_c > 0:
-                st.write(f"**TDS (1% > ₹50L):** ₹{math.ceil(tds_c):,}")
-            else:
-                st.write("**TDS (1% > ₹50L):** Not applicable")
-            st.success(
-                f"**Total Govt Liability on Custom Value: ₹{math.ceil(total_c):,}**"
-            )
+            st.write(f"Consideration Value: ₹{custom_cons:,.2f}")
+            st.write(f"Stamp: ₹{math.ceil(stamp_c):,}")
+            st.write(f"Mutation: ₹{mutation_c:,}")
+            st.write(f"E-Fees: ₹{math.ceil(e_fees_c):,}")
+            st.success(f"Total Duty: ₹{math.ceil(total_c):,}")
 
         st.markdown("</div>", unsafe_allow_html=True)
 
@@ -1256,14 +973,11 @@ with tab_history:
     st.subheader("Saved History")
 
     if st.session_state.user_id is None:
-        st.error("Please sign in to view your saved calculations.")
+        st.error("Please sign in.")
     else:
         resp = (
             supabase.table("history")
-            .select(
-                "created_at, colony_name, property_type, category,"
-                "consideration, stamp_duty, e_fees, tds, total_govt_duty"
-            )
+            .select("created_at, colony_name, property_type, category, consideration, stamp_duty, e_fees, tds, total_govt_duty")
             .eq("user_id", st.session_state.user_id)
             .order("created_at", desc=True)
             .execute()
@@ -1271,7 +985,7 @@ with tab_history:
 
         rows = resp.data or []
         if not rows:
-            st.info("No history saved yet. Run a calculation and click “Save to my account”.")
+            st.info("No history saved.")
         else:
             df = pd.DataFrame(rows)
             df = df.rename(
@@ -1299,20 +1013,19 @@ with tab_about:
     st.markdown('<div class="box">', unsafe_allow_html=True)
     st.subheader("About this calculator")
 
-    st.write(
-        """
-        **Delhi Property Price Calculator** helps you estimate:
+    st.write("""
+        This tool calculates:
+        • Circle-rate values  
+        • Construction value  
+        • Stamp duty  
+        • Mutation fees  
+        • E-registration fees  
+        • TDS  
+        • DDA / CGHS built-up value  
 
-        - Circle-rate based land and construction value  
-        - Stamp duty according to buyer category  
-        - Mutation charges & e-registration fees  
-        - TDS (where applicable)  
-        - DDA / CGHS built-up government value
-
-        Designed and implemented by **Rishav Singh** for  
-        **Aggarwal Documents & Legal Consultants**.
-        """
-    )
+        Designed by **Rishav Singh**  
+        for **Aggarwal Documents & Legal Consultants**
+    """)
 
     st.write("---")
     st.write("**Public app link:**")
@@ -1324,11 +1037,7 @@ with tab_about:
         f"Use it here: {APP_URL}"
     )
     wa = quote(wa_text, safe=":/%")
-
-    st.markdown(
-        f'<a href="https://wa.me/?text={wa}"><button>📲 Share on WhatsApp</button></a>',
-        unsafe_allow_html=True,
-    )
+    st.markdown(f'<a href="https://wa.me/?text={wa}"><button>📲 Share on WhatsApp</button></a>', unsafe_allow_html=True)
 
     st.markdown("</div>", unsafe_allow_html=True)
 
@@ -1340,5 +1049,4 @@ st.markdown(
     '<div class="footer">© '
     f'{date.today().year} Rishav Singh · Aggarwal Documents & Legal Consultants</div>',
     unsafe_allow_html=True,
-)
-
+    )

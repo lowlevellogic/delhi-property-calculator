@@ -525,10 +525,14 @@ def render_auth_modal():
 
     st.markdown('<div class="auth-wrapper"><div class="auth-card">', unsafe_allow_html=True)
 
-    try:
-        st.image("logo.jpg", width=120)
-    except:
-        pass
+    st.markdown(
+    """
+    <div style="text-align:center;">
+        <img src="logo.jpg" width="120">
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
     st.markdown(
         """
@@ -1050,3 +1054,4 @@ st.markdown(
     f'{date.today().year} Rishav Singh · Aggarwal Documents & Legal Consultants</div>',
     unsafe_allow_html=True,
     )
+

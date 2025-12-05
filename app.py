@@ -527,16 +527,21 @@ def render_auth_modal():
 
     # ---------------- Logo (Centered) ----------------
     # ---------------- Logo (Centered Perfectly Using Flexbox) ----------------
-    st.markdown("""
-        <div style="
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            margin-bottom: 10px;
-        ">
-            st.image("logo.jpg", width="120">
-        </div>
-    """, unsafe_allow_html=True)
+    # ---------------- Logo (Centered in modal) ----------------
+
+st.markdown(
+    """
+    <div style="
+        width:100%;
+        display:flex;
+        justify-content:center;
+        margin-bottom:10px;
+    ">
+        <img src="logo.jpg" width="120">
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
     # ---------------- Heading ----------------
     st.markdown(
@@ -1059,6 +1064,7 @@ st.markdown(
     f'{date.today().year} Rishav Singh · Aggarwal Documents & Legal Consultants</div>',
     unsafe_allow_html=True,
     )
+
 
 
 

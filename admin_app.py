@@ -210,23 +210,36 @@ with tab3:
             df = df[df["colony_name"].str.contains(search, case=False)]
         st.dataframe(df, use_container_width=True)
 
-
-# -------------------------------------------------
-#  HISTORY TAB
-# -------------------------------------------------
-
+# ---------- HISTORY ----------
 with tab4:
-    st.subheader("📂 User Calculation History")
+    st.subheader("Calculation History")
     hist_df = load_table("history")
-    users_df = load_table("users", "id, email")
-
     if not hist_df.empty:
-        mapping = dict(zip(users_df["id"], users_df["email"]))
-        hist_df["email"] = hist_df["user_id"].map(mapping)
 
+        users_df = load_table("users", "id, email")
+        id_to_email = dict(zip(users_df["id"], users_df["email"]))
+        hist_df["user_email"] = hist_df["user_id"].map(id_to_email)
+
+        cols = [
+            "created_at",
+            "user_email",
+            "colony_name",
+            "property_type",
+            "category",
+            "consideration",
+            "stamp_duty",
+            "e_fees",
+            "tds",
+            "total_govt_duty",
+        ]
+
+        cols = [c for c in cols if c in hist_df.columns]
+        hist_df = hist_df[cols]
+
+        # ✅ FIXED LINE (now valid syntax)
         st.dataframe(
             hist_df.sort_values("created_at", ascending=False),
-            use_container_width=True,
+            use_container_width=True
         )
 
 
@@ -274,5 +287,6 @@ with tab_events:
             events_df.sort_values("created_at", ascending=False),
             use_container_width=True,
         )
+
 
 

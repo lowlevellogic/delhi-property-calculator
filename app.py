@@ -525,17 +525,14 @@ def render_auth_modal():
 
     st.markdown('<div class="auth-wrapper"><div class="auth-card">', unsafe_allow_html=True)
 
-    # ---------------- Logo (Centered) ----------------
-    # ---------------- Logo (Centered Perfectly Using Flexbox) ----------------
-    # ---------------- Logo (Centered in modal) ----------------
-
+    # ----------- CENTER LOGO (WORKS 100%) -----------
 st.markdown(
     """
     <div style="
-        width:100%;
-        display:flex;
-        justify-content:center;
-        margin-bottom:10px;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        margin-bottom: 15px;
     ">
         <img src="logo.jpg" width="120">
     </div>
@@ -1064,6 +1061,7 @@ st.markdown(
     f'{date.today().year} Rishav Singh · Aggarwal Documents & Legal Consultants</div>',
     unsafe_allow_html=True,
     )
+
 
 
 

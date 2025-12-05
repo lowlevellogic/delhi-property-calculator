@@ -637,7 +637,7 @@ def render_auth_modal():
                 update_last_login(row["id"])
                 log_event("login", f"{row['email']} logged in")
                 st.success("Welcome back! You are now signed in.")
-                st.experimental_rerun()
+                st.rerun()
 
         # --- Reset password flow (inside login tab) ---
         if st.session_state.show_reset_form:
@@ -1341,3 +1341,4 @@ st.markdown(
     f'{date.today().year} Rishav Singh · Aggarwal Documents & Legal Consultants</div>',
     unsafe_allow_html=True,
 )
+

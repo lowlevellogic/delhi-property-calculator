@@ -494,7 +494,7 @@ with tab_history:
 
             date_range = st.date_input(
                 "Date range",
-                value=(min_d, max_d),
+                value=(min_d, max_d), key = "history_date_range"
             )
 
         # ---- APPLY FILTERS ----
@@ -602,7 +602,7 @@ with tab_events:
             else:
                 today = date.today()
                 min_d = max_d = today
-            date_range = st.date_input("Date range", value=(min_d, max_d))
+            date_range = st.date_input("Date range", value=(min_d, max_d), key = "events_date_range")
 
         df_show = df.copy()
 
@@ -640,3 +640,4 @@ with tab_events:
                     st.rerun()
                 except Exception as e:
                     st.error(f"Error deleting events: {e}")
+

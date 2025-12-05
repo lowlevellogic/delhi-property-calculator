@@ -526,19 +526,14 @@ def render_auth_modal():
     st.markdown('<div class="auth-wrapper"><div class="auth-card">', unsafe_allow_html=True)
 
     # ----------- CENTER LOGO (WORKS 100%) -----------
-st.markdown(
-    """
-    <div style="
-        width: 100%;
-        display: flex;
-        justify-content: center;
-        margin-bottom: 15px;
-    ">
-        <img src="logo.jpg" width="120">
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
+    st.markdown(
+        """
+        <div style="width:100%; display:flex; justify-content:center; margin-bottom:15px;">
+            <img src="logo.jpg" width="120">
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
     # ---------------- Heading ----------------
     st.markdown(
@@ -1061,6 +1056,7 @@ st.markdown(
     f'{date.today().year} Rishav Singh · Aggarwal Documents & Legal Consultants</div>',
     unsafe_allow_html=True,
     )
+
 
 
 

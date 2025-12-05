@@ -8,13 +8,13 @@ from urllib.parse import quote
 import pandas as pd
 import streamlit as st
 
+from supabase import create_client, Client
+
 from database import (
     get_connection,
     init_db,
     create_otp,
     verify_otp,
-    touch_visitor,
-    log_calc_event,
 )
 from email_otp import send_otp_email
 
@@ -106,6 +106,13 @@ st.markdown(
             background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
             color: #ffffff;
         }
+        .stMarkdown, .stText, .stNumberInput > label, .stSelectbox > label,
+        .stRadio > label, .stCheckbox > label {
+            color: #ffffff !important;
+        }
+        label {
+            color: #ffffff !important;
+        }
         .main-header {
             display: flex;
             align-items: center;
@@ -134,15 +141,34 @@ st.markdown(
             font-size: 13px;
             color: #d0e8ff;
         }
-        /* Make form labels / widget text white so they are visible */
-        label, .stTextInput label, .stNumberInput label,
-        .stSelectbox label, .stRadio label, .stCheckbox label {
-            color: #ffffff !important;
-        }
     </style>
     """,
     unsafe_allow_html=True,
 )
+
+# -------------------------------------------------
+# SUPABASE CLIENT (for tracking events)
+# -------------------------------------------------
+
+def create_supabase_client() -> Client | None:
+    # Prefer secrets; fall back to hard-coded values if secrets not set
+    url = st.secrets.get(
+        "supabase_url",
+        "https://sbcfsmvehwlqeuyifmdo.supabase.co",
+    )
+    key = st.secrets.get(
+        "supabase_anon_key",
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNiY2ZzbXZlaHdscWV1eWlmbWRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ4NzAxOTQsImV4cCI6MjA4MDQ0NjE5NH0.yqSjd5w91zvyogfeThl6Epnuq5a1mDvIn1SP7R-8gH4",
+    )
+    if not url or not key:
+        return None
+    try:
+        return create_client(url, key)
+    except Exception:
+        return None
+
+
+supabase: Client | None = create_supabase_client()
 
 # -------------------------------------------------
 # DB INIT & SESSION STATE
@@ -188,8 +214,10 @@ def ensure_session_state():
         "otp_sent": False,
         "last_result": None,
         "last_result_tab": None,
-        "visitor_id": None,
-        "ref_source": None,
+        "session_id": str(uuid.uuid4()),
+        "visitor_city": "",
+        "visitor_device": "",
+        "page_view_logged": False,
     }
     for k, v in defaults.items():
         if k not in st.session_state:
@@ -198,45 +226,34 @@ def ensure_session_state():
 
 ensure_session_state()
 
+# -------------------------------------------------
+# VISITOR TRACKING (Supabase)
+# -------------------------------------------------
 
-def init_visitor_tracking():
-    # Unique visitor ID (per browser/session)
-    if st.session_state.visitor_id is None:
-        st.session_state.visitor_id = str(uuid.uuid4())
+def track_event(event_name: str, extra: dict | None = None):
+    """Send simple tracking event to Supabase events table."""
+    if supabase is None:
+        return
 
-    # Try to pick ref_source from query params (?from=whatsapp etc.)
-    if st.session_state.ref_source is None:
-        try:
-            qp = st.query_params  # new Streamlit
-        except Exception:
-            qp = st.experimental_get_query_params()  # old fallback
+    try:
+        payload = {
+            "event_name": event_name,
+            "user_id": st.session_state.user_id,
+            "session_id": st.session_state.session_id,
+            "url": APP_URL,
+            "city": st.session_state.get("visitor_city") or None,
+            "device": st.session_state.get("visitor_device") or None,
+            "extra": extra or {},
+        }
+        supabase.table("events").insert(payload).execute()
+    except Exception:
+        # Fail silently – we don't want analytics failure to break the app
+        pass
 
-        src = None
-        if isinstance(qp, dict):
-            if "from" in qp:
-                val = qp["from"]
-                if isinstance(val, list):
-                    src = val[0]
-                else:
-                    src = val
-        st.session_state.ref_source = src or "direct"
-
-    # Track / update visitor in DB
-    touch_visitor(
-        st.session_state.visitor_id,
-        device="Unknown",
-        browser="Unknown",
-        city="Unknown",
-        ref_source=st.session_state.ref_source,
-    )
-
-
-init_visitor_tracking()
 
 # -------------------------------------------------
 # COLONIES FROM DB
 # -------------------------------------------------
-
 
 @st.cache_data
 def load_colonies_from_db():
@@ -254,7 +271,6 @@ COLONY_NAMES, COLONY_MAP = load_colonies_from_db()
 # -------------------------------------------------
 # CALC HELPERS
 # -------------------------------------------------
-
 
 def convert_sq_yards_to_sq_meters(sq_yards: float) -> float:
     return round(sq_yards * 0.8361, 2)
@@ -342,7 +358,7 @@ def run_calculation(
     tds = final_consideration * 0.01 if final_consideration > 5_000_000 else 0.0
     total_payable = stamp_duty + e_fees + tds
 
-    return {
+    result = {
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "property_type": property_type,
         "colony_name": colony_name,
@@ -370,6 +386,7 @@ def run_calculation(
         "construction_value": construction_value,
         "parking_cost": parking_cost,
     }
+    return result
 
 
 def determine_area_category(plinth_area_sqm: float) -> str:
@@ -498,6 +515,20 @@ def auth_sidebar():
     with st.sidebar:
         st.markdown("### 🔐 Account")
 
+        # Visitor info (city + device) for tracking
+        st.text_input(
+            "Your City (optional)",
+            key="visitor_city",
+            help="Used only for anonymous statistics.",
+        )
+        st.text_input(
+            "Your Device / Browser (optional)",
+            key="visitor_device",
+            help="Example: Android Chrome, Windows Laptop, iPhone Safari, etc.",
+        )
+
+        st.write("---")
+
         if st.session_state.user_id is None:
             tab_login, tab_signup = st.tabs(["Login", "Sign Up"])
 
@@ -506,6 +537,10 @@ def auth_sidebar():
                 email = st.text_input("Email", key="login_email")
                 password = st.text_input(
                     "Password", type="password", key="login_pw"
+                )
+                remember_me = st.checkbox(
+                    "Remember me (keeps you logged in in this browser session)",
+                    value=True,
                 )
                 if st.button("Login", key="login_btn"):
                     row = get_user_by_email(email)
@@ -521,6 +556,10 @@ def auth_sidebar():
                             st.session_state.user_id = user_id
                             st.session_state.user_email = u_email
                             st.success(f"Logged in as {u_email}")
+                            track_event(
+                                "login_success",
+                                {"email": u_email, "remember_me": remember_me},
+                            )
 
             # ---------- SIGNUP ----------
             with tab_signup:
@@ -544,11 +583,19 @@ def auth_sidebar():
                                     "Failed to send OTP. Check email settings."
                                 )
                                 st.text(str(err))
+                                track_event(
+                                    "signup_otp_failed",
+                                    {"email": signup_email, "error": str(err)},
+                                )
                             else:
                                 create_otp(signup_email, otp)
                                 st.session_state.pending_signup_email = signup_email
                                 st.session_state.otp_sent = True
                                 st.success("OTP sent to your email.")
+                                track_event(
+                                    "signup_otp_sent",
+                                    {"email": signup_email},
+                                )
 
                 if st.session_state.otp_sent and st.session_state.pending_signup_email:
                     st.write(
@@ -569,6 +616,12 @@ def auth_sidebar():
                             )
                             if not ok:
                                 st.error("Invalid or expired OTP.")
+                                track_event(
+                                    "signup_otp_invalid",
+                                    {
+                                        "email": st.session_state.pending_signup_email
+                                    },
+                                )
                             else:
                                 pw_hash = hash_password(new_password)
                                 user = create_user(
@@ -579,9 +632,14 @@ def auth_sidebar():
                                 st.session_state.otp_sent = False
                                 st.session_state.pending_signup_email = None
                                 st.success("Account created and logged in!")
+                                track_event(
+                                    "signup_success",
+                                    {"email": st.session_state.user_email},
+                                )
         else:
             st.success(f"Logged in as: {st.session_state.user_email}")
             if st.button("Logout"):
+                track_event("logout", {"email": st.session_state.user_email})
                 st.session_state.user_id = None
                 st.session_state.user_email = None
                 st.experimental_rerun()
@@ -610,6 +668,11 @@ st.write("---")
 
 # Sidebar auth
 auth_sidebar()
+
+# Log a single page view per session
+if not st.session_state.page_view_logged:
+    track_event("page_view", {})
+    st.session_state.page_view_logged = True
 
 # -------------------------------------------------
 # MAIN TABS
@@ -757,23 +820,15 @@ with tab_res:
         )
         st.session_state.last_result = res
         st.session_state.last_result_tab = "Residential"
-
-        # Log calculation event for analytics
-        log_calc_event(
-            visitor_id=st.session_state.visitor_id,
-            user_id=st.session_state.user_id,
-            property_type="Residential",
-            colony_name=res["colony_name"],
-            category=res["category"],
-            consideration=res["final_consideration"],
-            total_govt_duty=res["total_payable"],
-            device="Unknown",
-            browser="Unknown",
-            city="Unknown",
-            ref_source=st.session_state.ref_source,
-        )
-
         st.success("Residential property calculation completed.")
+        track_event(
+            "calc_residential",
+            {
+                "category": r_category,
+                "land_area_yards": r_land_area_yards,
+                "owner": r_owner,
+            },
+        )
 
     if (
         st.session_state.last_result
@@ -893,23 +948,15 @@ with tab_com:
         )
         st.session_state.last_result = res
         st.session_state.last_result_tab = "Commercial"
-
-        # Log calculation event for analytics
-        log_calc_event(
-            visitor_id=st.session_state.visitor_id,
-            user_id=st.session_state.user_id,
-            property_type="Commercial",
-            colony_name=res["colony_name"],
-            category=res["category"],
-            consideration=res["final_consideration"],
-            total_govt_duty=res["total_payable"],
-            device="Unknown",
-            browser="Unknown",
-            city="Unknown",
-            ref_source=st.session_state.ref_source,
-        )
-
         st.success("Commercial property calculation completed.")
+        track_event(
+            "calc_commercial",
+            {
+                "category": c_category,
+                "land_area_yards": c_land_area_yards,
+                "owner": c_owner,
+            },
+        )
 
     if (
         st.session_state.last_result
@@ -983,19 +1030,13 @@ with tab_dda:
         tds_govt = govt_value * 0.01 if govt_value > 5_000_000 else 0.0
         total_govt = stamp_govt + e_fees_govt + tds_govt
 
-        # Log DDA / CGHS calculation as an event
-        log_calc_event(
-            visitor_id=st.session_state.visitor_id,
-            user_id=st.session_state.user_id,
-            property_type="DDA/CGHS",
-            colony_name=None,
-            category=None,
-            consideration=govt_value,
-            total_govt_duty=total_govt,
-            device="Unknown",
-            browser="Unknown",
-            city="Unknown",
-            ref_source=st.session_state.ref_source,
+        track_event(
+            "calc_dda_cghs",
+            {
+                "usage": usage_key,
+                "plinth_area_yards": dda_area_yards,
+                "more_than_4": more_than_4_flag,
+            },
         )
 
         st.markdown('<div class="box">', unsafe_allow_html=True)
@@ -1042,21 +1083,6 @@ with tab_dda:
             e_fees_c = custom_cons * 0.01 + mutation_c
             tds_c = custom_cons * 0.01 if custom_cons > 5_000_000 else 0.0
             total_c = stamp_c + e_fees_c + tds_c
-
-            # (Optional) log this too as a separate event if you like
-            log_calc_event(
-                visitor_id=st.session_state.visitor_id,
-                user_id=st.session_state.user_id,
-                property_type="DDA/CGHS-CUSTOM",
-                colony_name=None,
-                category=None,
-                consideration=custom_cons,
-                total_govt_duty=total_c,
-                device="Unknown",
-                browser="Unknown",
-                city="Unknown",
-                ref_source=st.session_state.ref_source,
-            )
 
             st.write(f"**Consideration Value:** ₹{custom_cons:,.2f}")
             st.write(f"**Stamp Duty Rate:** {duty_rate_c*100:.2f}%")
@@ -1122,6 +1148,7 @@ with tab_history:
                 )
                 conn.commit()
                 st.success("Your history has been cleared.")
+                track_event("history_cleared", {"user_id": st.session_state.user_id})
                 st.experimental_rerun()
 
     st.markdown("</div>", unsafe_allow_html=True)

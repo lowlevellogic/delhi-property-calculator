@@ -1030,6 +1030,27 @@ def render_summary_block(res, save_key):
 
 
 # -------------------------------------------------
+# -------------------------------------------------
+# SIDEBAR STATUS
+# -------------------------------------------------
+
+def render_sidebar_status():
+    with st.sidebar:
+        st.markdown("### 👤 Account")
+
+        if st.session_state.user_id is not None:
+            display_name = st.session_state.username or st.session_state.user_email
+            st.success(f"Signed in as **{display_name}**")
+            if st.button("Logout", key="logout_btn_sidebar"):
+                st.session_state.user_id = None
+                st.session_state.user_email = None
+                st.session_state.username = None
+                st.session_state.show_auth_modal = True
+                st.rerun()
+        else:
+            st.info("Using as guest.")
+            if st.button("Login / Sign up", key="open_auth_from_sidebar"):
+                st.session_state.show_auth_modal = True
 
 # AUTH POPUP
 
@@ -1958,6 +1979,7 @@ st.markdown(
     unsafe_allow_html=True,
 
     )
+
 
 
 

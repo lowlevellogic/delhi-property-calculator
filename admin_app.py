@@ -168,8 +168,8 @@ def render_login_page():
             unsafe_allow_html=True,
         )
 
-        email = st.text_input("Admin Email", key="admin_email_input")
-        pw = st.text_input("Admin Password", type="password", key="admin_password_input")
+        email = st.text_input("Admin Email", key="admin_email_input_login")
+pw = st.text_input("Admin Password", type="password", key="admin_password_input_login")
 
         login_btn = st.button("Login as Admin", use_container_width=True)
 
@@ -671,5 +671,6 @@ with tab_events:
                     st.rerun()
                 except Exception as e:
                     st.error(f"Error deleting events: {e}")
+
 
 

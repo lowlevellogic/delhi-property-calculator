@@ -1,482 +1,171 @@
-import hashlib
-from datetime import datetime
-
 import pandas as pd
 import streamlit as st
+from supabase import create_client, Client
 
-from database import get_connection, init_db
+# -------------------------------------------------
+# SUPABASE & ADMIN AUTH
+# -------------------------------------------------
 
 
-# -----------------------------------------
-# BASIC CONFIG
-# -----------------------------------------
+@st.cache_resource
+def get_supabase() -> Client:
+    url = st.secrets["SUPABASE_URL"]
+    key = st.secrets["SUPABASE_KEY"]
+    return create_client(url, key)
 
-st.set_page_config(
-    page_title="Admin – Delhi Property Calculator",
-    layout="wide",
+
+supabase = get_supabase()
+
+ADMIN_EMAIL = st.secrets["ADMIN_EMAIL"]
+ADMIN_PASSWORD = st.secrets["ADMIN_PASSWORD"]
+
+
+def ensure_state():
+    if "admin_auth" not in st.session_state:
+        st.session_state.admin_auth = False
+
+
+ensure_state()
+
+st.set_page_config(page_title="Admin – Delhi Property Calculator", layout="wide")
+
+st.title("🛡️ Admin Dashboard")
+st.caption("Internal dashboard – Aggarwal Documents & Legal Consultants")
+
+# ---------- LOGIN ----------
+with st.sidebar:
+    st.header("Admin Login")
+
+    if not st.session_state.admin_auth:
+        email = st.text_input("Admin Email")
+        pw = st.text_input("Admin Password", type="password")
+        if st.button("Login as Admin"):
+            if email == ADMIN_EMAIL and pw == ADMIN_PASSWORD:
+                st.session_state.admin_auth = True
+                st.success("Admin login successful.")
+                st.experimental_rerun()
+            else:
+                st.error("Invalid admin credentials.")
+    else:
+        st.success(f"Logged in as admin: {ADMIN_EMAIL}")
+        if st.button("Logout"):
+            st.session_state.admin_auth = False
+            st.experimental_rerun()
+
+if not st.session_state.admin_auth:
+    st.stop()
+
+# -------------------------------------------------
+# HELPER TO LOAD TABLES
+# -------------------------------------------------
+
+
+def load_table(name: str, select: str = "*"):
+    try:
+        res = supabase.table(name).select(select).execute()
+        data = res.data or []
+        if not data:
+            st.info(f"No rows in table '{name}'.")
+            return pd.DataFrame()
+        return pd.DataFrame(data)
+    except Exception as e:
+        st.warning(f"Could not load table '{name}': {e}")
+        return pd.DataFrame()
+
+
+tab_overview, tab_users, tab_colonies, tab_history, tab_otps, tab_events = st.tabs(
+    ["Overview", "Users", "Colonies", "History", "OTP Logs", "Events"]
 )
 
-st.markdown(
-    """
-    <style>
-        .stApp {
-            background: radial-gradient(circle at top, #182848, #03001e);
-            color: #f5f7ff;
-        }
-        .admin-header {
-            display:flex;
-            align-items:center;
-            gap:12px;
-        }
-        .admin-title {
-            font-size:24px;
-            font-weight:800;
-            margin:0;
-            color:#fdfcff;
-        }
-        .admin-sub {
-            font-size:14px;
-            margin:0;
-            color:#c9d4ff;
-        }
-        .box {
-            background: rgba(0, 0, 0, 0.45);
-            padding: 18px 20px;
-            border-radius: 12px;
-            margin-bottom: 16px;
-        }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
+# ---------- OVERVIEW ----------
+with tab_overview:
+    st.subheader("Overview")
 
-
-# -----------------------------------------
-# DB + HELPERS
-# -----------------------------------------
-
-init_db()
-conn = get_connection()
-
-
-def hash_password(pw: str) -> str:
-    return hashlib.sha256(pw.encode()).hexdigest()
-
-
-def ensure_admin_session():
-    if "admin_logged_in" not in st.session_state:
-        st.session_state.admin_logged_in = False
-    if "admin_email" not in st.session_state:
-        st.session_state.admin_email = None
-
-
-ensure_admin_session()
-
-
-# -----------------------------------------
-# ADMIN AUTH
-# -----------------------------------------
-
-def admin_login_ui():
-    st.markdown(
-        """
-        <div class="admin-header">
-            <div>
-                <p class="admin-title">Admin Dashboard</p>
-                <p class="admin-sub">Aggarwal Documents &amp; Legal Consultants</p>
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
+    users_df = load_table(
+        "users", "id, email, created_at, last_login, city, device"
     )
-    st.write("---")
-
-    st.markdown('<div class="box">', unsafe_allow_html=True)
-    st.subheader("🔐 Admin Login")
-
-    # SECRET ADMIN CREDENTIALS
-    admin_email_secret = st.secrets["admin"]["email"]
-    admin_password_secret = st.secrets["admin"]["password"]
-
-    email = st.text_input("Admin Email")
-    password = st.text_input("Admin Password", type="password")
-
-    if st.button("Login as Admin"):
-        if email == admin_email_secret and password == admin_password_secret:
-            st.session_state.admin_logged_in = True
-            st.session_state.admin_email = email
-            st.success("Admin login successful.")
-            st.rerun()
-        else:
-            st.error("Invalid admin credentials.")
-
-    st.markdown("</div>", unsafe_allow_html=True)
-
-
-def require_admin():
-    if not st.session_state.admin_logged_in:
-        admin_login_ui()
-        st.stop()
-
-
-# -----------------------------------------
-# ADMIN PAGES
-# -----------------------------------------
-
-def page_overview():
-    st.markdown('<div class="box">', unsafe_allow_html=True)
-    st.subheader("📊 Overview")
-
-    c = conn.cursor()
-
-    try:
-        c.execute("SELECT COUNT(*) FROM users;")
-        total_users = c.fetchone()[0]
-    except Exception:
-        total_users = "N/A"
-
-    try:
-        c.execute("SELECT COUNT(*) FROM history;")
-        total_history = c.fetchone()[0]
-    except Exception:
-        total_history = "N/A"
-
-    try:
-        c.execute("SELECT COUNT(*) FROM colonies;")
-        total_colonies = c.fetchone()[0]
-    except Exception:
-        total_colonies = "N/A"
+    hist_df = load_table("history")
+    events_df = load_table("events")
 
     col1, col2, col3 = st.columns(3)
-    col1.metric("Total Users", total_users)
-    col2.metric("History Records", total_history)
-    col3.metric("Colonies", total_colonies)
+    with col1:
+        st.metric("Total Users", len(users_df))
+    with col2:
+        st.metric("Saved Calculations", len(hist_df))
+    with col3:
+        st.metric("Tracked Events", len(events_df))
 
-    st.markdown("</div>", unsafe_allow_html=True)
-
-
-def page_users():
-    st.markdown('<div class="box">', unsafe_allow_html=True)
-    st.subheader("👥 Manage Users")
-
-    c = conn.cursor()
-    try:
-        df_users = pd.read_sql_query(
-            "SELECT id, email, is_verified, created_at FROM users ORDER BY id DESC;",
-            conn,
-        )
-        st.write("All registered users:")
-        st.dataframe(df_users, use_container_width=True)
-    except Exception as e:
-        st.error("Error loading users table.")
-        st.text(str(e))
-        st.markdown("</div>", unsafe_allow_html=True)
-        return
-
-    st.write("---")
-    col_create, col_reset, col_delete = st.columns(3)
-
-    # ----- CREATE USER -----
-    with col_create:
-        st.markdown("#### ➕ Create User Manually")
-        new_email = st.text_input("New User Email", key="admin_new_user_email")
-        new_pw = st.text_input("New User Password", type="password", key="admin_new_user_pw")
-
-        if st.button("Create User", key="btn_create_user"):
-            if not new_email or not new_pw:
-                st.error("Enter email and password.")
-            else:
-                try:
-                    pw_hash = hash_password(new_pw)
-                    c.execute(
-                        """
-                        INSERT INTO users (email, password_hash, is_verified, created_at)
-                        VALUES (?, ?, ?, ?);
-                        """,
-                        (new_email.lower(), pw_hash, 1, datetime.utcnow().isoformat()),
-                    )
-                    conn.commit()
-                    st.success(f"User '{new_email}' created.")
-                    st.rerun()
-                except Exception as e:
-                    st.error("Error creating user.")
-                    st.text(str(e))
-
-    # ----- RESET PASSWORD -----
-    with col_reset:
-        st.markdown("#### 🔁 Reset User Password")
-        reset_email = st.text_input("User Email", key="admin_reset_email")
-        new_pw2 = st.text_input("New Password", type="password", key="admin_reset_pw")
-
-        if st.button("Reset Password", key="btn_reset_pw"):
-            if not reset_email or not new_pw2:
-                st.error("Enter email and new password.")
-            else:
-                try:
-                    pw_hash = hash_password(new_pw2)
-                    c.execute(
-                        "UPDATE users SET password_hash = ? WHERE email = ?;",
-                        (pw_hash, reset_email.lower()),
-                    )
-                    conn.commit()
-
-                    if c.rowcount == 0:
-                        st.warning("No user found with that email.")
-                    else:
-                        st.success("Password updated.")
-                except Exception as e:
-                    st.error("Error updating password.")
-                    st.text(str(e))
-
-    # ----- DELETE USER -----
-    with col_delete:
-        st.markdown("#### 🗑️ Delete User")
-        del_email = st.text_input("User Email to Delete", key="admin_del_email")
-
-        if st.button("Delete User", key="btn_delete_user"):
-            if not del_email:
-                st.error("Enter email to delete.")
-            else:
-                try:
-                    c.execute("DELETE FROM users WHERE email = ?;", (del_email.lower(),))
-                    conn.commit()
-
-                    if c.rowcount == 0:
-                        st.warning("No user found.")
-                    else:
-                        st.success("User deleted.")
-                        st.rerun()
-                except Exception as e:
-                    st.error("Error deleting user.")
-                    st.text(str(e))
-
-    st.markdown("</div>", unsafe_allow_html=True)
-
-
-def page_colonies():
-    st.markdown('<div class="box">', unsafe_allow_html=True)
-    st.subheader("🏙️ Manage Colonies")
-
-    c = conn.cursor()
-    try:
-        df_cols = pd.read_sql_query(
-            "SELECT id, colony_name, category FROM colonies ORDER BY colony_name;",
-            conn,
-        )
-        st.write("Existing colonies:")
-        st.dataframe(df_cols, use_container_width=True)
-    except Exception as e:
-        st.error("Error loading colonies.")
-        st.text(str(e))
-        st.markdown("</div>", unsafe_allow_html=True)
-        return
-
-    st.write("---")
-    col_add, col_update, col_delete = st.columns(3)
-
-    # ----- ADD COLONY -----
-    with col_add:
-        st.markdown("#### ➕ Add Colony")
-        new_name = st.text_input("Colony Name", key="new_colony_name")
-        new_cat = st.selectbox(
-            "Category (A–H)",
-            ["A", "B", "C", "D", "E", "F", "G", "H"],
-            key="new_colony_cat",
+    st.write("### Recent Users")
+    if not users_df.empty:
+        st.dataframe(
+            users_df.sort_values("created_at", ascending=False).head(20),
+            use_container_width=True,
         )
 
-        if st.button("Add Colony", key="btn_add_colony"):
-            if not new_name:
-                st.error("Enter colony name.")
-            else:
-                try:
-                    c.execute(
-                        "INSERT INTO colonies (colony_name, category) VALUES (?, ?);",
-                        (new_name.strip(), new_cat),
-                    )
-                    conn.commit()
-                    st.success("Colony added.")
-                    st.rerun()
-                except Exception as e:
-                    st.error("Error adding colony.")
-                    st.text(str(e))
-
-    # ----- UPDATE COLONY -----
-    with col_update:
-        st.markdown("#### ✏️ Update Category")
-        upd_name = st.text_input("Existing Colony Name", key="upd_colony_name")
-        upd_cat = st.selectbox(
-            "New Category (A–H)",
-            ["A", "B", "C", "D", "E", "F", "G", "H"],
-            key="upd_colony_cat",
-        )
-
-        if st.button("Update Category", key="btn_upd_colony"):
-            if not upd_name:
-                st.error("Enter colony name.")
-            else:
-                try:
-                    c.execute(
-                        "UPDATE colonies SET category = ? WHERE colony_name = ?;",
-                        (upd_cat, upd_name.strip()),
-                    )
-                    conn.commit()
-                    st.success("Colony updated.")
-                    st.rerun()
-                except Exception as e:
-                    st.error("Error updating colony.")
-                    st.text(str(e))
-
-    # ----- DELETE COLONY -----
-    with col_delete:
-        st.markdown("#### 🗑️ Delete Colony")
-        del_name = st.text_input("Colony Name to Delete", key="del_colony_name")
-
-        if st.button("Delete Colony", key="btn_del_colony"):
-            if not del_name:
-                st.error("Enter colony name.")
-            else:
-                try:
-                    c.execute(
-                        "DELETE FROM colonies WHERE colony_name = ?;",
-                        (del_name.strip(),),
-                    )
-                    conn.commit()
-                    st.success("Colony deleted.")
-                    st.rerun()
-                except Exception as e:
-                    st.error("Error deleting colony.")
-                    st.text(str(e))
-
-    st.markdown("</div>", unsafe_allow_html=True)
-
-
-def page_history():
-    st.markdown('<div class="box">', unsafe_allow_html=True)
-    st.subheader("📚 Calculations History")
-
-    c = conn.cursor()
-    try:
-        df_hist = pd.read_sql_query(
-            """
-            SELECT h.id,
-                   h.created_at,
-                   u.email AS user_email,
-                   h.colony_name,
-                   h.property_type,
-                   h.category,
-                   h.consideration,
-                   h.stamp_duty,
-                   h.e_fees,
-                   h.tds,
-                   h.total_govt_duty
-            FROM history h
-            LEFT JOIN users u ON h.user_id = u.id
-            ORDER BY h.created_at DESC
-            LIMIT 500;
-            """,
-            conn,
-        )
-        st.write("Last 500 history records:")
-        st.dataframe(df_hist, use_container_width=True)
-    except Exception as e:
-        st.error("Error loading history.")
-        st.text(str(e))
-        return
-
-    st.write("---")
-    st.markdown("#### 🗑️ Delete History Records")
-
-    del_all = st.checkbox("Delete ALL history records (for all users)")
-    del_user_email = st.text_input("Or delete by user email", key="hist_del_email")
-
-    if st.button("Delete Selected History", key="btn_del_hist"):
-        try:
-            if del_all:
-                c.execute("DELETE FROM history;")
-                conn.commit()
-                st.success("All history deleted.")
-                st.rerun()
-            elif del_user_email:
-                c.execute(
-                    "DELETE FROM history WHERE user_id IN (SELECT id FROM users WHERE email = ?);",
-                    (del_user_email.lower(),),
-                )
-                conn.commit()
-                st.success("History deleted for that user.")
-                st.rerun()
-            else:
-                st.warning("Select delete all or enter a user email.")
-        except Exception as e:
-            st.error("Error deleting history.")
-            st.text(str(e))
-
-    st.markdown("</div>", unsafe_allow_html=True)
-
-
-def page_otps():
-    st.markdown('<div class="box">', unsafe_allow_html=True)
-    st.subheader("📨 OTP Logs")
-
-    try:
-        df_otps = pd.read_sql_query(
-            "SELECT id, email, otp_code, expires_at, used FROM otps ORDER BY id DESC LIMIT 200;",
-            conn
-        )
-        st.write("Last 200 OTP records:")
-        st.dataframe(df_otps, use_container_width=True)
-
-    except Exception as e:
-        st.warning(
-            "Could not load OTP table. It may not exist or has a different structure."
-        )
-        st.text(str(e))
-
-    st.markdown("</div>", unsafe_allow_html=True)
-
-
-# -----------------------------------------
-# MAIN ADMIN APP
-# -----------------------------------------
-
-require_admin()
-
-header_col1, header_col2 = st.columns([3, 1])
-with header_col1:
-    st.markdown(
-        """
-        <div class="admin-header">
-            <div>
-                <p class="admin-title">Admin Dashboard</p>
-                <p class="admin-sub">Logged in as: Admin</p>
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-with header_col2:
-    if st.button("Logout", key="admin_logout"):
-        st.session_state.admin_logged_in = False
-        st.session_state.admin_email = None
-        st.rerun()
-
-st.write("---")
-
-tab_overview, tab_users, tab_colonies, tab_history, tab_otps = st.tabs(
-    ["📊 Overview", "👥 Users", "🏙️ Colonies", "📚 History", "📨 OTP Logs"]
-)
-
-with tab_overview:
-    page_overview()
-
+# ---------- USERS ----------
 with tab_users:
-    page_users()
+    st.subheader("Users")
+    users_df = load_table(
+        "users", "id, email, created_at, last_login, city, device"
+    )
+    if not users_df.empty:
+        search = st.text_input("Search email")
+        if search:
+            users_df = users_df[users_df["email"].str.contains(search, case=False)]
+        st.dataframe(users_df, use_container_width=True)
 
+# ---------- COLONIES ----------
 with tab_colonies:
-    page_colonies()
+    st.subheader("Colonies")
+    col_df = load_table("colonies", "id, colony_name, category")
+    if not col_df.empty:
+        search = st.text_input("Search colony")
+        if search:
+            col_df = col_df[col_df["colony_name"].str.contains(search, case=False)]
+        st.dataframe(col_df, use_container_width=True)
 
+# ---------- HISTORY ----------
 with tab_history:
-    page_history()
+    st.subheader("Calculation History")
+    hist_df = load_table("history")
+    if not hist_df.empty:
+        users_df = load_table("users", "id, email")
+        id_to_email = dict(zip(users_df["id"], users_df["email"]))
+        hist_df["user_email"] = hist_df["user_id"].map(id_to_email)
+        cols = [
+            "created_at",
+            "user_email",
+            "colony_name",
+            "property_type",
+            "category",
+            "consideration",
+            "stamp_duty",
+            "e_fees",
+            "tds",
+            "total_govt_duty",
+        ]
+        cols = [c for c in cols if c in hist_df.columns]
+        hist_df = hist_df[cols]
+        st.dataframe(hist_df.sort_values("created_at", ascending=False), use_container_width=True)
 
+# ---------- OTP LOGS ----------
 with tab_otps:
-    page_otps()
+    st.subheader("OTP Logs")
+    otps_df = load_table(
+        "otps", "id, email, purpose, otp_code, used, expires_at, created_at"
+    )
+    if not otps_df.empty:
+        st.dataframe(
+            otps_df.sort_values("created_at", ascending=False),
+            use_container_width=True,
+        )
 
+# ---------- EVENTS ----------
+with tab_events:
+    st.subheader("Event Logs")
+    events_df = load_table("events")
+    if not events_df.empty:
+        st.dataframe(
+            events_df.sort_values("created_at", ascending=False),
+            use_container_width=True,
+        )

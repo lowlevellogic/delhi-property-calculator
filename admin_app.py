@@ -3,9 +3,8 @@ import streamlit as st
 from supabase import create_client, Client
 
 # -------------------------------------------------
-# SUPABASE & ADMIN AUTH
+#  CONFIG
 # -------------------------------------------------
-
 
 @st.cache_resource
 def get_supabase() -> Client:
@@ -13,139 +12,245 @@ def get_supabase() -> Client:
     key = st.secrets["SUPABASE_KEY"]
     return create_client(url, key)
 
-
 supabase = get_supabase()
 
 ADMIN_EMAIL = st.secrets["ADMIN_EMAIL"]
 ADMIN_PASSWORD = st.secrets["ADMIN_PASSWORD"]
 
 
+# -------------------------------------------------
+#  SESSION STATE
+# -------------------------------------------------
+
 def ensure_state():
     if "admin_auth" not in st.session_state:
         st.session_state.admin_auth = False
 
-
 ensure_state()
 
-st.set_page_config(page_title="Admin – Delhi Property Calculator", layout="wide")
 
-st.title("🛡️ Admin Dashboard")
-st.caption("Internal dashboard – Aggarwal Documents & Legal Consultants")
+# -------------------------------------------------
+#  PAGE UI THEME
+# -------------------------------------------------
 
-# ---------- LOGIN ----------
+st.set_page_config(
+    page_title="Admin Dashboard – Delhi Property Calculator",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
+
+st.markdown("""
+    <style>
+        .stApp {
+            background: linear-gradient(135deg, #0E1117, #1A1D24);
+            color: #E4E4E4;
+        }
+        .main-title {
+            font-size: 32px;
+            font-weight: 900;
+            color: #4BC0FF;
+            padding-bottom: 10px;
+        }
+        .sub-title {
+            font-size: 15px;
+            color: #9EB4C7;
+        }
+        .metric-box {
+            background: rgba(255,255,255,0.05);
+            padding: 18px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .big-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #4BC0FF;
+        }
+        .label {
+            font-size: 14px;
+            color: #C8D5E0;
+        }
+        .table-box {
+            background: rgba(255,255,255,0.04);
+            padding: 12px;
+            border-radius: 12px;
+        }
+        .sidebar .sidebar-content {
+            background: #0F1218 !important;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+
+# -------------------------------------------------
+#  SIDEBAR – ADMIN LOGIN
+# -------------------------------------------------
+
 with st.sidebar:
-    st.header("Admin Login")
+    st.header("🔐 Admin Login")
 
     if not st.session_state.admin_auth:
         email = st.text_input("Admin Email")
         pw = st.text_input("Admin Password", type="password")
-        if st.button("Login as Admin"):
+        
+        if st.button("Login", use_container_width=True):
             if email == ADMIN_EMAIL and pw == ADMIN_PASSWORD:
                 st.session_state.admin_auth = True
-                st.success("Admin login successful.")
+                st.success("Login successful.")
                 st.rerun()
             else:
                 st.error("Invalid admin credentials.")
     else:
-        st.success(f"Logged in as admin: {ADMIN_EMAIL}")
-        if st.button("Logout"):
+        st.success(f"Logged in as: {ADMIN_EMAIL}")
+        if st.button("Logout", use_container_width=True):
             st.session_state.admin_auth = False
             st.rerun()
 
 if not st.session_state.admin_auth:
     st.stop()
 
+
 # -------------------------------------------------
-# HELPER TO LOAD TABLES
+#  HELPER – LOAD TABLE
 # -------------------------------------------------
 
-
-def load_table(name: str, select: str = "*"):
+def load_table(name: str, select="*"):
     try:
         res = supabase.table(name).select(select).execute()
-        data = res.data or []
-        if not data:
-            st.info(f"No rows in table '{name}'.")
+        rows = res.data or []
+        if not rows:
             return pd.DataFrame()
-        return pd.DataFrame(data)
+        return pd.DataFrame(rows)
     except Exception as e:
-        st.warning(f"Could not load table '{name}': {e}")
+        st.error(f"Error loading table '{name}': {e}")
         return pd.DataFrame()
 
 
-tab_overview, tab_users, tab_colonies, tab_history, tab_otps, tab_events = st.tabs(
-    ["Overview", "Users", "Colonies", "History", "OTP Logs", "Events"]
+# -------------------------------------------------
+#  HEADER
+# -------------------------------------------------
+
+st.markdown('<p class="main-title">🛡️ Admin Dashboard</p>', unsafe_allow_html=True)
+st.markdown('<p class="sub-title">Internal dashboard for Delhi Property Price Calculator</p>', unsafe_allow_html=True)
+st.write("---")
+
+
+# -------------------------------------------------
+#  MAIN TABS
+# -------------------------------------------------
+
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(
+    ["📊 Overview", "👥 Users", "📌 Colonies", "📂 History", "🔑 OTP Logs", "📁 Events"]
 )
 
-# ---------- OVERVIEW ----------
-with tab_overview:
-    st.subheader("Overview")
 
-    users_df = load_table(
-        "users", "id, email, created_at, last_login, city, device"
-    )
-    hist_df = load_table("history")
+# -------------------------------------------------
+#  OVERVIEW TAB
+# -------------------------------------------------
+
+with tab1:
+    users_df = load_table("users", "id, email, created_at, last_login")
+    history_df = load_table("history")
     events_df = load_table("events")
+    otps_df = load_table("otps")
 
-    col1, col2, col3 = st.columns(3)
+    col1, col2, col3, col4 = st.columns(4)
+
     with col1:
-        st.metric("Total Users", len(users_df))
-    with col2:
-        st.metric("Saved Calculations", len(hist_df))
-    with col3:
-        st.metric("Tracked Events", len(events_df))
+        st.markdown('<div class="metric-box"><div class="big-number">'
+                    f'{len(users_df)}</div><div class="label">Total Users</div></div>',
+                    unsafe_allow_html=True)
 
-    st.write("### Recent Users")
+    with col2:
+        st.markdown('<div class="metric-box"><div class="big-number">'
+                    f'{len(history_df)}</div><div class="label">Saved Calculations</div></div>',
+                    unsafe_allow_html=True)
+
+    with col3:
+        st.markdown('<div class="metric-box"><div class="big-number">'
+                    f'{len(otps_df)}</div><div class="label">OTP Records</div></div>',
+                    unsafe_allow_html=True)
+
+    with col4:
+        st.markdown('<div class="metric-box"><div class="big-number">'
+                    f'{len(events_df)}</div><div class="label">Event Logs</div></div>',
+                    unsafe_allow_html=True)
+
+    st.write("### 👤 Latest Registered Users")
+    
     if not users_df.empty:
+        st.dataframe(users_df.sort_values("created_at", ascending=False).head(15), use_container_width=True)
+
+
+
+# -------------------------------------------------
+#  USERS TAB
+# -------------------------------------------------
+
+with tab2:
+    st.subheader("👥 All Users")
+    df = load_table("users")
+    if not df.empty:
+        search = st.text_input("Search user by email")
+        if search:
+            df = df[df["email"].str.contains(search, case=False)]
+        st.dataframe(df, use_container_width=True)
+
+
+# -------------------------------------------------
+#  COLONIES TAB
+# -------------------------------------------------
+
+with tab3:
+    st.subheader("📌 Colony List")
+    df = load_table("colonies", "id, colony_name, category")
+    if not df.empty:
+        search = st.text_input("Search colony")
+        if search:
+            df = df[df["colony_name"].str.contains(search, case=False)]
+        st.dataframe(df, use_container_width=True)
+
+
+# -------------------------------------------------
+#  HISTORY TAB
+# -------------------------------------------------
+
+with tab4:
+    st.subheader("📂 User Calculation History")
+    hist_df = load_table("history")
+    users_df = load_table("users", "id, email")
+
+    if not hist_df.empty:
+        mapping = dict(zip(users_df["id"], users_df["email"]))
+        hist_df["email"] = hist_df["user_id"].map(mapping)
+
         st.dataframe(
-            users_df.sort_values("created_at", ascending=False).head(20),
+            hist_df.sort_values("created_at", ascending=False),
             use_container_width=True,
         )
 
-# ---------- USERS ----------
-with tab_users:
-    st.subheader("Users")
-    users_df = load_table(
-        "users", "id, email, created_at, last_login, city, device"
-    )
-    if not users_df.empty:
-        search = st.text_input("Search email")
-        if search:
-            users_df = users_df[users_df["email"].str.contains(search, case=False)]
-        st.dataframe(users_df, use_container_width=True)
 
-# ---------- COLONIES ----------
-with tab_colonies:
-    st.subheader("Colonies")
-    col_df = load_table("colonies", "id, colony_name, category")
-    if not col_df.empty:
-        search = st.text_input("Search colony")
-        if search:
-            col_df = col_df[col_df["colony_name"].str.contains(search, case=False)]
-        st.dataframe(col_df, use_container_width=True)
+# -------------------------------------------------
+#  OTP LOGS TAB
+# -------------------------------------------------
 
-# ---------- HISTORY ----------
-with tab_history:
-    st.subheader("Calculation History")
-    hist_df = load_table("history")
-    if not hist_df.empty:
-        users_df = load_table("users", "id, email")
-        id_to_email = dict(zip(users_df["id"], users_df["email"]))
-        hist_df["user_email"] = hist_df["user_id"].map(id_to_email)
-        cols = [
-            "created_at",
-            "user_email",
-            "colony_name",
-            "property_type",
-            "category",
-            "consideration",
-            "stamp_duty",
-            "e_fees",
-            "tds",
-            "total_govt_duty",
-        ]
-        cols = [c for c in cols if c in hist_df.columns]
-        hist_df = hist_df[cols]
+with tab5:
+    st.subheader("🔑 OTP Logs")
+
+    df = load_table("otps")
+    if not df.empty:
+        st.dataframe(df.sort_values("created_at", ascending=False), use_container_width=True)
+
+# -------------------------------------------------
+#  EVENTS TAB
+# -------------------------------------------------
+
+with tab6:
+    st.subheader("📁 Tracking Events")
+
+    df = load_table("events")
+    if not df.empty:
+        st.dataframe(df.sort_values("created_at", ascending=False), use_container_width=True)        hist_df = hist_df[cols]
         st.dataframe(hist_df.sort_values("created_at", ascending=False), use_container_width=True)
 
 # ---------- OTP LOGS ----------
@@ -169,4 +274,5 @@ with tab_events:
             events_df.sort_values("created_at", ascending=False),
             use_container_width=True,
         )
+
 

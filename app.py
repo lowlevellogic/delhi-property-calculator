@@ -7,22 +7,29 @@ from urllib.parse import quote
 
 import pandas as pd
 import streamlit as st
-
 from supabase import create_client, Client
 
-from database import (
-    get_connection,
-    init_db,
-    create_otp,
-    verify_otp,
-)
 from email_otp import send_otp_email
+
+# -------------------------------------------------
+# SUPABASE CLIENT
+# -------------------------------------------------
+
+
+@st.cache_resource
+def get_supabase() -> Client:
+    url = st.secrets["SUPABASE_URL"]
+    key = st.secrets["SUPABASE_KEY"]
+    return create_client(url, key)
+
+
+supabase = get_supabase()
 
 # -------------------------------------------------
 # BASIC CONFIG
 # -------------------------------------------------
 
-APP_URL = "https://delhi-property-calculator-lkdbpzkcuch6l8cgpehdsi.streamlit.app"
+APP_URL = "https://delhi-property-calculator.streamlit.app"  # change to your new URL
 
 stampdutyrates = {"male": 0.06, "female": 0.04, "joint": 0.05}
 
@@ -91,13 +98,10 @@ UNIFORM_RATES_MORE_THAN_4 = {
 }
 
 # -------------------------------------------------
-# STREAMLIT PAGE CONFIG & THEME
+# PAGE THEME
 # -------------------------------------------------
 
-st.set_page_config(
-    page_title="Delhi Property Price Calculator",
-    layout="wide",
-)
+st.set_page_config(page_title="Delhi Property Price Calculator", layout="wide")
 
 st.markdown(
     """
@@ -105,13 +109,6 @@ st.markdown(
         .stApp {
             background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
             color: #ffffff;
-        }
-        .stMarkdown, .stText, .stNumberInput > label, .stSelectbox > label,
-        .stRadio > label, .stCheckbox > label {
-            color: #ffffff !important;
-        }
-        label {
-            color: #ffffff !important;
         }
         .main-header {
             display: flex;
@@ -141,41 +138,17 @@ st.markdown(
             font-size: 13px;
             color: #d0e8ff;
         }
+        label, .st-bb, .st-bc {
+            color: #ffffff !important;
+        }
     </style>
     """,
     unsafe_allow_html=True,
 )
 
 # -------------------------------------------------
-# SUPABASE CLIENT (for tracking events)
+# SUPABASE HELPERS
 # -------------------------------------------------
-
-def create_supabase_client() -> Client | None:
-    # Prefer secrets; fall back to hard-coded values if secrets not set
-    url = st.secrets.get(
-        "supabase_url",
-        "https://sbcfsmvehwlqeuyifmdo.supabase.co",
-    )
-    key = st.secrets.get(
-        "supabase_anon_key",
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNiY2ZzbXZlaHdscWV1eWlmbWRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ4NzAxOTQsImV4cCI6MjA4MDQ0NjE5NH0.yqSjd5w91zvyogfeThl6Epnuq5a1mDvIn1SP7R-8gH4",
-    )
-    if not url or not key:
-        return None
-    try:
-        return create_client(url, key)
-    except Exception:
-        return None
-
-
-supabase: Client | None = create_supabase_client()
-
-# -------------------------------------------------
-# DB INIT & SESSION STATE
-# -------------------------------------------------
-
-init_db()
-conn = get_connection()
 
 
 def hash_password(pw: str) -> str:
@@ -183,41 +156,114 @@ def hash_password(pw: str) -> str:
 
 
 def get_user_by_email(email: str):
-    c = conn.cursor()
-    c.execute(
-        "SELECT id, email, password_hash, is_verified FROM users WHERE email = ?;",
-        (email.lower(),),
-    )
-    return c.fetchone()
+    email = email.lower().strip()
+    if not email:
+        return None
+    res = supabase.table("users").select("*").eq("email", email).maybe_single().execute()
+    return res.data
 
 
-def create_user(email: str, password_hash: str):
-    c = conn.cursor()
-    c.execute(
-        "INSERT INTO users (email, password_hash, is_verified, created_at) "
-        "VALUES (?, ?, ?, ?);",
-        (email.lower(), password_hash, 1, datetime.utcnow().isoformat()),
+def create_user(email: str, password_hash: str, city: str | None, device: str | None):
+    payload = {
+        "email": email.lower(),
+        "password_hash": password_hash,
+        "is_verified": True,
+        "city": city,
+        "device": device,
+    }
+    res = supabase.table("users").insert(payload).execute()
+    if res.data:
+        return res.data[0]
+    return None
+
+
+def update_user_password(user_id: str, new_hash: str):
+    supabase.table("users").update({"password_hash": new_hash}).eq("id", user_id).execute()
+
+
+def update_last_login(user_id: str, city: str | None, device: str | None):
+    supabase.table("users").update(
+        {
+            "last_login": datetime.utcnow().isoformat(),
+            "city": city,
+            "device": device,
+        }
+    ).eq("id", user_id).execute()
+
+
+def create_otp_record(email: str, otp_code: str, purpose: str):
+    supabase.table("otps").insert(
+        {
+            "email": email.lower(),
+            "otp_code": otp_code,
+            "purpose": purpose,
+            "expires_at": (datetime.utcnow()).isoformat(),
+        }
+    ).execute()
+
+
+def verify_otp_record(email: str, otp_code: str, purpose: str) -> bool:
+    now_iso = datetime.utcnow().isoformat()
+    res = (
+        supabase.table("otps")
+        .select("*")
+        .eq("email", email.lower())
+        .eq("otp_code", otp_code)
+        .eq("purpose", purpose)
+        .eq("used", False)
+        .gt("expires_at", now_iso)
+        .order("id", desc=True)
+        .limit(1)
+        .execute()
     )
-    conn.commit()
-    c.execute(
-        "SELECT id, email, password_hash, is_verified FROM users WHERE email = ?;",
-        (email.lower(),),
-    )
-    return c.fetchone()
+    if not res.data:
+        return False
+    otp_row = res.data[0]
+    supabase.table("otps").update({"used": True}).eq("id", otp_row["id"]).execute()
+    return True
+
+
+def track_event(event_type: str, user_id: str | None = None, meta: dict | None = None):
+    try:
+        payload = {
+            "event_type": event_type,
+            "user_id": user_id,
+            "meta": meta or {},
+        }
+        supabase.table("events").insert(payload).execute()
+    except Exception:
+        # We don't want tracking failures to break the app
+        pass
+
+
+@st.cache_data
+def load_colonies_from_db():
+    res = supabase.table("colonies").select("colony_name, category").order("colony_name").execute()
+    rows = res.data or []
+    df = pd.DataFrame(rows)
+    names = df["colony_name"].tolist() if not df.empty else []
+    mapping = dict(zip(df["colony_name"], df["category"])) if not df.empty else {}
+    return names, mapping
+
+
+COLONY_NAMES, COLONY_MAP = load_colonies_from_db()
+
+# -------------------------------------------------
+# SESSION STATE
+# -------------------------------------------------
 
 
 def ensure_session_state():
     defaults = {
         "user_id": None,
         "user_email": None,
-        "pending_signup_email": None,
-        "otp_sent": False,
         "last_result": None,
         "last_result_tab": None,
-        "session_id": str(uuid.uuid4()),
-        "visitor_city": "",
-        "visitor_device": "",
-        "page_view_logged": False,
+        "reset_email": None,
+        "reset_otp_sent": False,
+        "city": "",
+        "device": "",
+        "visit_tracked": False,
     }
     for k, v in defaults.items():
         if k not in st.session_state:
@@ -227,50 +273,9 @@ def ensure_session_state():
 ensure_session_state()
 
 # -------------------------------------------------
-# VISITOR TRACKING (Supabase)
+# COMMON CALC HELPERS
 # -------------------------------------------------
 
-def track_event(event_name: str, extra: dict | None = None):
-    """Send simple tracking event to Supabase events table."""
-    if supabase is None:
-        return
-
-    try:
-        payload = {
-            "event_name": event_name,
-            "user_id": st.session_state.user_id,
-            "session_id": st.session_state.session_id,
-            "url": APP_URL,
-            "city": st.session_state.get("visitor_city") or None,
-            "device": st.session_state.get("visitor_device") or None,
-            "extra": extra or {},
-        }
-        supabase.table("events").insert(payload).execute()
-    except Exception:
-        # Fail silently – we don't want analytics failure to break the app
-        pass
-
-
-# -------------------------------------------------
-# COLONIES FROM DB
-# -------------------------------------------------
-
-@st.cache_data
-def load_colonies_from_db():
-    df = pd.read_sql_query(
-        "SELECT colony_name, category FROM colonies ORDER BY colony_name;",
-        conn,
-    )
-    names = df["colony_name"].tolist()
-    mapping = dict(zip(df["colony_name"], df["category"]))
-    return names, mapping
-
-
-COLONY_NAMES, COLONY_MAP = load_colonies_from_db()
-
-# -------------------------------------------------
-# CALC HELPERS
-# -------------------------------------------------
 
 def convert_sq_yards_to_sq_meters(sq_yards: float) -> float:
     return round(sq_yards * 0.8361, 2)
@@ -309,7 +314,6 @@ def run_calculation(
     custom_cons: float,
     colony_name: str | None = None,
 ):
-    # Choose rate tables
     if property_type == "Residential":
         circlerates = circlerates_res
         construction_rates = construction_rates_res
@@ -418,39 +422,25 @@ def dda_minimum_value(
     value = plinth_area_sqm * rate
     return rate, value
 
-# -------------------------------------------------
-# HISTORY SAVE / SUMMARY BLOCK
-# -------------------------------------------------
-
 
 def save_history_to_db(res: dict):
     if st.session_state.user_id is None:
         st.error("Please login to save history.")
         return
-    c = conn.cursor()
-    c.execute(
-        """
-        INSERT INTO history (
-            user_id, created_at, colony_name,
-            property_type, category,
-            consideration, stamp_duty, e_fees, tds, total_govt_duty
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-        """,
-        (
-            st.session_state.user_id,
-            res["timestamp"],
-            res["colony_name"],
-            res["property_type"],
-            res["category"],
-            res["final_consideration"],
-            res["stamp_duty"],
-            res["e_fees"],
-            res["tds"],
-            res["total_payable"],
-        ),
-    )
-    conn.commit()
+
+    payload = {
+        "user_id": st.session_state.user_id,
+        "created_at": res["timestamp"],
+        "colony_name": res["colony_name"],
+        "property_type": res["property_type"],
+        "category": res["category"],
+        "consideration": res["final_consideration"],
+        "stamp_duty": res["stamp_duty"],
+        "e_fees": res["e_fees"],
+        "tds": res["tds"],
+        "total_govt_duty": res["total_payable"],
+    }
+    supabase.table("history").insert(payload).execute()
     st.success("Summary saved to History.")
 
 
@@ -507,7 +497,7 @@ def render_summary_block(res: dict, save_key: str):
     st.markdown("</div>", unsafe_allow_html=True)
 
 # -------------------------------------------------
-# AUTH SIDEBAR (LOGIN / SIGNUP + OTP)
+# AUTH SIDEBAR  (LOGIN / SIGNUP / FORGOT PASSWORD)
 # -------------------------------------------------
 
 
@@ -515,22 +505,33 @@ def auth_sidebar():
     with st.sidebar:
         st.markdown("### 🔐 Account")
 
-        # Visitor info (city + device) for tracking
-        st.text_input(
-            "Your City (optional)",
-            key="visitor_city",
-            help="Used only for anonymous statistics.",
-        )
-        st.text_input(
-            "Your Device / Browser (optional)",
-            key="visitor_device",
-            help="Example: Android Chrome, Windows Laptop, iPhone Safari, etc.",
-        )
+        # Optional city/device – you can remove this block if you don't want to ask
+        with st.expander("Optional: City & Device (for admin stats)"):
+            st.session_state.city = st.text_input(
+                "Your City (optional)",
+                value=st.session_state.city or "",
+            )
+            st.session_state.device = st.text_input(
+                "Your Device / Browser (optional)",
+                value=st.session_state.device or "",
+            )
 
-        st.write("---")
+        if not st.session_state.visit_tracked:
+            track_event(
+                "visit",
+                None,
+                {
+                    "city": st.session_state.city or None,
+                    "device": st.session_state.device or None,
+                    "session": str(uuid.uuid4()),
+                },
+            )
+            st.session_state.visit_tracked = True
 
         if st.session_state.user_id is None:
-            tab_login, tab_signup = st.tabs(["Login", "Sign Up"])
+            tab_login, tab_signup, tab_reset = st.tabs(
+                ["Login", "Sign Up", "Forgot Password"]
+            )
 
             # ---------- LOGIN ----------
             with tab_login:
@@ -538,108 +539,156 @@ def auth_sidebar():
                 password = st.text_input(
                     "Password", type="password", key="login_pw"
                 )
-                remember_me = st.checkbox(
-                    "Remember me (keeps you logged in in this browser session)",
+                remember = st.checkbox(
+                    "Remember me (keeps you logged in this browser session)",
                     value=True,
                 )
+
                 if st.button("Login", key="login_btn"):
-                    row = get_user_by_email(email)
-                    if not row:
+                    user = get_user_by_email(email)
+                    if not user:
                         st.error("No account found with this email.")
                     else:
-                        user_id, u_email, pw_hash, is_verified = row
-                        if pw_hash != hash_password(password):
+                        if user["password_hash"] != hash_password(password):
                             st.error("Incorrect password.")
-                        elif not is_verified:
-                            st.error("Account not verified. Please sign up again.")
                         else:
-                            st.session_state.user_id = user_id
-                            st.session_state.user_email = u_email
-                            st.success(f"Logged in as {u_email}")
-                            track_event(
-                                "login_success",
-                                {"email": u_email, "remember_me": remember_me},
+                            st.session_state.user_id = user["id"]
+                            st.session_state.user_email = user["email"]
+                            update_last_login(
+                                user["id"],
+                                st.session_state.city or None,
+                                st.session_state.device or None,
                             )
+                            track_event(
+                                "login",
+                                user["id"],
+                                {
+                                    "city": st.session_state.city or None,
+                                    "device": st.session_state.device or None,
+                                },
+                            )
+                            st.success(f"Logged in as {user['email']}")
 
             # ---------- SIGNUP ----------
             with tab_signup:
                 signup_email = st.text_input(
                     "Email for Signup", key="signup_email"
                 )
+                signup_pw = st.text_input(
+                    "Set Password", type="password", key="signup_pw"
+                )
 
-                if st.button("Send OTP", key="send_otp_btn"):
-                    if not signup_email:
-                        st.error("Please enter an email.")
+                if st.button("Sign Up", key="signup_btn"):
+                    if not signup_email or not signup_pw:
+                        st.error("Please enter both email and password.")
+                    elif get_user_by_email(signup_email):
+                        st.error("This email is already registered. Please login.")
                     else:
-                        existing = get_user_by_email(signup_email)
-                        if existing:
-                            st.error(
-                                "This email is already registered. Please login."
-                            )
+                        otp, err = send_otp_email(signup_email)
+                        if err:
+                            st.error("Failed to send OTP. Check email settings.")
+                            st.text(str(err))
                         else:
-                            otp, err = send_otp_email(signup_email)
-                            if err:
-                                st.error(
-                                    "Failed to send OTP. Check email settings."
-                                )
-                                st.text(str(err))
-                                track_event(
-                                    "signup_otp_failed",
-                                    {"email": signup_email, "error": str(err)},
-                                )
-                            else:
-                                create_otp(signup_email, otp)
-                                st.session_state.pending_signup_email = signup_email
-                                st.session_state.otp_sent = True
-                                st.success("OTP sent to your email.")
-                                track_event(
-                                    "signup_otp_sent",
-                                    {"email": signup_email},
-                                )
+                            create_otp_record(signup_email, otp, "signup")
+                            st.session_state.pending_signup_email = signup_email
+                            st.session_state.signup_pw_hash = hash_password(signup_pw)
+                            st.session_state.signup_otp_sent = True
+                            st.success("OTP sent to your email. Please verify below.")
 
-                if st.session_state.otp_sent and st.session_state.pending_signup_email:
-                    st.write(
-                        f"OTP sent to: {st.session_state.pending_signup_email}"
-                    )
-                    otp_input = st.text_input("Enter OTP", key="otp_input")
-                    new_password = st.text_input(
-                        "Set Password", type="password", key="signup_pw"
-                    )
-                    if st.button(
-                        "Verify OTP & Create Account", key="verify_otp_btn"
-                    ):
-                        if not otp_input or not new_password:
-                            st.error("Please enter both OTP and password.")
+                if st.session_state.get("signup_otp_sent"):
+                    otp_input = st.text_input("Enter OTP", key="signup_otp_input")
+                    if st.button("Verify OTP & Create Account", key="signup_verify_btn"):
+                        email = st.session_state.get("pending_signup_email")
+                        pw_hash = st.session_state.get("signup_pw_hash")
+                        if not email or not pw_hash:
+                            st.error("Signup session expired. Please start again.")
+                        elif not otp_input:
+                            st.error("Please enter the OTP.")
                         else:
-                            ok = verify_otp(
-                                st.session_state.pending_signup_email, otp_input
+                            ok = verify_otp_record(email, otp_input, "signup")
+                            if not ok:
+                                st.error("Invalid or expired OTP.")
+                            else:
+                                user = create_user(
+                                    email,
+                                    pw_hash,
+                                    st.session_state.city or None,
+                                    st.session_state.device or None,
+                                )
+                                if user:
+                                    st.session_state.user_id = user["id"]
+                                    st.session_state.user_email = user["email"]
+                                    track_event(
+                                        "signup",
+                                        user["id"],
+                                        {
+                                            "city": st.session_state.city or None,
+                                            "device": st.session_state.device or None,
+                                        },
+                                    )
+                                    st.success("Account created and logged in!")
+                                else:
+                                    st.error("Failed to create user.")
+                                st.session_state.signup_otp_sent = False
+                                st.session_state.pending_signup_email = None
+                                st.session_state.signup_pw_hash = None
+
+            # ---------- FORGOT PASSWORD ----------
+            with tab_reset:
+                reset_email = st.text_input(
+                    "Registered Email", key="reset_email_input"
+                )
+
+                if st.button("Send Reset OTP", key="reset_send_btn"):
+                    user = get_user_by_email(reset_email)
+                    if not user:
+                        st.error("No account found with this email.")
+                    else:
+                        otp, err = send_otp_email(reset_email)
+                        if err:
+                            st.error("Failed to send OTP. Check email settings.")
+                            st.text(str(err))
+                        else:
+                            create_otp_record(reset_email, otp, "reset_password")
+                            st.session_state.reset_email = reset_email
+                            st.session_state.reset_otp_sent = True
+                            st.success("Password reset OTP sent to your email.")
+
+                if st.session_state.reset_otp_sent and st.session_state.reset_email:
+                    otp_input = st.text_input(
+                        "Enter Reset OTP", key="reset_otp_input"
+                    )
+                    new_pw = st.text_input(
+                        "New Password", type="password", key="reset_new_pw"
+                    )
+                    if st.button("Verify OTP & Reset Password", key="reset_verify_btn"):
+                        if not otp_input or not new_pw:
+                            st.error("Please enter both OTP and new password.")
+                        else:
+                            ok = verify_otp_record(
+                                st.session_state.reset_email,
+                                otp_input,
+                                "reset_password",
                             )
                             if not ok:
                                 st.error("Invalid or expired OTP.")
-                                track_event(
-                                    "signup_otp_invalid",
-                                    {
-                                        "email": st.session_state.pending_signup_email
-                                    },
-                                )
                             else:
-                                pw_hash = hash_password(new_password)
-                                user = create_user(
-                                    st.session_state.pending_signup_email, pw_hash
+                                user = get_user_by_email(
+                                    st.session_state.reset_email
                                 )
-                                st.session_state.user_id = user[0]
-                                st.session_state.user_email = user[1]
-                                st.session_state.otp_sent = False
-                                st.session_state.pending_signup_email = None
-                                st.success("Account created and logged in!")
-                                track_event(
-                                    "signup_success",
-                                    {"email": st.session_state.user_email},
-                                )
+                                if not user:
+                                    st.error("User not found anymore.")
+                                else:
+                                    update_user_password(
+                                        user["id"], hash_password(new_pw)
+                                    )
+                                    st.success("Password updated. Please login.")
+                                st.session_state.reset_email = None
+                                st.session_state.reset_otp_sent = False
+
         else:
             st.success(f"Logged in as: {st.session_state.user_email}")
             if st.button("Logout"):
-                track_event("logout", {"email": st.session_state.user_email})
                 st.session_state.user_id = None
                 st.session_state.user_email = None
                 st.experimental_rerun()
@@ -666,13 +715,7 @@ with header_col2:
 
 st.write("---")
 
-# Sidebar auth
 auth_sidebar()
-
-# Log a single page view per session
-if not st.session_state.page_view_logged:
-    track_event("page_view", {})
-    st.session_state.page_view_logged = True
 
 # -------------------------------------------------
 # MAIN TABS
@@ -820,15 +863,9 @@ with tab_res:
         )
         st.session_state.last_result = res
         st.session_state.last_result_tab = "Residential"
+        if st.session_state.user_id:
+            track_event("calc_residential", st.session_state.user_id, res)
         st.success("Residential property calculation completed.")
-        track_event(
-            "calc_residential",
-            {
-                "category": r_category,
-                "land_area_yards": r_land_area_yards,
-                "owner": r_owner,
-            },
-        )
 
     if (
         st.session_state.last_result
@@ -948,15 +985,9 @@ with tab_com:
         )
         st.session_state.last_result = res
         st.session_state.last_result_tab = "Commercial"
+        if st.session_state.user_id:
+            track_event("calc_commercial", st.session_state.user_id, res)
         st.success("Commercial property calculation completed.")
-        track_event(
-            "calc_commercial",
-            {
-                "category": c_category,
-                "land_area_yards": c_land_area_yards,
-                "owner": c_owner,
-            },
-        )
 
     if (
         st.session_state.last_result
@@ -1030,15 +1061,6 @@ with tab_dda:
         tds_govt = govt_value * 0.01 if govt_value > 5_000_000 else 0.0
         total_govt = stamp_govt + e_fees_govt + tds_govt
 
-        track_event(
-            "calc_dda_cghs",
-            {
-                "usage": usage_key,
-                "plinth_area_yards": dda_area_yards,
-                "more_than_4": more_than_4_flag,
-            },
-        )
-
         st.markdown('<div class="box">', unsafe_allow_html=True)
         st.write("## 🔹 Government (Circle) Value – DDA/CGHS")
 
@@ -1069,7 +1091,6 @@ with tab_dda:
             f"**Total Govt Liability on Govt Value: ₹{math.ceil(total_govt):,}**"
         )
 
-        # Optional custom consideration
         if dda_calc_custom and dda_custom_cons > 0:
             st.write("---")
             st.write("### Govt. Duty on Your Custom Consideration")
@@ -1110,45 +1131,52 @@ with tab_history:
     if st.session_state.user_id is None:
         st.error("Please login to view your history.")
     else:
-        c = conn.cursor()
-        c.execute(
-            """
-            SELECT created_at, colony_name, property_type, category,
-                   consideration, stamp_duty, e_fees, tds, total_govt_duty
-            FROM history
-            WHERE user_id = ?
-            ORDER BY created_at DESC;
-            """,
-            (st.session_state.user_id,),
+        res = (
+            supabase.table("history")
+            .select(
+                "created_at, colony_name, property_type, category, "
+                "consideration, stamp_duty, e_fees, tds, total_govt_duty"
+            )
+            .eq("user_id", st.session_state.user_id)
+            .order("created_at", desc=True)
+            .execute()
         )
-        rows = c.fetchall()
+        rows = res.data or []
         if not rows:
             st.info("No saved entries yet.")
         else:
             df = pd.DataFrame(
                 rows,
                 columns=[
-                    "Time",
-                    "Colony",
-                    "Type",
-                    "Category",
-                    "Consideration (₹)",
-                    "Stamp Duty (₹)",
-                    "E-Fees (₹)",
-                    "TDS (₹)",
-                    "Total Govt Duty (₹)",
+                    "created_at",
+                    "colony_name",
+                    "property_type",
+                    "category",
+                    "consideration",
+                    "stamp_duty",
+                    "e_fees",
+                    "tds",
+                    "total_govt_duty",
                 ],
             )
+            df.columns = [
+                "Time",
+                "Colony",
+                "Type",
+                "Category",
+                "Consideration (₹)",
+                "Stamp Duty (₹)",
+                "E-Fees (₹)",
+                "TDS (₹)",
+                "Total Govt Duty (₹)",
+            ]
             st.dataframe(df, use_container_width=True)
 
             if st.button("Clear My History"):
-                c.execute(
-                    "DELETE FROM history WHERE user_id = ?;",
-                    (st.session_state.user_id,),
-                )
-                conn.commit()
+                supabase.table("history").delete().eq(
+                    "user_id", st.session_state.user_id
+                ).execute()
                 st.success("Your history has been cleared.")
-                track_event("history_cleared", {"user_id": st.session_state.user_id})
                 st.experimental_rerun()
 
     st.markdown("</div>", unsafe_allow_html=True)

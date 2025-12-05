@@ -1,35 +1,27 @@
 import smtplib
 from email.mime.text import MIMEText
-import random
-import string
+from random import randint
 import streamlit as st
 
+def send_otp_email(to_email):
+    otp = str(randint(100000, 999999))
 
-def generate_otp():
-    return ''.join(random.choices(string.digits, k=6))
+    msg = MIMEText(f"""
+Your OTP code is: {otp}
 
-
-def send_otp_email(receiver_email: str):
+Valid for 10 minutes.
+Do NOT share this OTP with anyone.
+""")
+    msg["Subject"] = "Your Verification OTP"
+    msg["From"] = st.secrets["EMAIL_USER"]
+    msg["To"] = to_email
 
     try:
-        sender_email = st.secrets["email_auth"]["email"]
-        sender_password = st.secrets["email_auth"]["password"]
-
-        otp = generate_otp()
-
-        msg = MIMEText(
-            f"Your OTP for verification is:\n\n{otp}\n\nRegards,\nAggarwal Documents & Legal Consultants"
-        )
-        msg["Subject"] = "Your OTP Verification Code"
-        msg["From"] = sender_email
-        msg["To"] = receiver_email
-
-        with smtplib.SMTP("smtp.gmail.com", 587) as server:
-            server.starttls()
-            server.login(sender_email, sender_password)
-            server.send_message(msg)
-
+        server = smtplib.SMTP(st.secrets["EMAIL_HOST"], int(st.secrets["EMAIL_PORT"]))
+        server.starttls()
+        server.login(st.secrets["EMAIL_USER"], st.secrets["EMAIL_PASS"])
+        server.sendmail(st.secrets["EMAIL_USER"], to_email, msg.as_string())
+        server.quit()
         return otp, None
-
-    except Exception as error:
-        return None, str(error)
+    except Exception as e:
+        return None, str(e)

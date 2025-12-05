@@ -43,14 +43,14 @@ with st.sidebar:
             if email == ADMIN_EMAIL and pw == ADMIN_PASSWORD:
                 st.session_state.admin_auth = True
                 st.success("Admin login successful.")
-                st.experimental_rerun()
+                st.rerun()
             else:
                 st.error("Invalid admin credentials.")
     else:
         st.success(f"Logged in as admin: {ADMIN_EMAIL}")
         if st.button("Logout"):
             st.session_state.admin_auth = False
-            st.experimental_rerun()
+            st.rerun()
 
 if not st.session_state.admin_auth:
     st.stop()
@@ -169,3 +169,4 @@ with tab_events:
             events_df.sort_values("created_at", ascending=False),
             use_container_width=True,
         )
+

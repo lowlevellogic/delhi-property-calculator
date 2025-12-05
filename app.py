@@ -1,6 +1,8 @@
+# app.py  – Delhi Property Price Calculator (with popup auth & usernames)
+
 import math
 import hashlib
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from urllib.parse import quote
 
 import pandas as pd
@@ -13,7 +15,7 @@ from email_otp import send_otp_email
 # BASIC CONFIG
 # -------------------------------------------------
 
-APP_URL = "https://delhi-property-calculator-lkdbpzkcuch6l8cgpehdsi.streamlit.app"
+APP_URL = "https://delhi-property-calculator-public.streamlit.app"
 
 stampdutyrates = {"male": 0.06, "female": 0.04, "joint": 0.05}
 
@@ -90,8 +92,15 @@ st.markdown(
         }
         .main-header {
             display: flex;
-            align-items: center;
-            gap: 10px;
+            flex-direction: column;
+            gap: 2px;
+        }
+        @media (min-width: 768px) {
+            .main-header {
+                flex-direction: row;
+                align-items: baseline;
+                gap: 10px;
+            }
         }
         .brand-title {
             font-size: 22px;
@@ -109,9 +118,53 @@ st.markdown(
             padding: 20px;
             border-radius: 12px;
             margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.08);
         }
         label { color: #ffffff !important; }
         .footer { text-align:center; margin-top:30px; color:#d0e8ff; }
+
+        /* ---------- Auth popup ---------- */
+        .auth-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+            margin-bottom: 10px;
+        }
+        .auth-card {
+            width: 100%;
+            max-width: 480px;
+            background: radial-gradient(circle at top, rgba(15,23,42,0.96), rgba(15,23,42,0.98));
+            border-radius: 22px;
+            padding: 22px 22px 18px 22px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.75);
+            border: 1px solid rgba(148, 163, 184, 0.45);
+        }
+        .auth-heading {
+            text-align: center;
+            margin-bottom: 14px;
+        }
+        .auth-badge {
+            font-size: 11px;
+            color: #7dd3fc;
+            text-transform: uppercase;
+            letter-spacing: 0.16em;
+        }
+        .auth-title {
+            font-size: 22px;
+            font-weight: 800;
+            color: #f9fafb;
+            margin: 4px 0 2px 0;
+        }
+        .auth-subtitle {
+            font-size: 13px;
+            color: #9ca3af;
+        }
+        .auth-footer {
+            font-size: 11px;
+            color: #6b7280;
+            margin-top: 10px;
+            text-align: center;
+        }
     </style>
     """,
     unsafe_allow_html=True,
@@ -140,12 +193,16 @@ def ensure_session_state():
     defaults = {
         "user_id": None,
         "user_email": None,
+        "username": None,
         "pending_signup_email": None,
         "pending_otp_purpose": None,
         "otp_sent": False,
         "remember_me": False,
         "last_result": None,
         "last_result_tab": None,
+        "show_auth_modal": True,      # popup on first visit
+        "show_reset_form": False,     # forgot-password view
+        "signup_username": "",
     }
     for k, v in defaults.items():
         if k not in st.session_state:
@@ -174,7 +231,7 @@ def log_event(event_type: str, details: str = ""):
         pass
 
 
-log_event("visit", "User visited homepage")
+log_event("visit", "User opened calculator")
 
 # -------------------------------------------------
 # DB HELPERS
@@ -188,7 +245,7 @@ def hash_password(pw: str) -> str:
 def get_user_by_email(email: str):
     resp = (
         supabase.table("users")
-        .select("id, email, password_hash, is_verified")
+        .select("id, email, username, password_hash, is_verified")
         .eq("email", email.lower())
         .execute()
     )
@@ -196,12 +253,34 @@ def get_user_by_email(email: str):
     return rows[0] if rows else None
 
 
-def create_user(email: str, password_hash: str):
+def get_user_by_username(username: str):
+    resp = (
+        supabase.table("users")
+        .select("id, email, username, password_hash, is_verified")
+        .eq("username", username.lower())
+        .execute()
+    )
+    rows = resp.data or []
+    return rows[0] if rows else None
+
+
+def get_user_by_email_or_username(identifier: str):
+    ident = (identifier or "").strip().lower()
+    if not ident:
+        return None
+    if "@" in ident:
+        return get_user_by_email(ident)
+    # treat as username
+    return get_user_by_username(ident)
+
+
+def create_user(email: str, username: str, password_hash: str):
     resp = (
         supabase.table("users")
         .insert(
             {
                 "email": email.lower(),
+                "username": username.lower(),
                 "password_hash": password_hash,
                 "is_verified": True,
                 "created_at": datetime.utcnow().isoformat(),
@@ -258,7 +337,7 @@ def verify_otp_record(email, otp_code, purpose):
 
 def save_history_to_db(res: dict):
     if st.session_state.user_id is None:
-        return st.error("Login required to save.")
+        return st.error("Please sign in to save this calculation to your history.")
 
     supabase.table("history").insert(
         {
@@ -276,7 +355,7 @@ def save_history_to_db(res: dict):
     ).execute()
 
     log_event("history_saved", f"{res['property_type']} - {res['colony_name']}")
-    st.success("Saved to history.")
+    st.success("Saved to your account history.")
 
 # -------------------------------------------------
 # COLONIES CSV
@@ -327,9 +406,6 @@ def age_multiplier(year):
 def get_stampduty_rate(owner, val):
     base = stampdutyrates.get(owner, 0)
     return base + 0.01 if val > 2_500_000 else base
-
-
-# ---------- DDA HELPERS ----------
 
 
 def determine_area_category(plinth_area_sqm: float) -> str:
@@ -473,7 +549,7 @@ def render_summary_block(res, save_key):
         f"**Land Area:** {res['land_area_yards']} sq. yards "
         f"({res['land_area_m']:.2f} sq. meters)"
     )
-    st.write(f"**Land Value:** ₹{math.ceil(res['land_value_user']):,}")
+    st.write(f"**Land Value (Your Share):** ₹{math.ceil(res['land_value_user']):,}")
     st.write(f"**Construction Value:** ₹{math.ceil(res['construction_value']):,}")
     st.write(f"**Parking Cost:** ₹{math.ceil(res['parking_cost']):,}")
 
@@ -485,188 +561,326 @@ def render_summary_block(res, save_key):
     st.write(f"**TDS:** ₹{math.ceil(res['tds']):,}")
     st.success(f"**Total Govt. Duty: ₹{math.ceil(res['total_payable']):,}**")
 
-    if st.button("💾 Save This Summary", key=save_key):
+    if st.button("💾 Save This Summary to My Account", key=save_key):
         save_history_to_db(res)
 
     st.markdown("</div>", unsafe_allow_html=True)
 
 # -------------------------------------------------
-# AUTH SIDEBAR
+# AUTH POPUP (LOGIN / SIGNUP / FORGOT)
 # -------------------------------------------------
 
 
-def auth_sidebar():
-    with st.sidebar:
-        st.markdown("### 🔐 Account")
+def render_auth_modal():
+    """Center popup for login / signup. Can be closed to continue as guest."""
+    if not st.session_state.show_auth_modal:
+        return
+    if st.session_state.user_id is not None:
+        return
 
-        # ------- NOT LOGGED IN -------
-        if st.session_state.user_id is None:
-            tab_login, tab_signup, tab_reset = st.tabs(
-                ["Login", "Sign Up", "Forgot Password"]
-            )
+    st.markdown('<div class="auth-wrapper"><div class="auth-card">', unsafe_allow_html=True)
 
-            # LOGIN
-            with tab_login:
-                email = st.text_input("Email", key="login_email")
-                password = st.text_input("Password", type="password", key="login_pw")
-                remember = st.checkbox("Remember me", key="remember_me_check")
+    # Logo
+    try:
+        st.image("logo.jpg", width=120)
+    except Exception:
+        st.write("")
 
-                if st.button("Login", key="login_btn"):
-                    row = get_user_by_email(email)
-
-                    if not row:
-                        st.error("No account found.")
-                    elif row["password_hash"] != hash_password(password):
-                        st.error("Incorrect password.")
-                    else:
-                        # SAVE SESSION VALUES SAFELY
-                        st.session_state["user_id"] = row["id"]
-                        st.session_state["user_email"] = row["email"]
-                        st.session_state["remember_me"] = remember
-
-                        update_last_login(row["id"])
-                        log_event("login", f"{row['email']} logged in")
-
-                        st.success("Logged in!")
-                        st.rerun()
-            # SIGN UP
-            with tab_signup:
-                signup_email = st.text_input("Signup Email", key="signup_email")
-
-                if st.button("Send OTP", key="send_signup_otp"):
-                    if not signup_email:
-                        st.error("Enter email.")
-                    elif get_user_by_email(signup_email):
-                        st.error("Email already registered.")
-                    else:
-                        otp, err = send_otp_email(signup_email)
-                        if err:
-                            st.error("OTP failed.")
-                        else:
-                            create_otp_record(signup_email, otp, "signup")
-                            st.session_state.pending_signup_email = signup_email
-                            st.session_state.pending_otp_purpose = "signup"
-                            st.session_state.otp_sent = True
-                            st.success("OTP sent.")
-
-                if (
-                    st.session_state.otp_sent
-                    and st.session_state.pending_signup_email
-                    and st.session_state.pending_otp_purpose == "signup"
-                ):
-                    otp_entry = st.text_input("Enter OTP", key="signup_otp")
-                    pw_new = st.text_input(
-                        "Set Password", type="password", key="signup_pw"
-                    )
-
-                    if st.button("Verify & Create Account", key="signup_verify_btn"):
-                        if verify_otp_record(
-                            st.session_state.pending_signup_email,
-                            otp_entry,
-                            "signup",
-                        ):
-                            pw_hash = hash_password(pw_new)
-                            user = create_user(
-                                st.session_state.pending_signup_email,
-                                pw_hash,
-                            )
-                            st.session_state.user_id = user["id"]
-                            st.session_state.user_email = user["email"]
-                            log_event("signup", f"{user['email']} registered")
-                            st.success("Account created!")
-                            st.session_state.otp_sent = False
-                            st.session_state.pending_signup_email = None
-                            st.session_state.pending_otp_purpose = None
-                        else:
-                            st.error("Invalid OTP.")
-
-            # FORGOT PW
-            with tab_reset:
-                reset_email = st.text_input(
-                    "Registered Email", key="reset_email"
-                )
-
-                if st.button("Send Reset OTP", key="send_reset_otp_btn"):
-                    if not reset_email:
-                        st.error("Enter email.")
-                    elif not get_user_by_email(reset_email):
-                        st.error("Email not registered.")
-                    else:
-                        otp, err = send_otp_email(reset_email)
-                        if err:
-                            st.error("OTP failed.")
-                        else:
-                            create_otp_record(reset_email, otp, "reset")
-                            st.session_state.pending_signup_email = reset_email
-                            st.session_state.pending_otp_purpose = "reset"
-                            st.session_state.otp_sent = True
-                            st.success("Reset OTP sent.")
-
-                if (
-                    st.session_state.otp_sent
-                    and st.session_state.pending_signup_email
-                    and st.session_state.pending_otp_purpose == "reset"
-                ):
-                    otp2 = st.text_input("Enter OTP", key="reset_otp")
-                    newpw = st.text_input(
-                        "New Password", type="password", key="reset_new_pw"
-                    )
-
-                    if st.button("Reset Password", key="reset_pw_btn"):
-                        if verify_otp_record(
-                            st.session_state.pending_signup_email,
-                            otp2,
-                            "reset",
-                        ):
-                            supabase.table("users").update(
-                                {"password_hash": hash_password(newpw)}
-                            ).eq(
-                                "email", st.session_state.pending_signup_email
-                            ).execute()
-                            log_event(
-                                "password_reset",
-                                st.session_state.pending_signup_email,
-                            )
-                            st.success("Password reset!")
-                            st.session_state.otp_sent = False
-                            st.session_state.pending_signup_email = None
-                            st.session_state.pending_otp_purpose = None
-                        else:
-                            st.error("Invalid OTP.")
-
-        # ------- LOGGED IN -------
-        else:
-            st.success(f"Logged in as {st.session_state.user_email}")
-
-            if st.button("Logout", key="logout_btn"):
-                log_event("logout", st.session_state.user_email)
-                st.session_state.user_id = None
-                st.session_state.user_email = None
-                st.session_state.remember_me = False
-                st.rerun()
-
-# -------------------------------------------------
-# HEADER
-# -------------------------------------------------
-
-col1, col2 = st.columns([1, 6])
-with col1:
-    st.image("logo.jpg", width=70)
-with col2:
+    # Heading
     st.markdown(
         """
-        <div class="main-header">
-            <p class="brand-title">Aggarwal Documents & Legal Consultants</p>
-            <p class="brand-subtitle">Delhi Property Price Calculator</p>
+        <div class="auth-heading">
+            <div class="auth-badge">Rishav Singh • Aggarwal Documents & Legal Consultants</div>
+            <div class="auth-title">Sign in to continue</div>
+            <div class="auth-subtitle">
+                Create a free account to save your calculations, or continue as a guest.
+            </div>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
+    tab_login, tab_signup = st.tabs(["Login", "Sign Up"])
+
+    # ---------- LOGIN TAB ----------
+    with tab_login:
+        identifier = st.text_input(
+            "Email or Username",
+            key="login_identifier",
+            placeholder="e.g. rishav@gmail.com or rishav123",
+        )
+        password = st.text_input(
+            "Password",
+            type="password",
+            key="login_pw",
+        )
+        remember = st.checkbox("Remember me on this device", key="remember_me_check")
+
+        # Forgot password toggle
+        if st.button("Forgot password?", key="forgot_pw_link"):
+            st.session_state.show_reset_form = True
+
+        if st.button("Login", key="login_btn", use_container_width=True):
+            row = get_user_by_email_or_username(identifier)
+
+            if not row:
+                st.error("No account found with that email / username.")
+            elif row["password_hash"] != hash_password(password):
+                st.error("Incorrect password. Please try again.")
+            else:
+                st.session_state.user_id = row["id"]
+                st.session_state.user_email = row["email"]
+                st.session_state.username = row.get("username")
+                st.session_state.remember_me = remember
+                st.session_state.show_auth_modal = False
+                st.session_state.show_reset_form = False
+                update_last_login(row["id"])
+                log_event("login", f"{row['email']} logged in")
+                st.success("Welcome back! You are now signed in.")
+                st.experimental_rerun()
+
+        # --- Reset password flow (inside login tab) ---
+        if st.session_state.show_reset_form:
+            st.write("---")
+            st.markdown("##### Reset your password")
+
+            reset_identifier = st.text_input(
+                "Registered Email or Username",
+                key="reset_identifier",
+                placeholder="we'll send an OTP to your email",
+            )
+
+            if st.button("Send reset OTP", key="send_reset_otp_btn"):
+                if not reset_identifier:
+                    st.error("Please enter your registered email or username.")
+                else:
+                    email_to_use = None
+                    if "@" in reset_identifier:
+                        email_to_use = reset_identifier.lower()
+                    else:
+                        user = get_user_by_username(reset_identifier)
+                        if not user:
+                            st.error("Username not found.")
+                        else:
+                            email_to_use = user["email"]
+
+                    if email_to_use:
+                        # Check that user exists
+                            # (If we got here from username lookup, it exists)
+                        if not get_user_by_email(email_to_use):
+                            st.error("This email is not registered.")
+                        else:
+                            otp, err = send_otp_email(email_to_use)
+                            if err:
+                                st.error("Unable to send OTP at the moment.")
+                            else:
+                                create_otp_record(email_to_use, otp, "reset")
+                                st.session_state.pending_signup_email = email_to_use
+                                st.session_state.pending_otp_purpose = "reset"
+                                st.session_state.otp_sent = True
+                                st.success("Reset OTP sent to your email.")
+
+            if (
+                st.session_state.otp_sent
+                and st.session_state.pending_signup_email
+                and st.session_state.pending_otp_purpose == "reset"
+            ):
+                otp2 = st.text_input("Enter reset OTP", key="reset_otp")
+                newpw = st.text_input(
+                    "New password", type="password", key="reset_new_pw"
+                )
+
+                if st.button("Confirm password reset", key="reset_pw_btn"):
+                    if verify_otp_record(
+                        st.session_state.pending_signup_email,
+                        otp2,
+                        "reset",
+                    ):
+                        supabase.table("users").update(
+                            {"password_hash": hash_password(newpw)}
+                        ).eq(
+                            "email", st.session_state.pending_signup_email
+                        ).execute()
+                        log_event(
+                            "password_reset",
+                            st.session_state.pending_signup_email,
+                        )
+                        st.success("Password updated successfully. You can log in now.")
+                        st.session_state.otp_sent = False
+                        st.session_state.pending_signup_email = None
+                        st.session_state.pending_otp_purpose = None
+                        st.session_state.show_reset_form = False
+                    else:
+                        st.error("Invalid or expired OTP.")
+
+    # ---------- SIGNUP TAB ----------
+    with tab_signup:
+        signup_email = st.text_input(
+            "Email address",
+            key="signup_email",
+            placeholder="you@email.com",
+        )
+        signup_username = st.text_input(
+            "Choose a username",
+            key="signup_username_input",
+            placeholder="unique username (e.g. rishav123)",
+        )
+
+        if st.button("Send verification OTP", key="send_signup_otp_btn"):
+            if not signup_email or not signup_username:
+                st.error("Please enter both email and username.")
+            elif get_user_by_email(signup_email):
+                st.error("This email is already registered.")
+            elif get_user_by_username(signup_username):
+                st.error("This username is already taken. Please choose another.")
+            else:
+                otp, err = send_otp_email(signup_email)
+                if err:
+                    st.error("Unable to send OTP at the moment.")
+                else:
+                    create_otp_record(signup_email, otp, "signup")
+                    st.session_state.pending_signup_email = signup_email
+                    st.session_state.pending_otp_purpose = "signup"
+                    st.session_state.otp_sent = True
+                    st.session_state.signup_username = signup_username
+                    st.success("OTP sent to your email. Please verify to create account.")
+
+        if (
+            st.session_state.otp_sent
+            and st.session_state.pending_signup_email
+            and st.session_state.pending_otp_purpose == "signup"
+        ):
+            st.write("---")
+            st.markdown("##### Verify OTP & create account")
+
+            otp_entry = st.text_input("Enter OTP", key="signup_otp")
+            final_username = st.text_input(
+                "Confirm username",
+                key="signup_username_confirm",
+                value=st.session_state.get("signup_username", ""),
+            )
+            pw_new = st.text_input(
+                "Set password", type="password", key="signup_pw"
+            )
+
+            if st.button("Create my account", key="signup_verify_btn"):
+                if not final_username:
+                    st.error("Please confirm your username.")
+                elif get_user_by_username(final_username):
+                    st.error("This username is already taken. Please choose another.")
+                elif verify_otp_record(
+                    st.session_state.pending_signup_email,
+                    otp_entry,
+                    "signup",
+                ):
+                    pw_hash = hash_password(pw_new)
+                    user = create_user(
+                        st.session_state.pending_signup_email,
+                        final_username,
+                        pw_hash,
+                    )
+                    st.session_state.user_id = user["id"]
+                    st.session_state.user_email = user["email"]
+                    st.session_state.username = user.get("username")
+                    log_event(
+                        "signup",
+                        f"{user['email']} registered as {user.get('username')}",
+                    )
+                    st.success("Account created successfully. You are now signed in.")
+                    # clear flags
+                    st.session_state.otp_sent = False
+                    st.session_state.pending_signup_email = None
+                    st.session_state.pending_otp_purpose = None
+                    st.session_state.signup_username = ""
+                    st.session_state.show_auth_modal = False
+                    st.experimental_rerun()
+                else:
+                    st.error("Invalid or expired OTP.")
+
+    # ---------- Guest button ----------
+    st.write("")
+    col_guest1, col_guest2 = st.columns([1, 1])
+    with col_guest2:
+        if st.button("Continue as guest", key="continue_as_guest", use_container_width=True):
+            st.session_state.show_auth_modal = False
+            st.session_state.show_reset_form = False
+
+    st.markdown(
+        "<div class='auth-footer'>Using in guest mode will not save any history. "
+        "For best experience, create a free account.</div>",
+        unsafe_allow_html=True,
+    )
+
+    st.markdown("</div></div>", unsafe_allow_html=True)
+
+# -------------------------------------------------
+# SIDEBAR STATUS
+# -------------------------------------------------
+
+
+def render_sidebar_status():
+    with st.sidebar:
+        st.markdown("### 👤 Account")
+
+        if st.session_state.user_id is not None:
+            display_name = (
+                st.session_state.username
+                or st.session_state.user_email
+                or "Signed in"
+            )
+            st.success(f"Signed in as **{display_name}**")
+            if st.button("Logout", key="logout_btn_sidebar", use_container_width=True):
+                log_event("logout", st.session_state.user_email or "")
+                st.session_state.user_id = None
+                st.session_state.user_email = None
+                st.session_state.username = None
+                st.session_state.remember_me = False
+                st.session_state.show_auth_modal = True
+                st.experimental_rerun()
+        else:
+            st.info("You are currently using the calculator in **guest mode**.")
+            if st.button("Login / Sign up", key="open_auth_from_sidebar", use_container_width=True):
+                st.session_state.show_auth_modal = True
+
+
+# -------------------------------------------------
+# HEADER
+# -------------------------------------------------
+
+col1, col2, col3 = st.columns([1, 5, 2])
+with col1:
+    try:
+        st.image("logo.jpg", width=70)
+    except Exception:
+        st.write("")
+with col2:
+    st.markdown(
+        """
+        <div class="main-header">
+            <p class="brand-title">Delhi Property Price Calculator</p>
+            <p class="brand-subtitle">
+                by Rishav Singh • Aggarwal Documents & Legal Consultants
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+with col3:
+    if st.session_state.user_id is None:
+        if st.button("🔐 Login / Sign up", key="open_auth_top", use_container_width=True):
+            st.session_state.show_auth_modal = True
+    else:
+        st.write("")
+        st.caption(
+            f"Logged in as **{st.session_state.username or st.session_state.user_email}**"
+        )
+
 st.write("---")
 
-# Sidebar auth
-auth_sidebar()
+# Show sidebar status & auth popup
+render_sidebar_status()
+render_auth_modal()
 
 # -------------------------------------------------
 # MAIN TABS
@@ -692,7 +906,14 @@ with tab_home:
         """
         <div class="box">
         <h3>Welcome to the Delhi Property Price Calculator</h3>
-        <p>Use the tabs above to calculate Residential, Commercial and DDA/CGHS values.</p>
+        <p>
+        Quickly estimate government circle-rate value, stamp duty, mutation, e-fees and TDS
+        for properties in Delhi – residential plots, commercial properties and DDA / CGHS flats.
+        </p>
+        <p>
+        You can use the app freely as a guest. If you sign in, your calculations will be
+        saved to your personal history for future reference.
+        </p>
         </div>
         """,
         unsafe_allow_html=True,
@@ -716,7 +937,7 @@ with tab_res:
 
         if r_colony != "(Not using colony)":
             r_category = COLONY_MAP.get(r_colony, "G")
-            st.info(f"Detected Category: {r_category}")
+            st.info(f"Detected Category from master list: **{r_category}**")
             log_event("colony_selected", r_colony)
         else:
             r_category = st.selectbox(
@@ -728,21 +949,21 @@ with tab_res:
         )
 
         r_total = st.number_input(
-            "Total Floors", min_value=1, value=1, key="r_total_floors"
+            "Total Floors in Building", min_value=1, value=1, key="r_total_floors"
         )
         r_buy = st.number_input(
-            "Floors Buying", min_value=1, value=1, key="r_buy_floors"
+            "No. of Floors being Purchased", min_value=1, value=1, key="r_buy_floors"
         )
 
     with col2:
         r_owner = st.selectbox(
-            "Owner Type", ["male", "female", "joint"], key="r_owner"
+            "Buyer Category (for stamp duty)", ["male", "female", "joint"], key="r_owner"
         )
         r_const = st.radio(
             "Includes Construction?", ["yes", "no"], key="r_const_radio"
         )
         r_parking = st.radio(
-            "Parking?", ["yes", "no"], key="r_parking_radio"
+            "Parking Included?", ["yes", "no"], key="r_parking_radio"
         )
 
     r_area = 0.0
@@ -757,7 +978,7 @@ with tab_res:
             )
         with col4:
             r_year = st.number_input(
-                "Construction Year",
+                "Year of Construction",
                 value=2005,
                 min_value=1900,
                 max_value=2100,
@@ -765,7 +986,7 @@ with tab_res:
             )
 
     r_custom = st.number_input(
-        "Custom Consideration (₹)", value=0, key="r_custom_cons"
+        "Custom Consideration (₹, optional)", value=0, key="r_custom_cons"
     )
 
     if st.button("Calculate Residential", key="calc_res_btn"):
@@ -813,7 +1034,7 @@ with tab_com:
 
         if c_colony != "(Not using colony)":
             c_category = COLONY_MAP.get(c_colony, "G")
-            st.info(f"Detected Category: {c_category}")
+            st.info(f"Detected Category from master list: **{c_category}**")
             log_event("colony_selected", c_colony)
         else:
             c_category = st.selectbox(
@@ -827,21 +1048,21 @@ with tab_com:
         )
 
         c_total = st.number_input(
-            "Total Floors", min_value=1, value=1, key="c_total_floors"
+            "Total Floors in Building", min_value=1, value=1, key="c_total_floors"
         )
         c_buy = st.number_input(
-            "Floors Buying", min_value=1, value=1, key="c_buy_floors"
+            "No. of Floors being Purchased", min_value=1, value=1, key="c_buy_floors"
         )
 
     with col2:
         c_owner = st.selectbox(
-            "Owner Type", ["male", "female", "joint"], key="c_owner"
+            "Buyer Category (for stamp duty)", ["male", "female", "joint"], key="c_owner"
         )
         c_const = st.radio(
             "Includes Construction?", ["yes", "no"], key="c_const_radio"
         )
         c_parking = st.radio(
-            "Parking?", ["yes", "no"], key="c_parking_radio"
+            "Parking Included?", ["yes", "no"], key="c_parking_radio"
         )
 
     c_area = 0.0
@@ -856,7 +1077,7 @@ with tab_com:
             )
         with col4:
             c_year = st.number_input(
-                "Construction Year",
+                "Year of Construction",
                 value=2005,
                 min_value=1900,
                 max_value=2100,
@@ -864,7 +1085,7 @@ with tab_com:
             )
 
     c_custom = st.number_input(
-        "Custom Consideration (₹)", value=0, key="c_custom_cons"
+        "Custom Consideration (₹, optional)", value=0, key="c_custom_cons"
     )
 
     if st.button("Calculate Commercial", key="calc_com_btn"):
@@ -925,7 +1146,7 @@ with tab_dda:
         )
     with col2:
         dda_owner = st.selectbox(
-            "Buyer Type (for Stamp Duty)",
+            "Buyer Category (for Stamp Duty)",
             ["male", "female", "joint"],
             key="dda_owner",
         )
@@ -1035,7 +1256,7 @@ with tab_history:
     st.subheader("Saved History")
 
     if st.session_state.user_id is None:
-        st.error("Login required.")
+        st.error("Please sign in to view your saved calculations.")
     else:
         resp = (
             supabase.table("history")
@@ -1050,7 +1271,7 @@ with tab_history:
 
         rows = resp.data or []
         if not rows:
-            st.info("No history yet.")
+            st.info("No history saved yet. Run a calculation and click “Save to my account”.")
         else:
             df = pd.DataFrame(rows)
             df = df.rename(
@@ -1076,16 +1297,36 @@ with tab_history:
 
 with tab_about:
     st.markdown('<div class="box">', unsafe_allow_html=True)
-    st.subheader("About Aggarwal Documents & Legal Consultants")
-    st.write("Delhi Property Price Calculator – created by Rishav Singh.")
+    st.subheader("About this calculator")
+
+    st.write(
+        """
+        **Delhi Property Price Calculator** helps you estimate:
+
+        - Circle-rate based land and construction value  
+        - Stamp duty according to buyer category  
+        - Mutation charges & e-registration fees  
+        - TDS (where applicable)  
+        - DDA / CGHS built-up government value
+
+        Designed and implemented by **Rishav Singh** for  
+        **Aggarwal Documents & Legal Consultants**.
+        """
+    )
 
     st.write("---")
-    st.write("**App Link:**")
+    st.write("**Public app link:**")
     st.code(APP_URL)
 
-    wa = quote(f"Use this Delhi Property Calculator:\n{APP_URL}")
+    wa_text = (
+        "Delhi Property Circle Rate & Govt Duty Calculator "
+        "by Rishav Singh • Aggarwal Documents & Legal Consultants.%0A%0A"
+        f"Use it here: {APP_URL}"
+    )
+    wa = quote(wa_text, safe=":/%")
+
     st.markdown(
-        f'<a href="https://wa.me/?text={wa}"><button>Share on WhatsApp</button></a>',
+        f'<a href="https://wa.me/?text={wa}"><button>📲 Share on WhatsApp</button></a>',
         unsafe_allow_html=True,
     )
 
@@ -1096,7 +1337,7 @@ with tab_about:
 # -------------------------------------------------
 
 st.markdown(
-    '<div class="footer">Created by <b>Rishav</b> · Aggarwal Documents & Legal Consultants</div>',
+    '<div class="footer">© '
+    f'{date.today().year} Rishav Singh · Aggarwal Documents & Legal Consultants</div>',
     unsafe_allow_html=True,
-        )
-
+)

@@ -140,24 +140,55 @@ def load_table(name: str, select: str = "*") -> pd.DataFrame:
 # -------------------------------------------------
 
 def render_login_page():
-    """Full-screen centered admin login."""
+    """Full-screen centered admin login with logo."""
     st.markdown("<br><br>", unsafe_allow_html=True)
+
     col_left, col_center, col_right = st.columns([1, 1.1, 1])
 
     with col_center:
+
+        # ---------- LOGO ----------
+        try:
+            st.image("logo.jpg", width=180)
+        except:
+            st.write("")
+
         st.markdown('<div class="login-card">', unsafe_allow_html=True)
 
         st.markdown(
             """
-            <div class="login-badge">Aggarwal Documents & Legal Consultants</div>
-            <div class="login-title">Admin Control Panel</div>
-            <div class="login-subtitle">
-                Secure access to users, history, colony master & events.
+            <div style="text-align:center;">
+                <div class="login-badge">Aggarwal Documents & Legal Consultants</div>
+                <div class="login-title">Admin Control Panel</div>
+                <div class="login-subtitle">
+                    Secure access to users, history, colony master & events.
+                </div>
             </div>
             """,
             unsafe_allow_html=True,
         )
 
+        email = st.text_input("Admin Email", key="admin_email_input")
+        pw = st.text_input("Admin Password", type="password", key="admin_password_input")
+
+        login_btn = st.button("Login as Admin", use_container_width=True)
+
+        if login_btn:
+            if email == ADMIN_EMAIL and pw == ADMIN_PASSWORD:
+                st.session_state.admin_auth = True
+                st.success("Login successful.")
+                st.rerun()
+            else:
+                st.error("Invalid admin credentials.")
+
+        st.markdown(
+            "<p style='font-size:11px;color:#6b7280;margin-top:10px;'>"
+            "Only trusted internal users should access this dashboard.</p>",
+            unsafe_allow_html=True,
+        )
+
+        st.markdown("</div>", unsafe_allow_html=True)
+        
         email = st.text_input("Admin Email", key="admin_email_input")
         pw = st.text_input("Admin Password", type="password", key="admin_password_input")
 
@@ -640,4 +671,5 @@ with tab_events:
                     st.rerun()
                 except Exception as e:
                     st.error(f"Error deleting events: {e}")
+
 

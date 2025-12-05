@@ -126,7 +126,7 @@ st.markdown(
             color: #d0e8ff;
         }
         /* Force widget labels to white for visibility */
-        label, .stRadio > label, .stSelectbox > label {
+        label {
             color: #ffffff !important;
         }
     </style>
@@ -135,8 +135,9 @@ st.markdown(
 )
 
 # -------------------------------------------------
-# SUPABASE CLIENT
+# SUPABASE CLIENT (USERS / OTP / HISTORY)
 # -------------------------------------------------
+
 
 @st.cache_resource
 def get_supabase_client() -> Client:
@@ -171,7 +172,7 @@ def ensure_session_state():
 ensure_session_state()
 
 # -------------------------------------------------
-# DB HELPERS (USERS, OTPS, HISTORY, COLONIES)
+# DB HELPERS (USERS, OTPS, HISTORY)
 # -------------------------------------------------
 
 
@@ -215,6 +216,7 @@ def update_last_login(user_id):
             {"last_login": datetime.utcnow().isoformat()}
         ).eq("id", user_id).execute()
     except Exception:
+        # Not critical if this fails
         pass
 
 
@@ -279,23 +281,34 @@ def save_history_to_db(res: dict):
     ).execute()
     st.success("Summary saved to History.")
 
+# -------------------------------------------------
+# COLONIES FROM LOCAL CSV (NOT SUPABASE)
+# -------------------------------------------------
+
 
 @st.cache_data
-def load_colonies_from_db():
-    """Load colony names + categories from Supabase and return (names, mapping)."""
-    resp = (
-        supabase.table("colonies")
-        .select("colony_name, category")
-        .order("colony_name", desc=False)
-        .execute()
-    )
-    rows = resp.data or []
-    names = [r["colony_name"] for r in rows]
-    mapping = {r["colony_name"]: r["category"] for r in rows}
+def load_colonies_from_csv():
+    try:
+        df = pd.read_csv("colonies.csv")
+    except Exception:
+        # If file missing or unreadable, just return empty lists
+        return [], {}
+
+    # Normalise column names
+    df.columns = [c.strip().lower() for c in df.columns]
+
+    if "colony_name" not in df.columns or "category" not in df.columns:
+        return [], {}
+
+    df["colony_name"] = df["colony_name"].astype(str)
+    df["category"] = df["category"].astype(str).str.upper()
+
+    names = df["colony_name"].tolist()
+    mapping = dict(zip(df["colony_name"], df["category"]))
     return names, mapping
 
 
-COLONY_NAMES, COLONY_MAP = load_colonies_from_db()
+COLONY_NAMES, COLONY_MAP = load_colonies_from_csv()
 
 # -------------------------------------------------
 # CALC HELPERS
@@ -1130,20 +1143,7 @@ with tab_history:
         if not rows:
             st.info("No saved entries yet.")
         else:
-            df = pd.DataFrame(
-                rows,
-                columns=[
-                    "created_at",
-                    "colony_name",
-                    "property_type",
-                    "category",
-                    "consideration",
-                    "stamp_duty",
-                    "e_fees",
-                    "tds",
-                    "total_govt_duty",
-                ],
-            )
+            df = pd.DataFrame(rows)
             df = df.rename(
                 columns={
                     "created_at": "Time",

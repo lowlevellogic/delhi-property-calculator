@@ -3,7 +3,7 @@ import streamlit as st
 from supabase import create_client, Client
 
 # -------------------------------------------------
-#  CONFIG
+# CONFIG
 # -------------------------------------------------
 
 @st.cache_resource
@@ -19,7 +19,7 @@ ADMIN_PASSWORD = st.secrets["ADMIN_PASSWORD"]
 
 
 # -------------------------------------------------
-#  SESSION STATE
+# SESSION STATE
 # -------------------------------------------------
 
 def ensure_state():
@@ -30,7 +30,7 @@ ensure_state()
 
 
 # -------------------------------------------------
-#  PAGE UI THEME
+# PAGE UI THEME
 # -------------------------------------------------
 
 st.set_page_config(
@@ -70,20 +70,12 @@ st.markdown("""
             font-size: 14px;
             color: #C8D5E0;
         }
-        .table-box {
-            background: rgba(255,255,255,0.04);
-            padding: 12px;
-            border-radius: 12px;
-        }
-        .sidebar .sidebar-content {
-            background: #0F1218 !important;
-        }
     </style>
 """, unsafe_allow_html=True)
 
 
 # -------------------------------------------------
-#  SIDEBAR – ADMIN LOGIN
+# SIDEBAR ADMIN LOGIN
 # -------------------------------------------------
 
 with st.sidebar:
@@ -92,7 +84,7 @@ with st.sidebar:
     if not st.session_state.admin_auth:
         email = st.text_input("Admin Email")
         pw = st.text_input("Admin Password", type="password")
-        
+
         if st.button("Login", use_container_width=True):
             if email == ADMIN_EMAIL and pw == ADMIN_PASSWORD:
                 st.session_state.admin_auth = True
@@ -111,15 +103,13 @@ if not st.session_state.admin_auth:
 
 
 # -------------------------------------------------
-#  HELPER – LOAD TABLE
+# HELPER – LOAD TABLE
 # -------------------------------------------------
 
 def load_table(name: str, select="*"):
     try:
         res = supabase.table(name).select(select).execute()
         rows = res.data or []
-        if not rows:
-            return pd.DataFrame()
         return pd.DataFrame(rows)
     except Exception as e:
         st.error(f"Error loading table '{name}': {e}")
@@ -127,16 +117,17 @@ def load_table(name: str, select="*"):
 
 
 # -------------------------------------------------
-#  HEADER
+# HEADER
 # -------------------------------------------------
 
 st.markdown('<p class="main-title">🛡️ Admin Dashboard</p>', unsafe_allow_html=True)
-st.markdown('<p class="sub-title">Internal dashboard for Delhi Property Price Calculator</p>', unsafe_allow_html=True)
+st.markdown('<p class="sub-title">Internal dashboard for Delhi Property Price Calculator</p>',
+            unsafe_allow_html=True)
 st.write("---")
 
 
 # -------------------------------------------------
-#  MAIN TABS
+# TABS
 # -------------------------------------------------
 
 tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(
@@ -145,7 +136,7 @@ tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(
 
 
 # -------------------------------------------------
-#  OVERVIEW TAB
+# OVERVIEW TAB
 # -------------------------------------------------
 
 with tab1:
@@ -157,34 +148,46 @@ with tab1:
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
-        st.markdown('<div class="metric-box"><div class="big-number">'
-                    f'{len(users_df)}</div><div class="label">Total Users</div></div>',
-                    unsafe_allow_html=True)
+        st.markdown(f"""
+        <div class="metric-box">
+            <div class="big-number">{len(users_df)}</div>
+            <div class="label">Total Users</div>
+        </div>
+        """, unsafe_allow_html=True)
 
     with col2:
-        st.markdown('<div class="metric-box"><div class="big-number">'
-                    f'{len(history_df)}</div><div class="label">Saved Calculations</div></div>',
-                    unsafe_allow_html=True)
+        st.markdown(f"""
+        <div class="metric-box">
+            <div class="big-number">{len(history_df)}</div>
+            <div class="label">Saved Calculations</div>
+        </div>
+        """, unsafe_allow_html=True)
 
     with col3:
-        st.markdown('<div class="metric-box"><div class="big-number">'
-                    f'{len(otps_df)}</div><div class="label">OTP Records</div></div>',
-                    unsafe_allow_html=True)
+        st.markdown(f"""
+        <div class="metric-box">
+            <div class="big-number">{len(otps_df)}</div>
+            <div class="label">OTP Records</div>
+        </div>
+        """, unsafe_allow_html=True)
 
     with col4:
-        st.markdown('<div class="metric-box"><div class="big-number">'
-                    f'{len(events_df)}</div><div class="label">Event Logs</div></div>',
-                    unsafe_allow_html=True)
+        st.markdown(f"""
+        <div class="metric-box">
+            <div class="big-number">{len(events_df)}</div>
+            <div class="label">Event Logs</div>
+        </div>
+        """, unsafe_allow_html=True)
 
     st.write("### 👤 Latest Registered Users")
-    
-    if not users_df.empty:
-        st.dataframe(users_df.sort_values("created_at", ascending=False).head(15), use_container_width=True)
 
+    if not users_df.empty:
+        st.dataframe(users_df.sort_values("created_at", ascending=False).head(15),
+                     use_container_width=True)
 
 
 # -------------------------------------------------
-#  USERS TAB
+# USERS TAB
 # -------------------------------------------------
 
 with tab2:
@@ -198,7 +201,7 @@ with tab2:
 
 
 # -------------------------------------------------
-#  COLONIES TAB
+# COLONIES TAB
 # -------------------------------------------------
 
 with tab3:
@@ -210,9 +213,14 @@ with tab3:
             df = df[df["colony_name"].str.contains(search, case=False)]
         st.dataframe(df, use_container_width=True)
 
-# ---------- HISTORY ----------
+
+# -------------------------------------------------
+# HISTORY TAB (FIXED)
+# -------------------------------------------------
+
 with tab4:
-    st.subheader("Calculation History")
+    st.subheader("📂 Calculation History")
+
     hist_df = load_table("history")
     if not hist_df.empty:
 
@@ -236,57 +244,29 @@ with tab4:
         cols = [c for c in cols if c in hist_df.columns]
         hist_df = hist_df[cols]
 
-        # ✅ FIXED LINE (now valid syntax)
-        st.dataframe(
-            hist_df.sort_values("created_at", ascending=False),
-            use_container_width=True
-        )
+        st.dataframe(hist_df.sort_values("created_at", ascending=False),
+                     use_container_width=True)
 
 
 # -------------------------------------------------
-#  OTP LOGS TAB
+# OTP LOGS TAB
 # -------------------------------------------------
 
 with tab5:
     st.subheader("🔑 OTP Logs")
-
     df = load_table("otps")
     if not df.empty:
-        st.dataframe(df.sort_values("created_at", ascending=False), use_container_width=True)
+        st.dataframe(df.sort_values("created_at", ascending=False),
+                     use_container_width=True)
+
 
 # -------------------------------------------------
-#  EVENTS TAB
+# EVENTS TAB
 # -------------------------------------------------
 
 with tab6:
-    st.subheader("📁 Tracking Events")
-
+    st.subheader("📁 Events Logs")
     df = load_table("events")
     if not df.empty:
-        st.dataframe(df.sort_values("created_at", ascending=False), use_container_width=True)        hist_df = hist_df[cols]
-        st.dataframe(hist_df.sort_values("created_at", ascending=False), use_container_width=True)
-
-# ---------- OTP LOGS ----------
-with tab_otps:
-    st.subheader("OTP Logs")
-    otps_df = load_table(
-        "otps", "id, email, purpose, otp_code, used, expires_at, created_at"
-    )
-    if not otps_df.empty:
-        st.dataframe(
-            otps_df.sort_values("created_at", ascending=False),
-            use_container_width=True,
-        )
-
-# ---------- EVENTS ----------
-with tab_events:
-    st.subheader("Event Logs")
-    events_df = load_table("events")
-    if not events_df.empty:
-        st.dataframe(
-            events_df.sort_values("created_at", ascending=False),
-            use_container_width=True,
-        )
-
-
-
+        st.dataframe(df.sort_values("created_at", ascending=False),
+                     use_container_width=True)

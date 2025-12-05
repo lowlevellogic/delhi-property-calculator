@@ -531,13 +531,24 @@ def render_auth_modal():
     )
 
     # ---------- CENTERED LOGO (using columns) ----------
-    col_a, col_b, col_c = st.columns([1, 2, 1])
-    with col_b:
-        try:
-            st.image("logo.jpg", width=120)
-        except Exception:
-            st.write("")
+    # ---------- LOGO (VISIBLE + PERFECT CENTER) ----------
+    st.markdown(
+        """
+        <style>
+        .center-logo-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
 
+    st.markdown('<div class="center-logo-container">', unsafe_allow_html=True)
+    st.image("logo.jpg", width=120)
+    st.markdown("</div>", unsafe_allow_html=True)
     # ---------- Heading ----------
     st.markdown(
         """
@@ -1146,6 +1157,7 @@ st.markdown(
     f'{date.today().year} Rishav Singh · Aggarwal Documents & Legal Consultants</div>',
     unsafe_allow_html=True,
     )
+
 
 
 

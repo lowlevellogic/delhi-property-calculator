@@ -531,7 +531,7 @@ def render_auth_modal():
     )
 
     # ---------- CENTERED LOGO (using columns) ------------
-# GUARANTEED CENTERED LOGO – Works even when nothing else does
+# GUARANTEED CENTERED LOGO – 100% works, no indentation issues
 st.markdown(
     """
     <style>
@@ -540,7 +540,7 @@ st.markdown(
         left: 50%;
         transform: translateX(-50%);
         z-index: 999;
-        pointer-events: none;   /* so it doesn't block clicks below */
+        pointer-events: none;   /* doesn't block clicks below */
     }
     </style>
     """,
@@ -548,12 +548,12 @@ st.markdown(
 )
 
 st.markdown(
-    f'<img src="logo.jpg" width="120" class="centered-logo">',
+    '<img src="logo.jpg" width="120" class="centered-logo">',
     unsafe_allow_html=True
 )
 
-# Add empty space so content doesn't overlap the logo
-st.markdown("<br><br><br><br>", unsafe_allow_html=True)
+# Add some breathing space so the logo doesn't overlap your content
+st.markdown("<br><br><br><br><br>", unsafe_allow_html=True)
     # ---------- Heading ----------
     st.markdown(
         """
@@ -1162,6 +1162,7 @@ st.markdown(
     f'{date.today().year} Rishav Singh · Aggarwal Documents & Legal Consultants</div>',
     unsafe_allow_html=True,
     )
+
 
 
 

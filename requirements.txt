@@ -1,5 +1,5 @@
 streamlit
 pandas
-supabase-py
+supabase
 python-dotenv
 requests

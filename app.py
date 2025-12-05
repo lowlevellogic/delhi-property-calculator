@@ -508,10 +508,8 @@ def auth_sidebar():
             # LOGIN
             with tab_login:
                 email = st.text_input("Email", key="login_email")
-                password = st.text_input(
-                    "Password", type="password", key="login_pw"
-                )
-                remember = st.checkbox("Remember me", key="remember_me")
+                password = st.text_input("Password", type="password", key="login_pw")
+                remember = st.checkbox("Remember me", key="remember_me_check")
 
                 if st.button("Login", key="login_btn"):
                     row = get_user_by_email(email)
@@ -521,13 +519,16 @@ def auth_sidebar():
                     elif row["password_hash"] != hash_password(password):
                         st.error("Incorrect password.")
                     else:
-                        st.session_state.user_id = row["id"]
-                        st.session_state.user_email = row["email"]
-                        st.session_state.remember_me = remember
+                        # SAVE SESSION VALUES SAFELY
+                        st.session_state["user_id"] = row["id"]
+                        st.session_state["user_email"] = row["email"]
+                        st.session_state["remember_me"] = remember
+
                         update_last_login(row["id"])
                         log_event("login", f"{row['email']} logged in")
-                        st.success("Logged in!")
 
+                        st.success("Logged in!")
+                        st.rerun()
             # SIGN UP
             with tab_signup:
                 signup_email = st.text_input("Signup Email", key="signup_email")
@@ -1098,3 +1099,4 @@ st.markdown(
     '<div class="footer">Created by <b>Rishav</b> · Aggarwal Documents & Legal Consultants</div>',
     unsafe_allow_html=True,
         )
+

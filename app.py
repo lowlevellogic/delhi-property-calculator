@@ -501,8 +501,8 @@ def render_auth_modal():
 
     # ---------- Centered Logo ----------
     st.markdown('<div class="center-logo-box">', unsafe_allow_html=True)
-st.image("logo.jpg", width=120, use_container_width=False)
-st.markdown('</div>', unsafe_allow_html=True)
+    st.image("logo.jpg", width=120, use_container_width=False)
+    st.markdown('</div>', unsafe_allow_html=True)
     # ---------- Heading ----------
     st.markdown(
         """
@@ -1180,4 +1180,5 @@ st.markdown(
     f'{date.today().year} Rishav Singh · Aggarwal Documents & Legal Consultants</div>',
     unsafe_allow_html=True,
     )
+
 

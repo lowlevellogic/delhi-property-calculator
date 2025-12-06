@@ -550,6 +550,7 @@ with tab_res:
             st.info(f"Category auto-detected: **{category}**")
         else:
             category = st.selectbox("Manual Category", list(circlerates_res.keys()))
+            key="r_manual_category"
 
         land = st.number_input("Land Area (sq yd)", 1.0, value=50.0)
         total = st.number_input("Total Floors",1,value=1)
@@ -604,6 +605,7 @@ with tab_com:
             st.info(f"Category auto: **{category}**")
         else:
             category = st.selectbox("Manual Category", list(circlerates_com.keys()))
+            key="c_manual_category"
         land = st.number_input("Land Area (sq yd)",1.0, value=50.0)
         total = st.number_input("Total Floors",1,value=1)
         buy = st.number_input("Floors Purchased",1,value=1)
@@ -732,3 +734,4 @@ st.markdown(
     f"<div class='footer'>© {date.today().year} Rishav Singh · Aggarwal Documents & Legal Consultants</div>",
     unsafe_allow_html=True
     )
+

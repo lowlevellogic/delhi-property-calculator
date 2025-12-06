@@ -1,118 +1,130 @@
-/* ================================================
-   STYLES.CSS — PREMIUM AUTO LIGHT/DARK THEME
-   ================================================ */
-
-/* ---- System Light / Dark Mode ---- */
-:root {
-    --bg-main-light: #f8fafc;
-    --bg-card-light: rgba(255, 255, 255, 0.8);
-    --text-main-light: #0f172a;
-    --text-sub-light: #475569;
-    --border-light: rgba(0, 0, 0, 0.12);
-
-    --bg-main-dark: radial-gradient(circle at top left, #020617 0%, #0f172a 100%);
-    --bg-card-dark: rgba(15, 23, 42, 0.80);
-    --text-main-dark: #f1f5f9;
-    --text-sub-dark: #94a3b8;
-    --border-dark: rgba(148, 163, 184, 0.3);
-
-    --radius: 20px;
-    --shadow-light: 0 10px 30px rgba(0, 0, 0, 0.08);
-    --shadow-dark: 0 20px 45px rgba(0, 0, 0, 0.65);
+/* ============================================================
+   GLOBAL RESET
+============================================================ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-/* ---- Auto apply depending on OS Theme ---- */
+/* ============================================================
+   APP BACKGROUND
+============================================================ */
+.stApp {
+    background: #0B1120 !important;
+    color: #E2E8F0 !important;
+    font-family: "Inter", system-ui, sans-serif;
+}
+
+/* ============================================================
+   LIGHT MODE FIX
+============================================================ */
 @media (prefers-color-scheme: light) {
-    body, .stApp {
-        background: var(--bg-main-light) !important;
-        color: var(--text-main-light) !important;
+    .stApp {
+        background: #F8FAFC !important;
+        color: #0F172A !important;
     }
-    .box, .auth-card {
-        background: var(--bg-card-light) !important;
-        color: var(--text-main-light) !important;
-        border: 1px solid var(--border-light) !important;
-        box-shadow: var(--shadow-light) !important;
-        backdrop-filter: blur(22px);
+    .box {
+        background: #FFFFFF !important;
+        border: 1px solid #CBD5E1 !important;
+        color: #0F172A !important;
     }
-    .brand-subtitle, label, p, span {
-        color: var(--text-sub-light) !important;
+    label, p, h1, h2, h3, h4 {
+        color: #0F172A !important;
     }
-}
-
-@media (prefers-color-scheme: dark) {
-    body, .stApp {
-        background: var(--bg-main-dark) !important;
-        color: var(--text-main-dark) !important;
-    }
-    .box, .auth-card {
-        background: var(--bg-card-dark) !important;
-        color: var(--text-main-dark) !important;
-        border: 1px solid var(--border-dark) !important;
-        box-shadow: var(--shadow-dark) !important;
-        backdrop-filter: blur(25px);
-    }
-    .brand-subtitle, label, p, span {
-        color: var(--text-sub-dark) !important;
+    .stTextInput > label {
+        color: #0F172A !important;
     }
 }
 
-/* ---- Global Card ---- */
-.box {
-    padding: 22px;
-    border-radius: var(--radius);
-    margin-bottom: 22px;
-}
-
-/* ---- Header ---- */
+/* ============================================================
+   HEADER
+============================================================ */
 .main-header {
     display: flex;
     flex-direction: column;
     gap: 2px;
 }
+
 .brand-title {
     font-size: 26px;
     font-weight: 800;
-    margin: 0;
-}
-.brand-subtitle {
-    font-size: 13px;
-    margin: 0;
+    color: #F8FAFC !important;
 }
 
-/* ---- Auth Modal ---- */
+.brand-subtitle {
+    font-size: 13px;
+    color: #94A3B8 !important;
+}
+
+/* ============================================================
+   PREMIUM GLASS CARD
+============================================================ */
+.box {
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    border-radius: 18px;
+    padding: 22px;
+    margin-bottom: 22px;
+    backdrop-filter: blur(15px);
+}
+
+/* ============================================================
+   AUTH POPUP FIXED + CENTERED LOGO
+============================================================ */
 .auth-wrapper {
     display: flex;
     justify-content: center;
+    padding-top: 20px;
 }
+
 .auth-card {
     width: 100%;
-    max-width: 480px;
-    padding: 22px 22px 18px;
-    border-radius: var(--radius);
-    backdrop-filter: blur(20px);
+    max-width: 450px;
+    background: rgba(15, 23, 42, 0.90);
+    padding: 25px;
+    border-radius: 22px;
+    border: 1px solid rgba(255,255,255,0.08);
+    backdrop-filter: blur(16px);
 }
+
+/* LOGO FINALLY CENTERED */
 .center-logo-box {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    margin-bottom: 12px;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100% !important;
+    margin-bottom: 10px;
 }
 
-/* ---- Input Fields ---- */
-input, textarea, select {
-    border-radius: 10px !important;
+.center-logo-box img {
+    width: 120px !important;
+    display: block !important;
+    margin: auto !important;
 }
 
-/* ---- Summary ---- */
-.summary-line {
-    padding: 4px 0;
-    font-size: 15px;
+/* ============================================================
+   AUTH TEXT
+============================================================ */
+.auth-title {
+    text-align: center;
+    font-size: 22px;
+    font-weight: 700;
+    color: #F1F5F9;
 }
 
-/* ---- Footer ---- */
+.auth-subtitle {
+    text-align: center;
+    font-size: 14px;
+    color: #CBD5E1;
+}
+
+/* ============================================================
+   FOOTER
+============================================================ */
 .footer {
     text-align: center;
-    margin-top: 25px;
+    padding: 14px;
     font-size: 12px;
-    opacity: 0.8;
+    color: #94A3B8;
 }

@@ -1,171 +1,118 @@
-/* ---------------------------------------------------------
-   GLOBAL
---------------------------------------------------------- */
+/* ================================================
+   STYLES.CSS — PREMIUM AUTO LIGHT/DARK THEME
+   ================================================ */
 
-html, body, .stApp {
-    font-family: "Inter", sans-serif !important;
-}
-
+/* ---- System Light / Dark Mode ---- */
 :root {
-    --primary: #2563eb;
-    --primary-light: #3b82f6;
-    --primary-dark: #1e40af;
+    --bg-main-light: #f8fafc;
+    --bg-card-light: rgba(255, 255, 255, 0.8);
+    --text-main-light: #0f172a;
+    --text-sub-light: #475569;
+    --border-light: rgba(0, 0, 0, 0.12);
 
-    --bg-dark: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-    --bg-light: #f5f7fa;
+    --bg-main-dark: radial-gradient(circle at top left, #020617 0%, #0f172a 100%);
+    --bg-card-dark: rgba(15, 23, 42, 0.80);
+    --text-main-dark: #f1f5f9;
+    --text-sub-dark: #94a3b8;
+    --border-dark: rgba(148, 163, 184, 0.3);
 
-    --card-dark: rgba(0,0,0,0.45);
-    --card-light: #ffffff;
-
-    --border-light: rgba(0,0,0,0.10);
-    --border-dark: rgba(255,255,255,0.12);
-
-    --text-dark: #ffffff;
-    --text-light: #1f2937;
+    --radius: 20px;
+    --shadow-light: 0 10px 30px rgba(0, 0, 0, 0.08);
+    --shadow-dark: 0 20px 45px rgba(0, 0, 0, 0.65);
 }
 
-/* Dark / Light Auto Detection */
-@media (prefers-color-scheme: dark) {
-    .stApp { background: var(--bg-dark) !important; color: var(--text-dark) !important; }
-    .box   { background: var(--card-dark) !important; border-color: var(--border-dark) !important; }
-    label, p, span, h1, h2, h3, h4, h5 { color: var(--text-dark) !important; }
-}
-
+/* ---- Auto apply depending on OS Theme ---- */
 @media (prefers-color-scheme: light) {
-    .stApp { background: var(--bg-light) !important; color: var(--text-light) !important; }
-    .box   { background: var(--card-light) !important; border-color: var(--border-light) !important; }
-    label, p, span, h1, h2, h3, h4, h5 { color: var(--text-light) !important; }
+    body, .stApp {
+        background: var(--bg-main-light) !important;
+        color: var(--text-main-light) !important;
+    }
+    .box, .auth-card {
+        background: var(--bg-card-light) !important;
+        color: var(--text-main-light) !important;
+        border: 1px solid var(--border-light) !important;
+        box-shadow: var(--shadow-light) !important;
+        backdrop-filter: blur(22px);
+    }
+    .brand-subtitle, label, p, span {
+        color: var(--text-sub-light) !important;
+    }
 }
 
-/* ---------------------------------------------------------
-   GLASS BOXES
---------------------------------------------------------- */
+@media (prefers-color-scheme: dark) {
+    body, .stApp {
+        background: var(--bg-main-dark) !important;
+        color: var(--text-main-dark) !important;
+    }
+    .box, .auth-card {
+        background: var(--bg-card-dark) !important;
+        color: var(--text-main-dark) !important;
+        border: 1px solid var(--border-dark) !important;
+        box-shadow: var(--shadow-dark) !important;
+        backdrop-filter: blur(25px);
+    }
+    .brand-subtitle, label, p, span {
+        color: var(--text-sub-dark) !important;
+    }
+}
 
+/* ---- Global Card ---- */
 .box {
     padding: 22px;
-    border-radius: 14px;
-    border: 1px solid var(--border-light);
-    margin-bottom: 20px;
-    backdrop-filter: blur(14px);
-    transition: 0.25s ease-in-out;
+    border-radius: var(--radius);
+    margin-bottom: 22px;
 }
 
-.box:hover {
-    transform: translateY(-2px);
-}
-
-/* ---------------------------------------------------------
-   HEADER
---------------------------------------------------------- */
-
+/* ---- Header ---- */
 .main-header {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 2px;
 }
-
 .brand-title {
-    font-size: 24px;
+    font-size: 26px;
     font-weight: 800;
-    letter-spacing: -0.4px;
+    margin: 0;
 }
-
 .brand-subtitle {
-    opacity: 0.75;
-    font-size: 14px;
+    font-size: 13px;
+    margin: 0;
 }
 
-/* ---------------------------------------------------------
-   CENTER LOGO FIX — PERFECT CENTER
---------------------------------------------------------- */
-
-.center-logo-box, .auth-logo-box {
-    display: flex;
-    justify-content: center !important;
-    width: 100%;
-    margin-bottom: 15px;
-}
-
-img {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-/* ---------------------------------------------------------
-   AUTH POPUP
---------------------------------------------------------- */
-
+/* ---- Auth Modal ---- */
 .auth-wrapper {
     display: flex;
     justify-content: center;
-    margin-top: 30px;
 }
-
 .auth-card {
     width: 100%;
     max-width: 480px;
-    padding: 28px;
-    background: rgba(15,23,42,0.92);
-    border-radius: 22px;
-    border: 1px solid rgba(148,163,184,0.35);
-    box-shadow: 0 20px 60px rgba(0,0,0,0.65);
-    backdrop-filter: blur(20px) saturate(180%);
+    padding: 22px 22px 18px;
+    border-radius: var(--radius);
+    backdrop-filter: blur(20px);
+}
+.center-logo-box {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 12px;
 }
 
-.auth-title {
-    font-size: 22px;
-    font-weight: 900;
-    text-align: center;
-}
-
-.auth-subtitle {
-    font-size: 13px;
-    text-align: center;
-    opacity: 0.7;
-}
-
-/* ---------------------------------------------------------
-   BUTTONS
---------------------------------------------------------- */
-
-button, .stButton>button {
-    background: var(--primary) !important;
-    color: white !important;
+/* ---- Input Fields ---- */
+input, textarea, select {
     border-radius: 10px !important;
-    padding: 10px 16px !important;
-    border: none !important;
-    transition: background 0.2s ease-in-out;
 }
 
-button:hover, .stButton>button:hover {
-    background: var(--primary-light) !important;
+/* ---- Summary ---- */
+.summary-line {
+    padding: 4px 0;
+    font-size: 15px;
 }
 
-/* ---------------------------------------------------------
-   INPUTS
---------------------------------------------------------- */
-
-input, select, textarea {
-    border-radius: 8px !important;
-}
-
-/* ---------------------------------------------------------
-   DATA TABLE
---------------------------------------------------------- */
-
-.dataframe {
-    border-radius: 10px !important;
-    overflow: hidden !important;
-}
-
-/* ---------------------------------------------------------
-   FOOTER
---------------------------------------------------------- */
-
+/* ---- Footer ---- */
 .footer {
     text-align: center;
-    opacity: 0.7;
-    margin-top: 35px;
-    font-size: 14px;
+    margin-top: 25px;
+    font-size: 12px;
+    opacity: 0.8;
 }

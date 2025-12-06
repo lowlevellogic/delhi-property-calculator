@@ -1,6 +1,6 @@
 # ================================================
 # app.py – Delhi Property Price Calculator
-# FINAL PREMIUM VERSION  ✅
+# FINAL PREMIUM VERSION (uses external styles.css)
 # ================================================
 
 import math
@@ -18,7 +18,7 @@ from email_otp import send_otp_email
 # BASIC CONFIG
 # -------------------------------------------------
 
-APP_URL = "https://delhi-property-calculator-public.streamlit.app"
+APP_URL = "https://delhi-property-price-calculator.streamlit.app"  # update if needed
 
 stampdutyrates = {"male": 0.06, "female": 0.04, "joint": 0.05}
 
@@ -78,7 +78,7 @@ UNIFORM_RATES_MORE_THAN_4 = {
 }
 
 # -------------------------------------------------
-# PAGE THEME & CSS (Premium Glass UI)
+# PAGE CONFIG & CSS LOADER
 # -------------------------------------------------
 
 st.set_page_config(
@@ -86,107 +86,17 @@ st.set_page_config(
     layout="wide",
 )
 
-st.markdown(
-    """
-    <style>
-        .stApp {
-            background: radial-gradient(circle at top left, #020617 0%, #020617 45%, #020617 100%);
-            color: #e5e7eb;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
-        }
-        .main-header {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-        @media (min-width: 768px) {
-            .main-header {
-                flex-direction: row;
-                align-items: baseline;
-                gap: 10px;
-            }
-        }
-        .brand-title {
-            font-size: 24px;
-            font-weight: 800;
-            margin: 0;
-            color: #f9fafb;
-        }
-        .brand-subtitle {
-            font-size: 13px;
-            margin: 0;
-            color: #9ca3af;
-        }
-        .box {
-            background: radial-gradient(circle at top left, rgba(15,23,42,0.98), rgba(15,23,42,0.94));
-            padding: 20px 22px;
-            border-radius: 18px;
-            margin-bottom: 20px;
-            border: 1px solid rgba(148,163,184,0.35);
-            box-shadow: 0 22px 45px rgba(15,23,42,0.85);
-        }
-        .footer {
-            text-align:center;
-            margin-top:30px;
-            color:#94a3b8;
-            font-size: 12px;
-        }
-        label, .stMarkdown, .stTextInput label, .stNumberInput label {
-            color: #e5e7eb !important;
-        }
+def load_css(path: str = "styles.css"):
+    """Load external CSS file for theming."""
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            css = f.read()
+        st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
+    except FileNotFoundError:
+        st.warning("styles.css not found. Using default Streamlit theme.")
 
-        /* ---------- Auth popup ---------- */
-        .auth-wrapper {
-            display: flex;
-            justify-content: center;
-            margin-top: 10px;
-            margin-bottom: 10px;
-        }
-        .auth-card {
-            width: 100%;
-            max-width: 480px;
-            background: rgba(15,23,42,0.96);
-            border-radius: 24px;
-            padding: 22px 22px 18px 22px;
-            box-shadow: 0 22px 60px rgba(15,23,42,0.95);
-            border: 1px solid rgba(148,163,184,0.55);
-        }
-        .auth-heading {
-            text-align: center;
-            margin-bottom: 14px;
-        }
-        .auth-badge {
-            font-size: 11px;
-            color: #38bdf8;
-            text-transform: uppercase;
-            letter-spacing: 0.18em;
-        }
-        .auth-title {
-            font-size: 22px;
-            font-weight: 800;
-            color: #f9fafb;
-            margin: 4px 0 2px 0;
-        }
-        .auth-subtitle {
-            font-size: 13px;
-            color: #9ca3af;
-        }
-        .auth-footer {
-            font-size: 11px;
-            color: #64748b;
-            margin-top: 10px;
-            text-align: center;
-        }
-        .center-logo-box {
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            margin-bottom: 10px;
-        }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
+# Load external theme
+load_css()
 
 # -------------------------------------------------
 # SUPABASE CLIENT
@@ -514,9 +424,6 @@ def _calc(
         "construction_value": construction_value,
         "parking_cost": parking_cost,
     }
-    # ================================================
-# PART 2/3 – SUMMARY, SIDEBAR, AUTH POPUP, HEADER
-# ================================================
 
 # -------------------------------------------------
 # SUMMARY BLOCK
@@ -873,10 +780,6 @@ st.write("---")
 # Render sidebar + modal
 render_sidebar_status()
 render_auth_modal()
-
-# ================================================
-# PART 3/3 – TABS: HOME, RES, COM, DDA, HISTORY, ABOUT
-# ================================================
 
 # -------------------------------------------------
 # MAIN TABS
@@ -1280,4 +1183,4 @@ st.markdown(
     '<div class="footer">© '
     f'{date.today().year} Rishav Singh · Aggarwal Documents & Legal Consultants</div>',
     unsafe_allow_html=True,
-)
+    )

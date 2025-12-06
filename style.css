@@ -1,0 +1,171 @@
+/* ---------------------------------------------------------
+   GLOBAL
+--------------------------------------------------------- */
+
+html, body, .stApp {
+    font-family: "Inter", sans-serif !important;
+}
+
+:root {
+    --primary: #2563eb;
+    --primary-light: #3b82f6;
+    --primary-dark: #1e40af;
+
+    --bg-dark: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+    --bg-light: #f5f7fa;
+
+    --card-dark: rgba(0,0,0,0.45);
+    --card-light: #ffffff;
+
+    --border-light: rgba(0,0,0,0.10);
+    --border-dark: rgba(255,255,255,0.12);
+
+    --text-dark: #ffffff;
+    --text-light: #1f2937;
+}
+
+/* Dark / Light Auto Detection */
+@media (prefers-color-scheme: dark) {
+    .stApp { background: var(--bg-dark) !important; color: var(--text-dark) !important; }
+    .box   { background: var(--card-dark) !important; border-color: var(--border-dark) !important; }
+    label, p, span, h1, h2, h3, h4, h5 { color: var(--text-dark) !important; }
+}
+
+@media (prefers-color-scheme: light) {
+    .stApp { background: var(--bg-light) !important; color: var(--text-light) !important; }
+    .box   { background: var(--card-light) !important; border-color: var(--border-light) !important; }
+    label, p, span, h1, h2, h3, h4, h5 { color: var(--text-light) !important; }
+}
+
+/* ---------------------------------------------------------
+   GLASS BOXES
+--------------------------------------------------------- */
+
+.box {
+    padding: 22px;
+    border-radius: 14px;
+    border: 1px solid var(--border-light);
+    margin-bottom: 20px;
+    backdrop-filter: blur(14px);
+    transition: 0.25s ease-in-out;
+}
+
+.box:hover {
+    transform: translateY(-2px);
+}
+
+/* ---------------------------------------------------------
+   HEADER
+--------------------------------------------------------- */
+
+.main-header {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.brand-title {
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.4px;
+}
+
+.brand-subtitle {
+    opacity: 0.75;
+    font-size: 14px;
+}
+
+/* ---------------------------------------------------------
+   CENTER LOGO FIX — PERFECT CENTER
+--------------------------------------------------------- */
+
+.center-logo-box, .auth-logo-box {
+    display: flex;
+    justify-content: center !important;
+    width: 100%;
+    margin-bottom: 15px;
+}
+
+img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* ---------------------------------------------------------
+   AUTH POPUP
+--------------------------------------------------------- */
+
+.auth-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 480px;
+    padding: 28px;
+    background: rgba(15,23,42,0.92);
+    border-radius: 22px;
+    border: 1px solid rgba(148,163,184,0.35);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.65);
+    backdrop-filter: blur(20px) saturate(180%);
+}
+
+.auth-title {
+    font-size: 22px;
+    font-weight: 900;
+    text-align: center;
+}
+
+.auth-subtitle {
+    font-size: 13px;
+    text-align: center;
+    opacity: 0.7;
+}
+
+/* ---------------------------------------------------------
+   BUTTONS
+--------------------------------------------------------- */
+
+button, .stButton>button {
+    background: var(--primary) !important;
+    color: white !important;
+    border-radius: 10px !important;
+    padding: 10px 16px !important;
+    border: none !important;
+    transition: background 0.2s ease-in-out;
+}
+
+button:hover, .stButton>button:hover {
+    background: var(--primary-light) !important;
+}
+
+/* ---------------------------------------------------------
+   INPUTS
+--------------------------------------------------------- */
+
+input, select, textarea {
+    border-radius: 8px !important;
+}
+
+/* ---------------------------------------------------------
+   DATA TABLE
+--------------------------------------------------------- */
+
+.dataframe {
+    border-radius: 10px !important;
+    overflow: hidden !important;
+}
+
+/* ---------------------------------------------------------
+   FOOTER
+--------------------------------------------------------- */
+
+.footer {
+    text-align: center;
+    opacity: 0.7;
+    margin-top: 35px;
+    font-size: 14px;
+}

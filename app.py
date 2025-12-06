@@ -213,19 +213,17 @@ ensure_session_state()
 # -------------------------------------------------
 
 def log_event(event_type: str, details: str = ""):
+    """Insert analytics event into Supabase."""
     try:
-        supabase.table("events").insert(
-            {
-                "email": st.session_state.user_email or "guest",
-                "event_type": event_type,
-                "details": details,
-                "created_at": datetime.utcnow().isoformat(),
-            }
-        ).execute()
-    except Exception:
-        pass
-
-log_event("visit", "User opened calculator")
+        payload = {
+            "email": st.session_state.user_email or "guest",
+            "event_type": str(event_type or "unknown"),
+            "details": str(details or ""),
+            "created_at": datetime.utcnow().isoformat(),
+        }
+        supabase.table("events").insert(payload).execute()
+    except Exception as e:
+        print("EVENT LOG ERROR:", e)
 
 # -------------------------------------------------
 # DB HELPERS
@@ -742,6 +740,7 @@ def render_auth_modal():
             and st.session_state.pending_otp_purpose == "signup"
         ):
             st.write("---")
+            log_event("visit_home:, "User opened homepage")
             st.markdown("##### Verify OTP & create account")
 
             otp_entry = st.text_input("Enter OTP", key="signup_otp")
@@ -1228,3 +1227,4 @@ st.markdown(
     f'{date.today().year} Rishav Singh · Aggarwal Documents & Legal Consultants</div>',
     unsafe_allow_html=True,
     )
+

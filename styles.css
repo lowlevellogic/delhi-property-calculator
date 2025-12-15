@@ -1,1 +1,130 @@
+/* ============================================================
+   GLOBAL RESET
+============================================================ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
+/* ============================================================
+   APP BACKGROUND
+============================================================ */
+.stApp {
+    background: #0B1120 !important;
+    color: #E2E8F0 !important;
+    font-family: "Inter", system-ui, sans-serif;
+}
+
+/* ============================================================
+   LIGHT MODE FIX
+============================================================ */
+@media (prefers-color-scheme: light) {
+    .stApp {
+        background: #F8FAFC !important;
+        color: #0F172A !important;
+    }
+    .box {
+        background: #FFFFFF !important;
+        border: 1px solid #CBD5E1 !important;
+        color: #0F172A !important;
+    }
+    label, p, h1, h2, h3, h4 {
+        color: #0F172A !important;
+    }
+    .stTextInput > label {
+        color: #0F172A !important;
+    }
+}
+
+/* ============================================================
+   HEADER
+============================================================ */
+.main-header {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.brand-title {
+    font-size: 26px;
+    font-weight: 800;
+    color: #F8FAFC !important;
+}
+
+.brand-subtitle {
+    font-size: 13px;
+    color: #94A3B8 !important;
+}
+
+/* ============================================================
+   PREMIUM GLASS CARD
+============================================================ */
+.box {
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    border-radius: 18px;
+    padding: 22px;
+    margin-bottom: 22px;
+    backdrop-filter: blur(15px);
+}
+
+/* ============================================================
+   AUTH POPUP FIXED + CENTERED LOGO
+============================================================ */
+.auth-wrapper {
+    display: flex;
+    justify-content: center;
+    padding-top: 20px;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 450px;
+    background: rgba(15, 23, 42, 0.90);
+    padding: 25px;
+    border-radius: 22px;
+    border: 1px solid rgba(255,255,255,0.08);
+    backdrop-filter: blur(16px);
+}
+
+/* LOGO FINALLY CENTERED */
+.center-logo-box {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100% !important;
+    margin-bottom: 10px;
+}
+
+.center-logo-box img {
+    width: 120px !important;
+    display: block !important;
+    margin: auto !important;
+}
+
+/* ============================================================
+   AUTH TEXT
+============================================================ */
+.auth-title {
+    text-align: center;
+    font-size: 22px;
+    font-weight: 700;
+    color: #F1F5F9;
+}
+
+.auth-subtitle {
+    text-align: center;
+    font-size: 14px;
+    color: #CBD5E1;
+}
+
+/* ============================================================
+   FOOTER
+============================================================ */
+.footer {
+    text-align: center;
+    padding: 14px;
+    font-size: 12px;
+    color: #94A3B8;
+}

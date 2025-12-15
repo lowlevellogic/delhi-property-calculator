@@ -86,7 +86,7 @@ st.set_page_config(
     layout="wide",
 )
 
-def load_css(path: str = "styles.css"):
+def load_css(path: str = "style.css"):
     """Load external CSS file for theming."""
     try:
         with open(path, "r", encoding="utf-8") as f:
@@ -1180,5 +1180,6 @@ st.markdown(
     f'{date.today().year} Rishav Singh · Aggarwal Documents & Legal Consultants</div>',
     unsafe_allow_html=True,
     )
+
 
 
